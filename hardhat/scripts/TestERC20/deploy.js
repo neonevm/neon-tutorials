@@ -7,12 +7,11 @@
 const hre = require("hardhat");
 
 async function main() {
-    const TestERC20 = await hre.ethers.getContractFactory("TestERC20");
-    const erc20 = await TestERC20.deploy();
-    await erc20.deployed();
+    const TestERC20 = await hre.ethers.deployContract("TestERC20");
+    await TestERC20.waitForDeployment();
 
     console.log(
-        `TestERC20 token deployed to ${erc20.address}`
+        `TestERC20 token deployed to ${TestERC20.target}`
     );
 }
 
