@@ -7,19 +7,22 @@
 const { ethers, hre } = require("hardhat");
 
 async function main() {
-    const TestERC20Address = ''; // !!! paste here your deployed smart contract address !!!
+    const TestERC20Address = '0x56f30F1a39054020be1E2D1dDE7F32B2255D1CdE'; // !!! paste here your deployed smart contract address !!!
     if (!ethers.isAddress(TestERC20Address)) {
         console.log('Invalid TestERC20Address');
         return false;
     }
-
+    
+    const [owner] = await ethers.getSigners();
     const receiver = ethers.Wallet.createRandom(); // !!! change this to valid address on production !!!
     const TestERC20 = await ethers.getContractAt('TestERC20', TestERC20Address);
 
+    console.log('Sender balance before transfer', await TestERC20.balanceOf(owner.address));
     console.log('Receiver balance before transfer', await TestERC20.balanceOf(receiver.address));
 
-    await TestERC20.transfer(receiver, 1000);
+    await TestERC20.transfer(receiver, ethers.parseUnits('10', 18));
 
+    console.log('Sender balance after transfer', await TestERC20.balanceOf(owner.address));
     console.log('Receiver balance after transfer', await TestERC20.balanceOf(receiver.address));
 }
 
