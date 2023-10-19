@@ -7,8 +7,4 @@ contract TestERC20 is ERC20 {
     constructor() ERC20("TestERC20", "TST") {
         _mint(msg.sender, 1000 * 10 ** decimals());
     }
-
-    function decimals() public view override returns (uint8) {
-        return 9;
-    }
 }
