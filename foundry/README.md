@@ -39,21 +39,11 @@ forge install foundry-rs/forge-std --no-commit
 forge install openzeppelin/openzeppelin-contracts --no-commit
 ```
 
-## Setup Neon account (using Metamask)
+## Setup Neon network in the Metamask wallet
 
-To create new account:
-
-1. Setup your Metamask wallet to work with Neon devnet:
-
-   - Connect your metamask wallet to Neon Devnet using these settings:
-     - Network Name: Neon Devnet
-     - New RPC URL: https://devnet.neonevm.org
-     - Chain ID: 245022926
-     - Currency Symbol (optional): NEON
-
-2. Create a new account in Metamask
-3. Airdrop at most 100 NEONs to just created **account #1** [from here](https://neonfaucet.org/)
-4. Copy your Metamask account's private key (Account Details >> Export Private Key) and insert them into **.env**
+1. Go to [Chainlist](https://chainlist.org/?search=Neon+EVM&testnets=true) and add the Neon EVM DevNet and Neon EVM MainNet networks to your Metamask wallet.
+2. Airdrop at most 100 NEONs to the created **account #1** [from here](https://neonfaucet.org/)
+3. Copy your Metamask account's private key (Account Details >> Export Private Key) and insert them into **.env**
    **NOTE!** Add **0x** prefix at the beginning
 
 ## Set up .env file
@@ -61,7 +51,8 @@ To create new account:
 Create a .env file in the root project folder and add these lines -
 
 ```sh
-RPC_URL=https://devnet.neonevm.org
+RPC_URL_DEVNET=https://devnet.neonevm.org
+RPC_URL_MAINNET=https://neon-proxy-mainnet.solana.p2p.org
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
 ```
 
@@ -134,7 +125,7 @@ Ran 1 test suites: 26 tests passed, 0 failed, 0 skipped (26 total tests)
 ## Deploying contract
 
 ```sh
-forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY src/TestERC20/TestERC20.sol:TestERC20 --constructor-args "Test ERC20 Token" "TERC20" --legacy
+forge create --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY src/TestERC20/TestERC20.sol:TestERC20 --constructor-args "Test ERC20 Token" "TERC20" --legacy
 ```
 
 After successfully running this step you should get console output similar to:
@@ -150,7 +141,7 @@ Transaction hash: 0x6de9dab8a526cbac33008056d185b93dff725605efb791bf116b6bece4f0
 ## Send a transaction with a deployed smart contract function
 
 ```sh
-cast send <contract_address> --rpc-url $RPC_URL --private-key $PRIVATE_KEY "mint(address,uint256)" <deployer_address> 20000000000000000000 --legacy
+cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "mint(address,uint256)" <deployer_address> 20000000000000000000 --legacy
 ```
 
 After successfully running this step you should get console output similar to:
@@ -174,7 +165,7 @@ type                    0
 ## Call a deployed smart contract function
 
 ```sh
-cast call <contract_address> --rpc-url $RPC_URL "balanceOf(address)" <account_address>
+cast call <contract_address> --rpc-url $RPC_URL_DEVNET "balanceOf(address)" <account_address>
 ```
 
 After successfully running this step you should get console output similar to:
