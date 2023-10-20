@@ -7,7 +7,7 @@
 const { ethers, hre } = require("hardhat");
 
 async function main() {
-    const TestERC20Address = '0x56f30F1a39054020be1E2D1dDE7F32B2255D1CdE'; // !!! paste here your deployed smart contract address !!!
+    const TestERC20Address = ''; // !!! paste here your deployed smart contract address !!!
     if (!ethers.isAddress(TestERC20Address)) {
         console.log('Invalid TestERC20Address');
         return false;
