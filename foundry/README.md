@@ -35,8 +35,8 @@ git clone https://github.com/neonlabsorg/neon-tutorials.git
 
 ```sh
 cd foundry
-forge install foundry-rs/forge-std --no-commit .
-forge install openzeppelin/openzeppelin-contracts --no-commit .
+forge install foundry-rs/forge-std --no-commit
+forge install openzeppelin/openzeppelin-contracts --no-commit
 ```
 
 ## Setup Neon account (using Metamask)
