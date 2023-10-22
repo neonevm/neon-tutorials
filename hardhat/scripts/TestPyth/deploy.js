@@ -4,29 +4,24 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
-const { network } = require("hardhat");
+const { ethers, network } = require("hardhat");
 const { NEON_CONFIG } = require('../NEON_CONFIG');
 
 async function main() {
-    let priceFeeds;
+    let pythAddress;
     if (network.name == 'neondevnet') {
-        priceFeeds = NEON_CONFIG.DEVNET.CHAINLINK.PRICE_FEEDS;
+        pythAddress = NEON_CONFIG.DEVNET.PYTH.PROXY;
     } else if (network.name == 'neonmainnet') {
-        priceFeeds = NEON_CONFIG.MAINNET.CHAINLINK.PRICE_FEEDS;
+        pythAddress = NEON_CONFIG.MAINNET.PYTH.PROXY;
     }
+    console.log(pythAddress, 'pythAddress');
 
-    const TestChainlink = await hre.ethers.deployContract("TestChainlink");
-    await TestChainlink.waitForDeployment();
+    const TestPyth = await ethers.deployContract("TestPyth", [pythAddress]);
+    await TestPyth.waitForDeployment();
 
     console.log(
-        `TestChainlink deployed to ${TestChainlink.target}`
+        `TestPyth deployed to ${TestPyth.target}`
     );
-
-    for (const key in priceFeeds) {
-        let decimals = await TestChainlink.getDecimals(priceFeeds[key]);
-        console.log(key, Number(await TestChainlink.getLatestPrice(priceFeeds[key])) / (10 ** Number(decimals)));
-    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
