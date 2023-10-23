@@ -4,10 +4,10 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
+const { ethers } = require("hardhat");
 
 async function main() {
-    const TestERC721 = await hre.ethers.deployContract("TestERC721");
+    const TestERC721 = await ethers.deployContract("TestERC721");
     await TestERC721.waitForDeployment();
 
     console.log(

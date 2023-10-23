@@ -4,7 +4,7 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const { ethers, hre } = require("hardhat");
+const { ethers } = require("hardhat");
 
 async function main() {
     const TestERC721Address = ''; // paste here your deployed smart contract address
@@ -19,7 +19,7 @@ async function main() {
     await TestERC721.safeMint(owner.address, tokenId);
 
     console.log(
-        `TestERC721 NFT with tokenId ${tokenId} has been minted to ${owner.address}` 
+        `TestERC721 NFT with tokenId ${tokenId} has been minted to ${await TestERC721.ownerOf(tokenId)}` 
     );
 }
 
