@@ -4,19 +4,18 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require("hardhat");
-const { network } = require("hardhat");
-const { neonConfig } = require('../neonConfig');
+const { ethers, network } = require("hardhat");
+const { NEON_CONFIG } = require('../NEON_CONFIG');
 
 async function main() {
     let priceFeeds;
     if (network.name == 'neondevnet') {
-        priceFeeds = neonConfig.DEVNET.ADDRESS.CHAINLINK_PRICE_FEEDS;
+        priceFeeds = NEON_CONFIG.DEVNET.CHAINLINK.PRICE_FEEDS;
     } else if (network.name == 'neonmainnet') {
-        priceFeeds = neonConfig.MAINNET.ADDRESS.CHAINLINK_PRICE_FEEDS;
+        priceFeeds = NEON_CONFIG.MAINNET.CHAINLINK.PRICE_FEEDS;
     }
 
-    const TestChainlink = await hre.ethers.deployContract("TestChainlink");
+    const TestChainlink = await ethers.deployContract("TestChainlink");
     await TestChainlink.waitForDeployment();
 
     console.log(

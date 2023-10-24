@@ -4,14 +4,23 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
+const { NEON_CONFIG } = require('../NEON_CONFIG');
 
 async function main() {
-    const TestERC721 = await ethers.deployContract("TestERC721");
-    await TestERC721.waitForDeployment();
+    let pythAddress;
+    if (network.name == 'neondevnet') {
+        pythAddress = NEON_CONFIG.DEVNET.PYTH.PROXY;
+    } else if (network.name == 'neonmainnet') {
+        pythAddress = NEON_CONFIG.MAINNET.PYTH.PROXY;
+    }
+    console.log(pythAddress, 'pythAddress');
+
+    const TestPyth = await ethers.deployContract("TestPyth", [pythAddress]);
+    await TestPyth.waitForDeployment();
 
     console.log(
-        `TestERC721 token deployed to ${TestERC721.target}`
+        `TestPyth deployed to ${TestPyth.target}`
     );
 }
 
