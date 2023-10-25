@@ -174,4 +174,10 @@ After successfully running this step you should get console output similar to:
 20000000000000000000
 ```
 
+## Transfer the ERC20 token to another address
+
+```sh
+cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "transfer(address,uint256)" <receiver_address> 10000000000000000000 --legacy
+```
+
 ## ...Try it with your own contract and have fun!
