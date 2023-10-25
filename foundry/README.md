@@ -34,7 +34,7 @@ git clone https://github.com/neonlabsorg/neon-tutorials.git
 ## Install the required libraries
 
 ```sh
-cd foundry
+cd neon-tutorials/foundry
 forge install foundry-rs/forge-std --no-commit
 forge install openzeppelin/openzeppelin-contracts --no-commit
 ```
