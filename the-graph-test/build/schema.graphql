@@ -1,0 +1,15 @@
+type Transfer @entity(immutable: true) {
+    id: ID!
+    blockNumber: BigInt!
+    blockTimestamp: BigInt!
+    gasLimit: BigInt!
+    gasPrice: BigInt!
+    creator: User!
+    receiver: Bytes!
+    tokenAmount: BigInt!
+}
+
+type User @entity {
+    id: ID!
+    transfers: [Transfer!]! @derivedFrom(field: "creator")
+}

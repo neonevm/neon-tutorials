@@ -1,0 +1,25 @@
+specVersion: 0.0.4
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: ERC20
+    network: neonlabs
+    source:
+      address: "0xEA6B04272f9f62F997F666F07D3a974134f7FFb9"
+      abi: ERC20
+      startBlock: 199539421
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Transfer
+        - User
+      abis:
+        - name: ERC20
+          file: ERC20/abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTansfer
+      file: ERC20/ERC20.wasm
