@@ -34,7 +34,7 @@ git clone https://github.com/neonlabsorg/neon-tutorials.git
 ## Install the required libraries
 
 ```sh
-cd foundry
+cd neon-tutorials/foundry
 forge install foundry-rs/forge-std --no-commit
 forge install openzeppelin/openzeppelin-contracts --no-commit
 ```
@@ -165,15 +165,13 @@ type                    0
 ## Call a deployed smart contract function
 
 ```sh
-cast call <contract_address> --rpc-url $RPC_URL_DEVNET "balanceOf(address)" <account_address>
+cast call <contract_address> --rpc-url $RPC_URL_DEVNET "balanceOf(address) (uint256)" <account_address>
 ```
 
 After successfully running this step you should get console output similar to:
 
 ```sh
-0x000000000000000000000000000000000000000000000001158e460913d00000
+20000000000000000000
 ```
-
-**Note** The returned value is in hexadecimal form. So you can use this [link](https://www.rapidtables.com/convert/number/hex-to-decimal.html) to convert it into decimal form and check the value.
 
 ## ...Try it with your own contract and have fun!
