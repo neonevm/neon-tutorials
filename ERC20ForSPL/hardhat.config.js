@@ -23,7 +23,7 @@ module.exports = {
     networks: {
         neondevnet: {
             url: "https://devnet.neonevm.org",
-            accounts: [process.env.USER1_KEY, process.env.PRIVATE_KEY_OWNER, process.env.USER2_KEY, process.env.USER3_KEY],
+            accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY, process.env.USER2_KEY, process.env.USER3_KEY],
             chainId: 245022926,
             allowUnlimitedContractSize: false,
             gas: "auto",

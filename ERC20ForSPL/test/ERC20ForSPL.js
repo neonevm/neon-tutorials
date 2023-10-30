@@ -274,6 +274,23 @@ describe('Test init', async function () {
         ).to.be.reverted;
     });
 
+    it('Malicious uint64 overflow ( supposed to revert )', async function () {
+        // 18446744073709551615 is the maximum uint64
+        await expect(
+            ERC20ForSPLMintable.connect(user1).transfer(user2.address, '18446744073709551616')
+        ).to.be.revertedWithCustomError(
+            ERC20ForSPLMintable,
+            'AmountExceedsUint64'
+        );
+
+        await expect(
+            ERC20ForSPLMintable.connect(user1).burn('18446744073709551616')
+        ).to.be.revertedWithCustomError(
+            ERC20ForSPLMintable,
+            'AmountExceedsUint64'
+        );
+    });
+
     it('Malicious change of owner ( supposed to revert )', async function () {
         await expect(
             ERC20ForSPLMintable.connect(user1).transferOwnership(user1.address)
