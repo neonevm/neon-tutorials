@@ -304,6 +304,21 @@ describe('Test init', async function () {
         ).to.be.reverted;
     });
 
+    it('Malicious implementation initialize ( supposed to revert )', async function () {
+        const ERC20ForSPLMintableImplementationAddress = await upgrades.erc1967.getImplementationAddress(ERC20ForSPLMintable.target);
+        console.log(ERC20ForSPLMintableImplementationAddress, 'ERC20ForSPLMintableImplementationAddress');
+        const ERC20ForSPLMintableFactory = await hre.ethers.getContractFactory('ERC20ForSPLMintable');
+        const ERC20ForSPLMintableImplementation = await ERC20ForSPLMintableFactory.attach(ERC20ForSPLMintableImplementationAddress);
+
+        await expect(
+            ERC20ForSPLMintableImplementation.initialize(
+                'FAKECOIN',
+                'FAKE',
+                9
+            )
+        ).to.be.reverted;
+    });
+
     it('Test UUPS contract upgrade', async function () {
         const proxyOwner = await ERC20ForSPLMintable.owner();
         const totalSupply = await ERC20ForSPLMintable.totalSupply();

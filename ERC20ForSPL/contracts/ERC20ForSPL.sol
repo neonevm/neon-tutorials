@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import './interfaces/ISPLToken.sol';
 import './interfaces/IMetaplex.sol';
 
-
+/// @custom:oz-upgrades-unsafe-allow constructor
 contract ERC20ForSPL is OwnableUpgradeable, UUPSUpgradeable {
     ISPLToken public constant SPL_TOKEN = ISPLToken(0xFf00000000000000000000000000000000000004);
     IMetaplex public constant METAPLEX = IMetaplex(0xff00000000000000000000000000000000000005);
@@ -25,6 +25,10 @@ contract ERC20ForSPL is OwnableUpgradeable, UUPSUpgradeable {
     error MissingMetaplex();
     error InvalidTokenMint();
     error AmountExceedsUint64();
+
+    constructor() {
+        _disableInitializers();
+    }
 
     function initializeParent(bytes32 _tokenMint) public onlyInitializing {
         __Ownable_init(msg.sender);
