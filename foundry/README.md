@@ -52,8 +52,11 @@ Create a .env file in the root project folder and add these lines -
 
 ```sh
 RPC_URL_DEVNET=https://devnet.neonevm.org
+CHAIN_ID_DEVNET=245022926
 RPC_URL_MAINNET=https://neon-proxy-mainnet.solana.p2p.org
+CHAIN_ID_MAINNET=245022934
 PRIVATE_KEY=<YOUR_PRIVATE_KEY>
+VERIFIER_URL_BLOCKSCOUT=https://neon-devnet.blockscout.com/api
 ```
 
 Then run this -
@@ -196,6 +199,25 @@ status                  1
 transactionHash         0x5cee8f357282f0439deb7d45b2f8639b54fcdcdff8cacc0e24157fa5ef0c5041
 transactionIndex        0
 type                    0
+```
+
+## Verify deployed contract on Blockscout
+
+```sh
+forge verify-contract --chain-id $CHAIN_ID_DEVNET <contract_address> src/TestERC20/TestERC20.sol:TestERC20 --verifier-url $VERIFIER_URL_BLOCKSCOUT --verifier blockscout
+```
+
+After successfully running this step you should get console output similar to:
+
+```sh
+Start verifying contract `0x5537599aa2F97Dd60a66342522a465A7f2e40Ff9` deployed on 245022926
+
+Submitting verification for [src/TestERC20/TestERC20.sol:TestERC20] "0x5537599aa2F97Dd60a66342522a465A7f2e40Ff9".
+Submitted contract for verification:
+	Response: `OK`
+	GUID: `5537599aa2f97dd60a66342522a465a7f2e40ff9654118b3`
+	URL:
+        https://neon-devnet.blockscout.com/api?/address/0x5537599aa2f97dd60a66342522a465a7f2e40ff9
 ```
 
 ## ...Try it with your own contract and have fun!
