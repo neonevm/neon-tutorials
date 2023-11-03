@@ -6,13 +6,7 @@ This directory contains all the files necessary to deploy simplest ERC20-like co
 
 ## Prerequisites
 
-To use this project, Rust and Foundry must be installed on the machine.
-
-### Rust installation
-
-```sh
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+To use this project, Foundry must be installed on the machine.
 
 ### Foundry installation
 
