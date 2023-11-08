@@ -1,0 +1,10 @@
+{
+    "type": "module",
+    "scripts": {
+        "dev": "vite"
+    },
+    "dependencies": {
+        "@covalenthq/client-sdk": "^0.6.1",
+        "vite": "^4.5.0"
+    }
+}
