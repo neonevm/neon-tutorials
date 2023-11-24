@@ -8,7 +8,7 @@ This is an example of how we can integrate **[the Graph](https://thegraph.com/)*
 * ```graph create <SUBGRAPH_SLUG> --node <DEPLOYMENT_URL>``` - Creating a subgraph on Neon EVM.
 * ```graph codegen``` - Generates AssemblyScript types for a subgraph.
 * ```graph build``` - Builds a subgraph and (optionally) uploads it to IPFS.
-* ```graph deploy <SUBGRAPH_SLUG> --ipfs <IPFS_URL> --node <DEPLOYMENT_URL> —version-label=“v0.0.1"``` - Deploys a subgraph to a Graph node. Keep in mind always to increase the ```—version-label``` value on each deploy.
+* ```graph deploy <SUBGRAPH_SLUG> --ipfs <IPFS_URL> --node <DEPLOYMENT_URL> -—version-label="v0.0.1"``` - Deploys a subgraph to a Graph node. Keep in mind always to increase the ```-—version-label``` value on each deploy.
 
 #### Neon Mainnet data:
 * ```<SUBGRAPH_SLUG>``` - For the sake of the demo we will be using slug **neonlabs/usdc-token-subgraph**
