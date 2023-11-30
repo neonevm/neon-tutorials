@@ -8,5 +8,5 @@
     * **Integrate Pyth** - [Contract](https://github.com/neonlabsorg/neon-tutorials/tree/main/hardhat/contracts/TestPyth) &nbsp;|&nbsp; [Script](https://github.com/neonlabsorg/neon-tutorials/tree/main/hardhat/scripts/TestPyth)
 * **[Foundry examples](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry)**:
     * **[Deploy ERC20](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry/src/TestERC20)**
-* **[Integrate Subgraph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
+* **[Integrate the Graph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
 * **[Integrate Covalent](https://github.com/neonlabsorg/neon-tutorials/tree/main/covalent)**
