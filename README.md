@@ -1,3 +1,4 @@
+<pre>
 # NEON TUTORIALS
 
 * **[Hardhat examples](https://github.com/neonlabsorg/neon-tutorials/tree/main/hardhat):**
@@ -10,3 +11,4 @@
     * **[Deploy ERC20](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry/src/TestERC20)**
 * **[Integrate Subgraph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
 * **[Integrate Covalent](https://github.com/neonlabsorg/neon-tutorials/tree/main/covalent)**
+</pre>
