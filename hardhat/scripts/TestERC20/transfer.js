@@ -20,7 +20,8 @@ async function main() {
     console.log('Sender balance before transfer', await TestERC20.balanceOf(owner.address));
     console.log('Receiver balance before transfer', await TestERC20.balanceOf(receiver.address));
 
-    await TestERC20.transfer(receiver, ethers.parseUnits('10', 18));
+    let tx = await TestERC20.transfer(receiver, ethers.parseUnits('10', 18));
+    await tx.wait(3);
 
     console.log('Sender balance after transfer', await TestERC20.balanceOf(owner.address));
     console.log('Receiver balance after transfer', await TestERC20.balanceOf(receiver.address));

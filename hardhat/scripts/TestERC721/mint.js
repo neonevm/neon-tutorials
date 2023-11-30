@@ -16,7 +16,8 @@ async function main() {
     const tokenId = 2009; // this is a sample value, use proper ID for production
     const [owner] = await ethers.getSigners();
     const TestERC721 = await ethers.getContractAt('TestERC721', TestERC721Address);
-    await TestERC721.safeMint(owner.address, tokenId);
+    let tx = await TestERC721.safeMint(owner.address, tokenId);
+    await tx.wait(3);
 
     console.log(
         `TestERC721 NFT with tokenId ${tokenId} has been minted to ${await TestERC721.ownerOf(tokenId)}` 
