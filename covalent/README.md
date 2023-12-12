@@ -12,4 +12,4 @@ To be able to use Covalent SDK you need to generate an API key. Head to **[Coval
 ```
     VITE_COVALENT_API_KEY=XYZ
 ```
-- {XYZ} - is your Covalent API KEY.*
+- {XYZ} - is your Covalent API KEY.

@@ -31,7 +31,8 @@ async function main() {
 
     // fee has to be paid when you update Pyth price feeds
     const fee = await TestPyth.getUpdateFee(priceUpdateData);
-    await TestPyth.connect(owner).updatePriceFeeds(priceUpdateData, {value: fee});
+    let tx = await TestPyth.connect(owner).updatePriceFeeds(priceUpdateData, {value: fee});
+    await tx.wait(3);
 
     for (const key in priceIds) {
         console.log(key, await TestPyth.getPrice(priceIds[key]));
