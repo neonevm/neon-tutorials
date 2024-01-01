@@ -5,32 +5,42 @@
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
 const { ethers } = require("hardhat");
+const { expect } = require("chai");
 
 async function main() {
-    const [owner] = await ethers.getSigners();
+    // DEPLOYMENT PARAMS
+    const NAME = 'Testcoin';
+    const SYMBOL = 'TST';
+    const DECIMALS = 9;
+    const MINT_AMOUNT = ethers.parseUnits('1000', 9);
+    // /DEPLOYMENT PARAMS
 
+    const [owner] = await ethers.getSigners();
     const ERC20ForSPLMintableFactory = await hre.ethers.getContractFactory('ERC20ForSPLMintable');
     const ERC20ForSPLMintable = await upgrades.deployProxy(ERC20ForSPLMintableFactory, [
-        'Testcoin',
-        'TST',
-        9
+        NAME,
+        SYMBOL,
+        DECIMALS
     ], {kind: 'uups'});
     await ERC20ForSPLMintable.waitForDeployment();
+
+    const CONTRACT_OWNER = await ERC20ForSPLMintable.owner();
+    const IMPLEMENTATION = await upgrades.erc1967.getImplementationAddress(ERC20ForSPLMintable.target);
+    const ownerInitialBalance = await ERC20ForSPLMintable.balanceOf(owner.address);
 
     console.log(
         `ERC20ForSPLMintable proxy deployed to ${ERC20ForSPLMintable.target}`
     );
     console.log(
-        `ERC20ForSPLMintable implementation deployed to ${await upgrades.erc1967.getImplementationAddress(ERC20ForSPLMintable.target)}`
+        `ERC20ForSPLMintable implementation deployed to ${IMPLEMENTATION}`
     );
 
-    console.log(await ERC20ForSPLMintable.owner(), 'owner');
-    console.log(await ERC20ForSPLMintable.balanceOf(owner.address), 'balanceOf');
-
-    let tx = await ERC20ForSPLMintable.mint(owner.address, ethers.parseUnits('1000', 9));
+    let tx = await ERC20ForSPLMintable.mint(owner.address, MINT_AMOUNT);
     await tx.wait(1);
 
-    console.log(await ERC20ForSPLMintable.balanceOf(owner.address), 'balanceOf');
+    expect(owner.address).to.eq(CONTRACT_OWNER);
+    expect(ownerInitialBalance).to.eq(0);
+    expect(await ERC20ForSPLMintable.balanceOf(owner.address)).to.be.greaterThan(ownerInitialBalance);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

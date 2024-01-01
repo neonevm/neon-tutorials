@@ -21,7 +21,7 @@ describe('Test init', async function () {
     const RECEIPTS_COUNT = 30;
     // 0x0bd79ef4179d50678f8bb3b8573ae99bf66c8a2f74beab37970d386bc00367b4 // Custom token
     // 0xd0d6b2043fb14bea672e7e74fa09ce4a42e384bdc302e6d1d854127039afe07a // USDC Devnet
-    const TOKEN_MINT = '0xd0d6b2043fb14bea672e7e74fa09ce4a42e384bdc302e6d1d854127039afe07a'; // USDC Devnet
+    const TOKEN_MINT = '0xd0d6b2043fb14bea672e7e74fa09ce4a42e384bdc302e6d1d854127039afe07a'; // USDC Token Mint on Solana Devnet
 
     before(async function() {
         [owner, user1, user2, user3] = await ethers.getSigners();
