@@ -685,6 +685,16 @@
       "address": "0x9A3167cf55b5907D6156f46B20d590a55102f0E5",
       "txHash": "0x9ce60d79afe8b1001edea1663234ecf6c05d28e79cb472ddcc4efe4de1d183db",
       "kind": "uups"
+    },
+    {
+      "address": "0xE59FbCa0E182766DFc80f361B9B50b2265e09031",
+      "txHash": "0x72b70ae43f447f5db8dfc94c09212de1d30ae208686744d077c0d782f9bf0ae2",
+      "kind": "uups"
+    },
+    {
+      "address": "0x6b142E7eA5D39940e8709EC301Fc3CF005Fc5295",
+      "txHash": "0x50f48ab4afdbee9e28b39ab30d1c27e718eeacddfc55b613b494868f9e7e2373",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -3814,6 +3824,121 @@
             "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
             "contract": "ERC20ForSPL",
             "src": "contracts/ERC20ForSPL.sol:14"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)45_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "201eb4b6659943985163be25b3f64534505fbe1dd58a366556ab50abb96db668": {
+      "address": "0x162aAaE26dfdDaf4ad637C582Bda97a636358001",
+      "txHash": "0x32f47b01538cf4e55764c75aec4224ca9868629386fc47945e423228c389a198",
+      "layout": {
+        "solcVersion": "0.8.21",
+        "storage": [
+          {
+            "label": "tokenMint",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bytes32",
+            "contract": "ERC20ForSPL",
+            "src": "contracts/ERC20ForSPL.sol:17"
+          },
+          {
+            "label": "_allowances",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "ERC20ForSPL",
+            "src": "contracts/ERC20ForSPL.sol:18"
           }
         ],
         "types": {
