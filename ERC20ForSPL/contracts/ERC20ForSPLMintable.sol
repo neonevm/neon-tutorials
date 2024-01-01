@@ -3,7 +3,13 @@ pragma solidity 0.8.21;
 
 import './ERC20ForSPL.sol';
 
+
+/// @custom:oz-upgrades-unsafe-allow constructor
 contract ERC20ForSPLMintable is ERC20ForSPL {
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         string memory _name,
         string memory _symbol,
@@ -12,7 +18,7 @@ contract ERC20ForSPLMintable is ERC20ForSPL {
         ERC20ForSPL.initializeParent(_initialize(_name, _symbol, _decimals));
     }
 
-    function getMintAccount() public pure returns (bytes32) {
+    function findMintAccount() public pure returns (bytes32) {
         return SPL_TOKEN.findAccount(bytes32(0));
     }
 

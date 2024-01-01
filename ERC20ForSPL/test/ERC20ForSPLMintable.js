@@ -37,7 +37,7 @@ describe('Test init', async function () {
             ERC20ForSPLMintableAddress = ERC20ForSPLMintable.target;
             console.log('Creating instance of just now deployed contract with address ', ERC20ForSPLMintable.target);
         }
-        let mintAccount = await ERC20ForSPLMintable.getMintAccount();
+        let mintAccount = await ERC20ForSPLMintable.findMintAccount();
         solanaProgramAddress = ethers.encodeBase58(mintAccount);
         ownerSolanaPublicKey = ethers.encodeBase58(await ERC20ForSPLMintable.solanaAccount(owner.address));
         user1SolanaPublicKey = ethers.encodeBase58(await ERC20ForSPLMintable.solanaAccount(user1.address));
@@ -337,7 +337,7 @@ describe('Test init', async function () {
         await ERC20ForSPLMintableV2.waitForDeployment();
         console.log("ERC20ForSPLMintableV2 upgraded successfully");
 
-        // just a workout to wait for ERC20ForSPLMintableV2 to be mined onchain, because upgradeProxy doesn't support .wait()
+        // just a work around to wait for ERC20ForSPLMintableV2 to be mined onchain, because upgradeProxy doesn't support .wait()
         let tx = await owner.sendTransaction({
             to: owner.address,
             value: 0

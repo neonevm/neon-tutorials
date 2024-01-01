@@ -52,10 +52,6 @@ describe('Test init', async function () {
     });
 
     it('validate owner', async function () {
-        console.log(await ERC20ForSPL.balanceOf(owner.address), 'owner balance');
-        console.log(await ERC20ForSPL.balanceOf(user1.address), 'user1 balance');
-        console.log(await ERC20ForSPL.balanceOf(user2.address), 'user2 balance');
-        console.log(await ERC20ForSPL.balanceOf(user3.address), 'user2 balance');
         expect(await ERC20ForSPL.owner()).to.eq(owner.address);
     });
 
@@ -67,5 +63,78 @@ describe('Test init', async function () {
     it('validate decimals are equal', async function () {
         const mintDataOnSolana = await connection.getParsedAccountInfo(new PublicKey(solanaProgramAddress));
         expect(await ERC20ForSPL.decimals()).to.eq(mintDataOnSolana.value.data.parsed.info.decimals);
+    });
+
+    it('Malicious change of owner ( supposed to revert )', async function () {
+        await expect(
+            ERC20ForSPL.connect(user1).transferOwnership(user1.address)
+        ).to.be.reverted;
+    });
+
+    it('Malicious contract upgrade ( supposed to revert )', async function () {
+        const ERC20ForSPLV2Factory = await ethers.getContractFactory("ERC20ForSPLV2", user1);
+        await expect(
+            upgrades.upgradeProxy(ERC20ForSPLAddress, ERC20ForSPLV2Factory)
+        ).to.be.reverted;
+    });
+
+    it('Malicious implementation initialize ( supposed to revert )', async function () {
+        const ERC20ForSPLImplementationAddress = await upgrades.erc1967.getImplementationAddress(ERC20ForSPL.target);
+        console.log(ERC20ForSPLImplementationAddress, 'ERC20ForSPLImplementationAddress');
+        const ERC20ForSPLFactory = await hre.ethers.getContractFactory('ERC20ForSPL');
+        const ERC20ForSPLImplementation = await ERC20ForSPLFactory.attach(ERC20ForSPLImplementationAddress);
+
+        await expect(
+            ERC20ForSPLImplementation.initializeParent('0x0000000000000000000000000000000000000000000000000000000000000000')
+        ).to.be.reverted;
+    });
+
+    it('Test UUPS contract upgrade', async function () {
+        const proxyOwner = await ERC20ForSPL.owner();
+        const totalSupply = await ERC20ForSPL.totalSupply();
+        /* const ownerBalance = await ERC20ForSPL.balanceOf(owner.address);
+        const user1Balance = await ERC20ForSPL.balanceOf(user1.address);
+        const user2Balance = await ERC20ForSPL.balanceOf(user2.address);
+        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
+        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaTotalSupply = await connection.getTokenSupply(new PublicKey(solanaProgramAddress)); */
+
+        const ERC20ForSPLV2Factory = await ethers.getContractFactory("ERC20ForSPLV2");
+        const ERC20ForSPLV2 = await upgrades.upgradeProxy(ERC20ForSPLAddress, ERC20ForSPLV2Factory);
+        await ERC20ForSPLV2.waitForDeployment();
+        console.log("ERC20ForSPLV2 upgraded successfully");
+
+        // just a work around to wait for ERC20ForSPLV2 to be mined onchain, because upgradeProxy doesn't support .wait()
+        let tx = await owner.sendTransaction({
+            to: owner.address,
+            value: 0
+        });
+        await tx.wait(RECEIPTS_COUNT);
+
+        // check from Neon node
+        const dummyDataInV2 = await ERC20ForSPLV2.getDummyData();
+        const proxyOwnerAfter = await ERC20ForSPLV2.owner();
+        const totalSupplyAfter = await ERC20ForSPLV2.totalSupply();
+        /* const ownerBalanceAfter = await ERC20ForSPLV2.balanceOf(owner.address);
+        const user1BalanceAfter = await ERC20ForSPLV2.balanceOf(user1.address);
+        const user2BalanceAfter = await ERC20ForSPLV2.balanceOf(user2.address); */
+        expect(ERC20ForSPLV2.target).to.eq(ERC20ForSPL.target);
+        expect(dummyDataInV2).to.eq(12345);
+        expect(proxyOwner).to.eq(proxyOwnerAfter);
+        expect(totalSupply).to.eq(totalSupplyAfter);
+        /* expect(ownerBalance).to.eq(ownerBalanceAfter);
+        expect(user1Balance).to.eq(user1BalanceAfter);
+        expect(user2Balance).to.eq(user2BalanceAfter); */
+
+        // check from Solana node
+        /* const solanaTotalSupplyAfter = await connection.getTokenSupply(new PublicKey(solanaProgramAddress));
+        const solanaOwnerTokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        expect(solanaTotalSupply.value.amount).to.eq(solanaTotalSupplyAfter.value.amount);
+        expect(solanaOwnerTokenBalance.value.amount).to.eq(solanaOwnerTokenBalanceAfter.value.amount);
+        expect(solanaUser1TokenBalance.value.amount).to.eq(solanaUser1TokenBalanceAfter.value.amount);
+        expect(solanaUser2TokenBalance.value.amount).to.eq(solanaUser2TokenBalanceAfter.value.amount); */
     });
 });
