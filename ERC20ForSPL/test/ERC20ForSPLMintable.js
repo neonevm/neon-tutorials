@@ -1,7 +1,6 @@
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
 const web3 = require("@solana/web3.js");
-const { PublicKey } = require("@solana/web3.js");
 require("dotenv").config();
 
 // define Solana Devnet connection
@@ -15,9 +14,9 @@ describe('Test init', async function () {
     let ownerSolanaPublicKey;
     let user1SolanaPublicKey;
     let user2SolanaPublicKey;
-    const SPL_DECIMALS = 9; // always 0 for ERC20ForSPL
-    const INITIAL_OWNER_BALANCE = ethers.parseUnits('1000000', SPL_DECIMALS);
-    const INITIAL_USER_BALANCE = ethers.parseUnits('150', SPL_DECIMALS);
+    const TOKEN_MINT_DECIMALS = 9; // never higher than 9 for ERC20ForSPL
+    const INITIAL_OWNER_BALANCE = ethers.parseUnits('1000000', TOKEN_MINT_DECIMALS);
+    const INITIAL_USER_BALANCE = ethers.parseUnits('150', TOKEN_MINT_DECIMALS);
     const RECEIPTS_COUNT = 30;
 
     before(async function() {
@@ -79,9 +78,9 @@ describe('Test init', async function () {
         expect(await ERC20ForSPLMintable.totalSupply()).to.eq(INITIAL_OWNER_BALANCE + INITIAL_USER_BALANCE + INITIAL_USER_BALANCE);
 
         // check from Solana node
-        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
-        const user1SolanaTokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const user2SolanaTokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
+        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(ownerSolanaPublicKey));
+        const user1SolanaTokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const user2SolanaTokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
         expect(solanaOwnerTokenBalance.value.amount).to.eq(INITIAL_OWNER_BALANCE);
         expect(user1SolanaTokenBalance.value.amount).to.eq(INITIAL_USER_BALANCE);
         expect(user2SolanaTokenBalance.value.amount).to.eq(INITIAL_USER_BALANCE);
@@ -90,10 +89,10 @@ describe('Test init', async function () {
     it('burn from owner', async function () {
         const ownerBalance = await ERC20ForSPLMintable.balanceOf(owner.address);
         const totalSupply = await ERC20ForSPLMintable.totalSupply();
-        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
-        const solanaTotalSupply = await connection.getTokenSupply(new PublicKey(solanaProgramAddress));
+        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(ownerSolanaPublicKey));
+        const solanaTotalSupply = await connection.getTokenSupply(new web3.PublicKey(solanaProgramAddress));
 
-        const burnAmount = ethers.parseUnits('10', SPL_DECIMALS);
+        const burnAmount = ethers.parseUnits('10', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(owner).burn(burnAmount);
         await tx.wait(RECEIPTS_COUNT);
 
@@ -103,15 +102,15 @@ describe('Test init', async function () {
         expect(totalSupply).to.be.greaterThan(await ERC20ForSPLMintable.totalSupply());
 
         // check from Solana node
-        const solanaOwnerTokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
+        const solanaOwnerTokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(ownerSolanaPublicKey));
         expect(BigInt(solanaOwnerTokenBalance.value.amount)).to.be.greaterThan(solanaOwnerTokenBalanceAfter.value.amount);
         expect(BigInt(solanaOwnerTokenBalance.value.amount)).to.eq(BigInt(solanaOwnerTokenBalanceAfter.value.amount) + burnAmount);
-        const solanaTotalSupplyAfter = await connection.getTokenSupply(new PublicKey(solanaProgramAddress));
+        const solanaTotalSupplyAfter = await connection.getTokenSupply(new web3.PublicKey(solanaProgramAddress));
         expect(BigInt(solanaTotalSupply.value.amount)).to.be.greaterThan(BigInt(solanaTotalSupplyAfter.value.amount));
     });
 
     it('transfer from user1 to user2', async function () {
-        const transferAmount = ethers.parseUnits('5', SPL_DECIMALS);
+        const transferAmount = ethers.parseUnits('5', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(user1).transfer(user2.address, transferAmount);
         await tx.wait(RECEIPTS_COUNT);
 
@@ -120,14 +119,14 @@ describe('Test init', async function () {
         expect(await ERC20ForSPLMintable.balanceOf(user2.address)).to.eq(INITIAL_USER_BALANCE + transferAmount);
 
         // check from Solana node
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
         expect(solanaUser1TokenBalanceAfter.value.amount).to.eq(INITIAL_USER_BALANCE - transferAmount);
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(solanaUser2TokenBalanceAfter.value.amount).to.eq(INITIAL_USER_BALANCE + transferAmount);
     });
 
     it('transfer from user2 to user1', async function () {
-        const transferAmount = ethers.parseUnits('5', SPL_DECIMALS);
+        const transferAmount = ethers.parseUnits('5', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(user2).transfer(user1.address, transferAmount);
         await tx.wait(RECEIPTS_COUNT);
 
@@ -136,19 +135,19 @@ describe('Test init', async function () {
         expect(await ERC20ForSPLMintable.balanceOf(user2.address)).to.eq(INITIAL_USER_BALANCE);
 
         // check from Solana node
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
         expect(solanaUser1TokenBalanceAfter.value.amount).to.eq(INITIAL_USER_BALANCE);
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(solanaUser2TokenBalanceAfter.value.amount).to.eq(INITIAL_USER_BALANCE);
     });
 
     it('transfer from user1 to user2 using transferSolana', async function () {
         const user1Balance = await ERC20ForSPLMintable.balanceOf(user1.address);
         const user2Balance = await ERC20ForSPLMintable.balanceOf(user2.address);
-        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
 
-        const transferAmount = ethers.parseUnits('10', SPL_DECIMALS);
+        const transferAmount = ethers.parseUnits('10', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(user1).transferSolana(await ERC20ForSPLMintable.solanaAccount(user2.address), transferAmount);
         await tx.wait(RECEIPTS_COUNT);
 
@@ -159,8 +158,8 @@ describe('Test init', async function () {
         expect(user2BalanceAfter).to.be.greaterThan(user2Balance);
 
         // check from Solana node
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(BigInt(solanaUser1TokenBalance.value.amount)).to.be.greaterThan(BigInt(solanaUser1TokenBalanceAfter.value.amount));
         expect(BigInt(solanaUser2TokenBalanceAfter.value.amount)).to.be.greaterThan(BigInt(solanaUser2TokenBalance.value.amount));
     });
@@ -168,10 +167,10 @@ describe('Test init', async function () {
     it('transfer from user2 to user1 by using transferSolana', async function () {
         const user1Balance = await ERC20ForSPLMintable.balanceOf(user1.address);
         const user2Balance = await ERC20ForSPLMintable.balanceOf(user2.address);
-        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
 
-        const transferAmount = ethers.parseUnits('20', SPL_DECIMALS);
+        const transferAmount = ethers.parseUnits('20', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(user2).transferSolana(await ERC20ForSPLMintable.solanaAccount(user1.address), transferAmount);
         await tx.wait(RECEIPTS_COUNT);
 
@@ -182,8 +181,8 @@ describe('Test init', async function () {
         expect(user2Balance).to.be.greaterThan(user2BalanceAfter);
 
         // check from Solana node
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(BigInt(solanaUser1TokenBalanceAfter.value.amount)).to.be.greaterThan(BigInt(solanaUser1TokenBalance.value.amount));
         expect(BigInt(solanaUser2TokenBalance.value.amount)).to.be.greaterThan(BigInt(solanaUser2TokenBalanceAfter.value.amount));
     });
@@ -191,7 +190,7 @@ describe('Test init', async function () {
     it('approve from user2 to user1', async function () {
         const user2Allowance = await ERC20ForSPLMintable.allowance(user2.address, user1.address);
 
-        let tx = await ERC20ForSPLMintable.connect(user2).approve(user1.address, ethers.parseUnits('1', SPL_DECIMALS));
+        let tx = await ERC20ForSPLMintable.connect(user2).approve(user1.address, ethers.parseUnits('1', TOKEN_MINT_DECIMALS));
         await tx.wait(RECEIPTS_COUNT);
 
         const user2AllowanceAfter = await ERC20ForSPLMintable.allowance(user2.address, user1.address);
@@ -202,8 +201,8 @@ describe('Test init', async function () {
         const user2Allowance = await ERC20ForSPLMintable.allowance(user2.address, user1.address);
         const user1Balance = await ERC20ForSPLMintable.balanceOf(user1.address);
         const user2Balance = await ERC20ForSPLMintable.balanceOf(user2.address);
-        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
 
         let tx = await ERC20ForSPLMintable.connect(user1).transferFrom(user2.address, user1.address, user2Allowance);
         await tx.wait(RECEIPTS_COUNT);
@@ -218,21 +217,21 @@ describe('Test init', async function () {
         expect(user2Balance).to.be.greaterThan(user2BalanceAfter);
 
         // check from Solana node
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(BigInt(solanaUser1TokenBalanceAfter.value.amount)).to.be.greaterThan(BigInt(solanaUser1TokenBalance.value.amount));
         expect(BigInt(solanaUser2TokenBalance.value.amount)).to.be.greaterThan(BigInt(solanaUser2TokenBalanceAfter.value.amount));
     });
 
     it('approveSolana from user1 to user2 and owner; revoke with approveSolana', async function () {
-        let amount = ethers.parseUnits('1', SPL_DECIMALS);
+        let amount = ethers.parseUnits('1', TOKEN_MINT_DECIMALS);
         let tx = await ERC20ForSPLMintable.connect(user1).approveSolana(await ERC20ForSPLMintable.solanaAccount(user2.address), amount);
         await tx.wait(RECEIPTS_COUNT);
         let accountDelegateData = await ERC20ForSPLMintable.getAccountDelegateData(user1.address);
         expect(accountDelegateData[0]).to.eq(await ERC20ForSPLMintable.solanaAccount(user2.address));
         expect(accountDelegateData[1]).to.eq(BigInt(amount));
 
-        let amount1 = ethers.parseUnits('2', SPL_DECIMALS);
+        let amount1 = ethers.parseUnits('2', TOKEN_MINT_DECIMALS);
         let tx1 = await ERC20ForSPLMintable.connect(user1).approveSolana(await ERC20ForSPLMintable.solanaAccount(owner.address), amount1);
         await tx1.wait(RECEIPTS_COUNT);
         
@@ -252,27 +251,27 @@ describe('Test init', async function () {
     it('Malicious transfer ( supposed to revert )', async function () {
         // user3 has no tokens at all
         await expect(
-            ERC20ForSPLMintable.connect(user3).transfer(user1.address, ethers.parseUnits('1', SPL_DECIMALS))
+            ERC20ForSPLMintable.connect(user3).transfer(user1.address, ethers.parseUnits('1', TOKEN_MINT_DECIMALS))
         ).to.be.reverted;
     });
 
     it('Malicious transferFrom ( supposed to revert )', async function () {
         // user3 has no approval at all
         await expect(
-            ERC20ForSPLMintable.connect(user3).transferFrom(user2.address, user3.address, ethers.parseUnits('1', SPL_DECIMALS))
+            ERC20ForSPLMintable.connect(user3).transferFrom(user2.address, user3.address, ethers.parseUnits('1', TOKEN_MINT_DECIMALS))
         ).to.be.reverted;
     });
 
     it('Malicious mint ( supposed to revert )', async function () {
         await expect(
-            ERC20ForSPLMintable.connect(user1).mint(user2.address, ethers.parseUnits('1', SPL_DECIMALS))
+            ERC20ForSPLMintable.connect(user1).mint(user2.address, ethers.parseUnits('1', TOKEN_MINT_DECIMALS))
         ).to.be.reverted;
     });
 
     it('Malicious burn ( supposed to revert )', async function () {
         // user3 has no tokens at all
         await expect(
-            ERC20ForSPLMintable.connect(user3).burn(ethers.parseUnits('1', SPL_DECIMALS))
+            ERC20ForSPLMintable.connect(user3).burn(ethers.parseUnits('1', TOKEN_MINT_DECIMALS))
         ).to.be.reverted;
     });
 
@@ -327,10 +326,10 @@ describe('Test init', async function () {
         const ownerBalance = await ERC20ForSPLMintable.balanceOf(owner.address);
         const user1Balance = await ERC20ForSPLMintable.balanceOf(user1.address);
         const user2Balance = await ERC20ForSPLMintable.balanceOf(user2.address);
-        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
-        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
-        const solanaTotalSupply = await connection.getTokenSupply(new PublicKey(solanaProgramAddress));
+        const solanaOwnerTokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(ownerSolanaPublicKey));
+        const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
+        const solanaTotalSupply = await connection.getTokenSupply(new web3.PublicKey(solanaProgramAddress));
 
         const ERC20ForSPLMintableV2Factory = await ethers.getContractFactory("ERC20ForSPLMintableV2");
         const ERC20ForSPLMintableV2 = await upgrades.upgradeProxy(ERC20ForSPLMintableAddress, ERC20ForSPLMintableV2Factory);
@@ -360,10 +359,10 @@ describe('Test init', async function () {
         expect(user2Balance).to.eq(user2BalanceAfter);
 
         // check from Solana node
-        const solanaTotalSupplyAfter = await connection.getTokenSupply(new PublicKey(solanaProgramAddress));
-        const solanaOwnerTokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(ownerSolanaPublicKey));
-        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user1SolanaPublicKey));
-        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new PublicKey(user2SolanaPublicKey));
+        const solanaTotalSupplyAfter = await connection.getTokenSupply(new web3.PublicKey(solanaProgramAddress));
+        const solanaOwnerTokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(ownerSolanaPublicKey));
+        const solanaUser1TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
+        const solanaUser2TokenBalanceAfter = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
         expect(solanaTotalSupply.value.amount).to.eq(solanaTotalSupplyAfter.value.amount);
         expect(solanaOwnerTokenBalance.value.amount).to.eq(solanaOwnerTokenBalanceAfter.value.amount);
         expect(solanaUser1TokenBalance.value.amount).to.eq(solanaUser1TokenBalanceAfter.value.amount);
