@@ -9,3 +9,7 @@ typechain-types
 cache
 artifacts
 
+# OpenZeppelin
+.openzeppelin/unknown-*.json
+.openzeppelin/dev-*.json
+.openzeppelin/.session
