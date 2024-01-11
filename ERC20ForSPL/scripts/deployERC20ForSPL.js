@@ -9,7 +9,7 @@ const { expect } = require("chai");
 
 async function main() {
     // DEPLOYMENT PARAMS
-    const TOKEN_MINT = '0xd0d6b2043fb14bea672e7e74fa09ce4a42e384bdc302e6d1d854127039afe07a'; // USDC Token Mint on Solana Devnet, this value is only placed as an example. Make sure to update this value when deploying your contract!!!
+    const TOKEN_MINT = '0xa4a420d75f056d9cebb8eda13af07965261cb872b129f99b1ac94525ae8fded3'; // Custom SPLToken on Solana Devnet ( C5h24dhh9PjaVtHmf6CaqXbhi9SgrfwUSQt2MskWRLYr ). Make sure to update this value with your SPLToken address when deploying your contract on the Mainnet!!!
     // /DEPLOYMENT PARAMS
 
     const [owner] = await ethers.getSigners();
