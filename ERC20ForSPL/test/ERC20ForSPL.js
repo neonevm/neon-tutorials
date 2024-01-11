@@ -8,7 +8,7 @@ const connection = new web3.Connection("https://api.devnet.solana.com");
 
 describe('Test init', async function () {
     let owner, user1, user2, user3;
-    let ERC20ForSPLAddress = '0xA7650A1E0821f0bbC52af0895d9C696E90381f43';
+    let ERC20ForSPLAddress = ''; // PLACE HERE ERC20ForSPL address on Neon EVM
     let ERC20ForSPL;
     let solanaProgramAddress;
     let ownerSolanaPublicKey;
@@ -22,8 +22,7 @@ describe('Test init', async function () {
     before(async function() {
         [owner, user1, user2, user3] = await ethers.getSigners();
 
-        let passedERC20ForSPLAddress = ethers.isAddress(ERC20ForSPLAddress);
-        if (passedERC20ForSPLAddress) {
+        if (ethers.isAddress(ERC20ForSPLAddress)) {
             console.log('Creating instance of already deployed contract with address ', ERC20ForSPLAddress);
             ERC20ForSPL = await ethers.getContractAt('ERC20ForSPL', ERC20ForSPLAddress);
         } else {
@@ -214,8 +213,6 @@ describe('Test init', async function () {
             const user2Balance = await ERC20ForSPL.balanceOf(user2.address);
             const solanaUser1TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user1SolanaPublicKey));
             const solanaUser2TokenBalance = await connection.getTokenAccountBalance(new web3.PublicKey(user2SolanaPublicKey));
-
-            console.log(user2Allowance, 'user2Allowance');
 
             let tx = await ERC20ForSPL.connect(user1).transferFrom(user2.address, user1.address, user2Allowance);
             await tx.wait(RECEIPTS_COUNT);
