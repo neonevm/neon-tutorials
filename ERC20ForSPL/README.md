@@ -34,6 +34,7 @@ Like mentioned before ERC20ForSPL is used when we have an already existing SPLTo
 #### ERC20ForSPLMintable:
 > [!IMPORTANT]  
 > When deploying the **ERC20ForSPLMintable** standard the maximum of decimals we are allowed to use for our token is 9, because the maximum number we can store on Solana is `uint64`.
+
 ERC20ForSPLMintable is used when we don't have an existing SPLToken and we want to deploy one. The steps to produce the ERC20ForSPLMintable's tests are lesser - we don't have to fill in our testers balances with a transaction from Solana to Neon, because the ERC20ForSPLMintable smart contract includes a minting method which we can use in our tests `function mint(address to, uint256 amount) public onlyOwner`.
 
 To run the ERC20ForSPLMintable tests run the following command - `npx hardhat test --network neondevnet test/ERC20ForSPLMintable.js`.
