@@ -240,9 +240,4 @@ contract ERC20ForSPL is OwnableUpgradeable, UUPSUpgradeable {
         SPL_TOKEN.transfer(fromSolana, toSolana, uint64(amount));
         emit Transfer(from, to, amount);
     }
-
-    function initializeAccount() external {
-        if (!SPL_TOKEN.isSystemAccount(solanaAccount(msg.sender))) revert InvalidSystemAccount();
-        SPL_TOKEN.initializeAccount(_salt(msg.sender), tokenMint);
-    }
 }

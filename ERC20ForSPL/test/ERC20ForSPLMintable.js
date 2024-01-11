@@ -36,12 +36,12 @@ describe('Test init', async function () {
             ERC20ForSPLMintableAddress = ERC20ForSPLMintable.target;
             console.log('Creating instance of just now deployed contract with address ', ERC20ForSPLMintable.target);
         }
-        let mintAccount = await ERC20ForSPLMintable.findMintAccount();
-        solanaProgramAddress = ethers.encodeBase58(mintAccount);
+        const TokenMintAccount = await ERC20ForSPLMintable.findMintAccount();
+        solanaProgramAddress = ethers.encodeBase58(TokenMintAccount);
         ownerSolanaPublicKey = ethers.encodeBase58(await ERC20ForSPLMintable.solanaAccount(owner.address));
         user1SolanaPublicKey = ethers.encodeBase58(await ERC20ForSPLMintable.solanaAccount(user1.address));
         user2SolanaPublicKey = ethers.encodeBase58(await ERC20ForSPLMintable.solanaAccount(user2.address));
-        console.log(mintAccount, 'mintAccount');
+        console.log(TokenMintAccount, 'TokenMintAccount');
         console.log(solanaProgramAddress, 'solanaProgramAddress');
         console.log(ownerSolanaPublicKey, 'ownerSolanaPublicKey');
         console.log(user1SolanaPublicKey, 'user1SolanaPublicKey');
