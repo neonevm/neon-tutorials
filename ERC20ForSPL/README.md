@@ -19,14 +19,13 @@ This standard also interacts with the following 2 predefines on the Neon network
 
 ### Deploying & executing tests on Neon EVM Devnet:
 > [!IMPORTANT]  
-> Before starting the tests make sure to create `.env` file containing the following data _( make a copy of .env.example file and rename it to .env )_:
-```
-    PRIVATE_KEY_OWNER=XYZ
-    USER1_KEY=XYZ
-    USER2_KEY=XYZ
-    USER3_KEY=XYZ
-```
-> These are the private keys of our testers - make sure that these accounts have enough NEON balance to cover the transactions executed in the tests. _( You can get Devnet NEONs from the **[Neon Faucet](https://neonfaucet.org)** )_
+> Before starting the tests make sure to create `.env` file containing the private keys of the needed 4 testers _( make a copy of `.env.example` file and rename it to `.env` )_. Make sure that these accounts have enough NEON balance to cover the transactions executed in the tests. _( You can get Devnet NEONs from the **[Neon Faucet](https://neonfaucet.org)** )_
+    ```
+        PRIVATE_KEY_OWNER=XYZ
+        USER1_KEY=XYZ
+        USER2_KEY=XYZ
+        USER3_KEY=XYZ
+    ```
 
 #### ERC20ForSPL:
 Like mentioned before ERC20ForSPL is used when we already have existing SPLToken on Solana and for the sake of this demo we will be using this *[SPLToken](https://solscan.io/token/C5h24dhh9PjaVtHmf6CaqXbhi9SgrfwUSQt2MskWRLYr?cluster=devnet)*. The address of the token is already included in the testing script.
