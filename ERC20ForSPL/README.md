@@ -20,12 +20,12 @@ This standard also interacts with the following 2 predefines on the Neon network
 ### Deploying & executing tests on Neon EVM Devnet:
 > [!IMPORTANT]  
 > Before starting the tests make sure to create `.env` file containing the following data _( make a copy of .env.example file and rename it to .env )_:
-`
+```
     PRIVATE_KEY_OWNER=XYZ
     USER1_KEY=XYZ
     USER2_KEY=XYZ
     USER3_KEY=XYZ
-`
+```
 > These are the private keys of our testers - make sure that these accounts have enough NEON balance to cover the transactions executed in the tests. _( You can get Devnet NEONs from the **[Neon Faucet](https://neonfaucet.org)** )_
 
 #### ERC20ForSPL:
