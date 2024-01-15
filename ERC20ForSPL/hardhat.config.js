@@ -4,7 +4,7 @@ require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    solidity: "0.8.21",
+    solidity: "0.8.23",
     etherscan: {
         apiKey: {
             neonevm: "test"
