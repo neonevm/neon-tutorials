@@ -4,7 +4,7 @@ require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    solidity: "0.8.21",
+    solidity: "0.8.23",
     etherscan: {
         apiKey: {
             neonevm: "test"
@@ -38,15 +38,7 @@ module.exports = {
             gas: "auto",
             gasPrice: "auto",
             isFork: true
-        },
-        /* hardhat: {
-            forking: {
-                live: false,
-                saveDeployments: false,
-                accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY, process.env.USER2_KEY, process.env.USER3_KEY],
-                url: "https://devnet.neonevm.org"
-            }
-        } */
+        }
     },
     mocha: {
         timeout: 180000

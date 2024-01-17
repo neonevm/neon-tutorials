@@ -1,5 +1,5 @@
 {
-  "name": "ERC20ForSPL",
+  "name": "ERC20ForSPL & ERC20ForSPLMintable",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,12 +9,19 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@neonevm/token-transfer": "^3.0.1",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@openzeppelin/contracts": "^5.0.0",
     "@openzeppelin/contracts-upgradeable": "^5.0.0",
     "@openzeppelin/hardhat-upgrades": "^2.3.3",
+    "@solana/spl-token": "^0.3.9",
+    "@solana/web3.js": "^1.87.2",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.3.1",
     "hardhat": "^2.18.1",
-    "@solana/web3.js": "^1.87.2"
+    "nodemon": "^3.0.2",
+    "react": "^18.2.0",
+    "ts-node-dev": "^2.0.0",
+    "web3": "1.10.0"
   }
 }
