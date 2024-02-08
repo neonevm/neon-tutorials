@@ -1,11 +1,20 @@
-// SPDX-License-Identifier: MIT
+/* // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import "./openzeppelin-fork/contracts-upgradeable/proxy/utils/Initializable.sol";
-import './ERC20ForSPLBackbone.sol';
+import './ERC20ForSPL.sol';
 
-contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable {
+
+/// @title ERC20ForSPLMintable
+/// @author https://twitter.com/mnedelchev_
+/// @notice This contract serve as an interface of to be deployed SPLToken on Solana. Thru this interface Ethereum-like address on Neon chain can apply changes on Solana
+/// @custom:oz-upgrades-unsafe-allow constructor
+contract ERC20ForSPLMintable is ERC20ForSPL {
     error InvalidDecimals();
+
+    /// @notice Disabling the initializers to prevent of UUPS implementation getting hijacked
+    constructor() {
+        _disableInitializers();
+    }
 
     /// @notice Method used by the OpenZeppelin's UUPS lib that mimics the functionality of a constructor
     /// @param _name The name of the SPLToken
@@ -17,12 +26,7 @@ contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable {
         uint8 _decimals
     ) public initializer {
         if (_decimals > 9) revert InvalidDecimals();
-        
-        bytes32 _tokenMint = _initialize(_name, _symbol, _decimals);
-        if (!SPL_TOKEN.getMint(_tokenMint).isInitialized) revert InvalidTokenMint();
-        if (!METAPLEX.isInitialized(_tokenMint)) revert MissingMetaplex();
-
-        tokenMint = _tokenMint;
+        ERC20ForSPL.initializeParent(_initialize(_name, _symbol, _decimals));
     }
 
     /// @notice Returns the Solana address of the Token Mint
@@ -32,7 +36,7 @@ contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable {
 
     /// @notice Mint new SPLToken directly on Solana chain
     /// @custom:getter balanceOf
-    function mint(address to, uint256 amount) public {
+    function mint(address to, uint256 amount) public onlyOwner {
         if (to == address(0)) revert EmptyAddress();
         if (totalSupply() + amount > type(uint64).max) revert AmountExceedsUint64();
 
@@ -55,4 +59,4 @@ contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable {
         METAPLEX.createMetadata(mintAddress, _name, _symbol, "");
         return mintAddress;
     }
-}
+}*/
