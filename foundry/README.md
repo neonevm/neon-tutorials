@@ -119,7 +119,104 @@ Test result: ok. 26 passed; 0 failed; 0 skipped; finished in 37.04ms
 Ran 1 test suites: 26 tests passed, 0 failed, 0 skipped (26 total tests)
 ```
 
-## Deploying contract
+## Deploying contract, minting tokens, transferring tokens using Foundry Scripts
+
+### Deploy contract
+
+```sh
+forge script script/TestERC20/DeployTestERC20.s.sol:DeployTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation
+```
+
+After successfully running this step you should get console output similar to:
+
+```sh
+[⠢] Compiling...
+[⠒] Compiling 2 files with 0.8.21
+[⠢] Solc 0.8.21 finished in 842.35ms
+Compiler run successful!
+Script ran successfully.
+
+SKIPPING ON CHAIN SIMULATION.
+
+###
+Finding wallets for all the necessary addresses...
+##
+Sending transactions [0 - 0].
+⠁ [00:00:00] [######################################################################################################################################] 1/1 txes (0.0s)
+
+##
+Waiting for receipts.
+⠉ [00:00:04] [##################################################################################################################################] 1/1 receipts (0.0s)
+##### 245022926
+✅  [Success]Hash: 0x93b3a7f39f9bb5e6326d73b8f1c77ffe90a79390c784f1ece1ba74d6da356e31
+Contract Address: 0x853dA9a815c817866848Aff7fE43e4a74b8FF282
+Block: 278115244
+Paid: 5.7943561133217 ETH (33229200 gas * 174.37543225 gwei)
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+Total Paid: 5.7943561133217 ETH (33229200 gas * avg 174.37543225 gwei)
+```
+
+### Mint tokens to the deployer account and transfer tokens from the deployer account to another account
+
+```sh
+forge script script/TestERC20/MintTestERC20.s.sol:MintTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation
+```
+
+After successfully running this step you should get console output similar to:
+
+```sh
+[⠢] Compiling...
+No files changed, compilation skipped
+Script ran successfully.
+
+== Logs ==
+  The initial balance of the deployer account is:
+  99000000000000
+  The new balance of the deployer account is:
+  199000000000000
+  The initial balance of the receiver account before the transfer is:
+  1000000000000
+  The new balance of the deployer account after the transfer is:
+  198000000000000
+  The new balance of the receiver account after the transfer is:
+  2000000000000
+
+SKIPPING ON CHAIN SIMULATION.
+
+###
+Finding wallets for all the necessary addresses...
+##
+Sending transactions [0 - 1].
+⠉ [00:00:01] [######################################################################################################################################] 2/2 txes (0.0s)
+
+##
+Waiting for receipts.
+⠙ [00:00:06] [##################################################################################################################################] 2/2 receipts (0.0s)
+##### 245022926
+✅  [Success]Hash: 0x2b4e080fef106d489fbb986fe517f8ce393ba593019939b2c591ec37035126fc
+Block: 278118078
+Paid: 0.0017438435201 ETH (10000 gas * 174.38435201 gwei)
+
+
+##### 245022926
+✅  [Success]Hash: 0x7975d08e3cf9413670ede44ee9cc2f5d69c0d375530948453585b5195c5ca472
+Block: 278118084
+Paid: 0.0017438435201 ETH (10000 gas * 174.38435201 gwei)
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+Total Paid: 0.0034876870402 ETH (20000 gas * avg 174.38435201 gwei)
+```
+
+**_NOTE_** The native token displayed above should be NEON instead of ETH and the unit should be Galan instead of gwei (It is not possible to customize the display).
+
+## Deploying contract, minting tokens, transferring tokens without using Foundry Scripts
+
+### Deploy contract
 
 ```sh
 forge create --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY src/TestERC20/TestERC20.sol:TestERC20 --constructor-args "Test ERC20 Token" "TERC20" --legacy
@@ -135,7 +232,7 @@ Deployed to: 0x5537599aa2F97Dd60a66342522a465A7f2e40Ff9
 Transaction hash: 0x6de9dab8a526cbac33008056d185b93dff725605efb791bf116b6bece4f0c486
 ```
 
-## Send a transaction with a deployed smart contract function
+### Send a transaction with a deployed smart contract mint function
 
 ```sh
 cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "mint(address,uint256)" <deployer_address> 20000000000000000000 --legacy
@@ -159,7 +256,7 @@ transactionIndex        0
 type                    0
 ```
 
-## Call a deployed smart contract function
+### Call a deployed smart contract function
 
 ```sh
 cast call <contract_address> --rpc-url $RPC_URL_DEVNET "balanceOf(address) (uint256)" <account_address>
@@ -171,7 +268,7 @@ After successfully running this step you should get console output similar to:
 20000000000000000000
 ```
 
-## Transfer the ERC20 token to another address
+### Transfer the ERC20 token to another address
 
 ```sh
 cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "transfer(address,uint256)" <receiver_address> 10000000000000000000 --legacy

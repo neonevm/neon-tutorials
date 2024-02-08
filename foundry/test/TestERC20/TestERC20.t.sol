@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.21;
+pragma solidity 0.8.21;
 
 import "../../lib/forge-std/src/Test.sol";
 import "../../src/TestERC20/TestERC20.sol";
@@ -12,7 +12,7 @@ contract ContractTest is Test {
     address bob = vm.addr(0x2);
 
     function setUp() public {
-        token = new TestERC20("Test ERC20 Token", "TERC20");
+        token = new TestERC20("Test ERC20 Token", "TERC20", address(this));
     }
 
     function testName() external {
