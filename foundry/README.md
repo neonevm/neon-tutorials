@@ -1,6 +1,6 @@
 # Foundry Examples
 
-# Example deploying ERC20 to Neon Labs Devnet using Foundry
+# Example deploying ERC20 to Neon EVM Devnet using Foundry
 
 This directory contains all the files necessary to deploy simplest ERC20-like contract using Neon onto the Solana blockchain.
 
