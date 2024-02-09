@@ -3,6 +3,7 @@ pragma solidity 0.8.21;
 
 import "../../lib/forge-std/src/Script.sol";
 import "../../src/TestERC20/TestERC20.sol";
+import "forge-std/console.sol";
 
 contract DeployTestERC20Script is Script {
     function run() external {
@@ -10,8 +11,8 @@ contract DeployTestERC20Script is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Change the address to your own deployer account address    
-        new TestERC20("Test ERC20 Token", "TERC20", address(0x9CE2A03A7a258fB96d04Afb8Dd84b69A748B5959));
-
+        TestERC20 testERC20Address = new TestERC20("Test ERC20 Token", "TERC20", vm.addr(deployerPrivateKey));
+        console.log('TestERC20 deployed at: ', address(testERC20Address));
         vm.stopBroadcast();
     }
 }
