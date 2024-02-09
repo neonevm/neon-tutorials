@@ -23,7 +23,7 @@ async function main() {
     await ERC20ForSPLFactoryImpl.waitForDeployment();
     console.log(ERC20ForSPLFactoryImpl.target, 'Factory\'s UUPS implementation');
 
-    // deploy Factory's proxy
+    // deploy Factory's UUPS proxy
     const ERC1967Proxy = await ethers.getContractFactory('ERC1967Proxy');
     const ERC20ForSPLFactoryProxy = await ERC1967Proxy.deploy(
         ERC20ForSPLFactoryImpl.target,
@@ -72,13 +72,13 @@ async function main() {
     console.log(await ethers.provider.getStorage(ERC20ForSPLFactoryInstance.target, 1), 'ERC20ForSPLFactoryInstance - slot1 ( uups impl )');
     console.log(await ethers.provider.getStorage(ERC20ForSPLFactoryInstance.target, 2), 'ERC20ForSPLFactoryInstance - slot2 ( owner )\n');
 
-    // deploy new Factory's implementation
+    // deploy new Factory's UUPS implementation
     const ERC20ForSPLFactoryV2UUPSFactory = await hre.ethers.getContractFactory('ERC20ForSPLFactoryV2');
     const ERC20ForSPLFactoryV2Impl = await ethers.deployContract('ERC20ForSPLFactoryV2');
     await ERC20ForSPLFactoryV2Impl.waitForDeployment();
     console.log(ERC20ForSPLFactoryV2Impl.target, 'Factory\'s UUPS implementation');
 
-    // upgrade to new Factory's implementation
+    // upgrade to new Factory's UUPS implementation
     tx = await ERC20ForSPLFactoryInstance.upgradeToAndCall(ERC20ForSPLFactoryV2Impl.target, '0x');
     await tx.wait(3);
 

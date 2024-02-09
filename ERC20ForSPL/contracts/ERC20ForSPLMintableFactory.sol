@@ -4,32 +4,21 @@ pragma solidity 0.8.23;
 import "./openzeppelin-fork/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./openzeppelin-fork/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./openzeppelin-fork/contracts/proxy/beacon/BeaconProxy.sol";
-import "./ERC20ForSPL.sol";
+import "./interfaces/IERC20ForSPLMintable.sol";
+import "./ERC20ForSPLMintable.sol";
 
 
 /// @custom:oz-upgrades-unsafe-allow constructor
 contract ERC20ForSPLFactory is OwnableUpgradeable, UUPSUpgradeable {
     address private _implementation;
     address private _uupsImplementation;
-    mapping(bytes32 => Token) public tokensData;
+    mapping(bytes32 => address) public tokensData;
     address[] public tokens;
     address public beacon;
-
-    struct Token {
-        address token;
-        State state;
-    }
-
-    enum State {
-        New,
-        AlreadyExisting
-    }
 
     event TokenDeploy(bytes32 tokenMint, address token);
     event Upgraded(address indexed implementation);
 
-    error InvalidTokenData();
-    error AlreadyExistingERC20ForSPL();
     error BeaconInvalidImplementation(address implementation);
 
     /// @notice Disabling the initializers to prevent of implementation getting hijacked
@@ -65,21 +54,6 @@ contract ERC20ForSPLFactory is OwnableUpgradeable, UUPSUpgradeable {
         _setImplementation(newImplementation);
     }
 
-    function addAlreadyExistingERC20ForSPL(bytes32[] memory tokenMints, address[] memory alreadyExistingTokens) external onlyOwner {
-        uint tokensLen = alreadyExistingTokens.length;
-        if (tokensLen != tokenMints.length) revert InvalidTokenData();
-
-        for (uint i; i < tokensLen; ++i) {
-            if (tokensData[tokenMints[i]].token != address(0)) revert AlreadyExistingERC20ForSPL();
-
-            tokensData[tokenMints[i]] = Token({
-                token: alreadyExistingTokens[i],
-                state: State.AlreadyExisting
-            });
-            tokens.push(address(alreadyExistingTokens[i]));
-        }
-    }
-
     /**
      * @dev Sets the implementation contract address for this beacon
      *
@@ -95,18 +69,23 @@ contract ERC20ForSPLFactory is OwnableUpgradeable, UUPSUpgradeable {
         emit Upgraded(newImplementation);
     }
 
-    function deploy(bytes32 tokenMint) external {
-        if (tokensData[tokenMint].token != address(0)) revert AlreadyExistingERC20ForSPL();
-
+    function deploy(
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals
+    ) external {
         BeaconProxy token = new BeaconProxy(
             address(this),
-            abi.encodeWithSelector(ERC20ForSPL(address(0)).initialize.selector, tokenMint)
+            abi.encodeWithSelector(
+                ERC20ForSPLMintable(address(0)).initialize.selector, 
+                _name,
+                _symbol,
+                _decimals,
+                msg.sender
+            )
         );
 
-        tokensData[tokenMint] = Token({
-            token: address(token),
-            state: State.New
-        });
+        tokensData[IERC20ForSPLMintable(address(token)).findMintAccount()] = address(token);
         tokens.push(address(token));
 
         emit TokenDeploy(tokenMint, address(token));
