@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 import './interfaces/ISPLToken.sol';
 import './interfaces/IMetaplex.sol';
 
+
+/// @title ERC20ForSPLBackbone
+/// @author https://twitter.com/mnedelchev_
+/// @notice This contract serve as a backbone contract for both ERC20ForSPL and ERC20ForSPLMintable smart contracts. ERC20ForSPLBackbone contains the core logic of the ERC20ForSPL meanwhile in ERC20ForSPL and ERC20ForSPLMintable smart contracts 
+/// @dev This contract is part of a BeaconProxy contract. The storage is defined in the following way:
+/// @dev Storage slot 0 - taken by the Beacon address.
+/// @dev Every next slot is defined by the needs of the ERC20ForSPL standard.
 contract ERC20ForSPLBackbone {
     ISPLToken public constant SPL_TOKEN = ISPLToken(0xFf00000000000000000000000000000000000004);
     IMetaplex public constant METAPLEX = IMetaplex(0xff00000000000000000000000000000000000005);

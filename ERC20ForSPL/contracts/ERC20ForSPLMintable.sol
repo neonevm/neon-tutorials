@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 import "./openzeppelin-fork/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./openzeppelin-fork/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -8,8 +8,8 @@ import './ERC20ForSPLBackbone.sol';
 
 /// @title ERC20ForSPLMintable
 /// @author https://twitter.com/mnedelchev_
-/// @notice This contract serve as an interface of to be deployed SPLToken on Solana. Thru this interface Ethereum-like address on Neon chain can apply changes on Solana.
-/// @dev This contract logic is being used as BeaconProxy implementation. The Beacon is defined and inherited from ERC20ForSPLBackbone.sol at slot 0.
+/// @notice This contract serve as an interface of to be deployed SPLToken on Solana. Thru this interface Ethereum-like address on Neon EVM chain can apply changes on SPLToken account on Solana.
+/// @dev This contract is being used as a BeaconProxy implementation. The Beacon is defined and inherited from ERC20ForSPLBackbone.sol at storage slot 0.
 /// @custom:oz-upgrades-unsafe-allow constructor
 contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable, OwnableUpgradeable {
     error InvalidDecimals();
@@ -23,6 +23,7 @@ contract ERC20ForSPLMintable is ERC20ForSPLBackbone, Initializable, OwnableUpgra
     /// @param _name The name of the SPLToken
     /// @param _symbol The symbol of the SPLToken
     /// @param _decimals The decimals of the SPLToken. This value cannot be bigger than 9, because of Solana's maximum value limit of uint64
+    /// @param _owner The owner of the ERC20ForSPLMintable contract which has the permissions to mint new tokens
     function initialize(
         string memory _name,
         string memory _symbol,

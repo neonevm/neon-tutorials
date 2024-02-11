@@ -8,15 +8,21 @@ const { ethers, upgrades } = require('hardhat');
 const { expect } = require('chai');
 
 async function main() {
-    const TOKEN_MINT = '0xa4a420d75f056d9cebb8eda13af07965261cb872b129f99b1ac94525ae8fded3'; // Custom SPLToken on Solana Devnet ( C5h24dhh9PjaVtHmf6CaqXbhi9SgrfwUSQt2MskWRLYr )
+    [owner] = ethers.getSigners();
 
     const ERC20ForSPLFactoryAddress = '';
     const ERC20ForSPLFactoryInstance = await ethers.getContractAt('ERC20ForSPLFactory', ERC20ForSPLFactoryAddress);
 
-    let tx = await ERC20ForSPLFactoryInstance.deploy(TOKEN_MINT);
+    let tx = await ERC20ForSPLFactoryInstance.deploy(
+        'Test Token',
+        'TST',
+        9,
+        owner.address
+    );
     await tx.wait(3);
 
-    console.log(await ERC20ForSPLFactoryInstance.tokensData(TOKEN_MINT), 'tokensData(TOKEN_MINT)');
+    let mintableToken = await ERC20ForSPLFactoryInstance.tokens();
+    console.log(mintableToken[mintableToken.length - 1], 'tokensData(TOKEN_MINT)');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 interface IMetaplex {
     /// @notice Pass SPLToken metadata to Metaplex
