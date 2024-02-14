@@ -8,16 +8,16 @@ import "./interfaces/IERC20ForSPLMintable.sol";
 import "./ERC20ForSPLMintable.sol";
 
 
-/// @title ERC20ForSPLFactoryMintable
+/// @title ERC20ForSPLMintableFactory
 /// @author https://twitter.com/mnedelchev_
 /// @notice This contract serve as a factory to deploy deploy SPLToken on Solana together with interface contract on Neon EVM.
 /// @dev This contract is built with forked OpenZeppelin's UUPS standard and it's a Beacon contract at the same time. The storage is defined in the following way:
-/// @dev Storage slot 0 - taken by the forked BeaconProxy implementation.
-/// @dev Storage slot 1 - taken by the forked UUPS implementation.
+/// @dev Storage slot 0 - taken by the forked BeaconProxy's implementation.
+/// @dev Storage slot 1 - taken by the forked UUPS's implementation.
 /// @dev Storage slot 2 - taken by the forked OwnableUpgradeable's owner.
-/// @dev Every next slot is defined by the needs of the ERC20ForSPLFactory.
+/// @dev Every next slot is defined by the needs of the ERC20ForSPLMintableFactory.
 /// @custom:oz-upgrades-unsafe-allow constructor
-contract ERC20ForSPLFactoryMintable is OwnableUpgradeable, UUPSUpgradeable {
+contract ERC20ForSPLMintableFactory is OwnableUpgradeable, UUPSUpgradeable {
     address private _implementation;
     address private _uupsImplementation;
     address private _owner;
@@ -25,7 +25,7 @@ contract ERC20ForSPLFactoryMintable is OwnableUpgradeable, UUPSUpgradeable {
     address[] public tokens;
     address public beacon;
 
-    event TokenDeploy(bytes32 tokenMint, address token);
+    event TokenDeploy(bytes32 indexed tokenMint, address indexed token);
     event Upgraded(address indexed implementation);
 
     error BeaconInvalidImplementation(address implementation);

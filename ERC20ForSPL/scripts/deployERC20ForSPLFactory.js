@@ -10,9 +10,9 @@ const { expect } = require("chai");
 async function main() {
     // deploy Beacon's implementation
     const ERC20ForSPLContractFactory = await ethers.getContractFactory('ERC20ForSPL');
-    const ERC20ForSPL = await ethers.deployContract('ERC20ForSPL');
-    await ERC20ForSPL.waitForDeployment();
-    console.log(ERC20ForSPL.target, 'Beacon\'s implementation');
+    const ERC20ForSPLImpl = await ethers.deployContract('ERC20ForSPL');
+    await ERC20ForSPLImpl.waitForDeployment();
+    console.log(ERC20ForSPLImpl.target, 'Beacon\'s implementation');
 
     // deploy Factory's implementation
     const ERC20ForSPLFactoryUUPSFactory = await hre.ethers.getContractFactory('ERC20ForSPLFactory');
@@ -24,7 +24,7 @@ async function main() {
     const ERC1967Proxy = await ethers.getContractFactory('ERC1967Proxy');
     const ERC20ForSPLFactoryProxy = await ERC1967Proxy.deploy(
         ERC20ForSPLFactoryImpl.target,
-        ERC20ForSPLFactoryUUPSFactory.interface.encodeFunctionData('initialize', [ERC20ForSPL.target])
+        ERC20ForSPLFactoryUUPSFactory.interface.encodeFunctionData('initialize', [ERC20ForSPLImpl.target])
     );
     await ERC20ForSPLFactoryProxy.waitForDeployment(); 
 
