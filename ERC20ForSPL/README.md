@@ -8,7 +8,9 @@ Basically this standard allows you to interact with a token which exists nativel
 * Method to transfer tokens to Neon address - `function transfer(address to, uint256 amount) public returns (bool)`
 * Method to transfer tokens to Solana address - `function transferSolana(bytes32 to, uint64 amount) public returns (bool)` _( The **to** parameter is the Solana public address of the transfer receiver in `bytes32` format )_
 
-This current version is upgradeable by using OpenZeppelin's UUPS library and it has ownership logic which sets the deployer as the smart contract owner. The owner can manage the contract upgradibility and the `mint` method.
+Both **ERC20ForSPL** and **ERC20ForSPLMintable** are being deployed thru the following factory smart contracts - **ERC20ForSPLFactory** and **ERC20ForSPLMintableFactory**. The factory contracts are Beacons build with forked OpenZeppelin's BeaconProxy lib and they serve to hold the implementation for the Beacon proxies _( **ERC20ForSPL** and **ERC20ForSPLMintable** )_. The factory contracts are also upgradeable by using forked OpenZeppelin's UUPS library. Only the factory owner ( Neon DAO ) can decide whethever to upgrade the factory's UUPS implementation or the beacon proxies's implementation. 
+
+**ERC20ForSPLMintable** has ownership logic _( forked OpenZeppelin's Ownable library )_ which allows the **ERC20ForSPLMintableFactory** to decide which address will be the smart contract owner. This owner has the permission to call the `mint` method.
 
 Another important thing worth mentioning is that this standard interacts with the following 2 predefined smart contracts on the Neon EVM chain:
 * `ISPLToken(0xFf00000000000000000000000000000000000004)` - this is a factory protocol on Solana where all of the Solana's SPL tokens are being deployed.

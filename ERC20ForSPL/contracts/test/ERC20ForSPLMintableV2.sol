@@ -8,6 +8,6 @@ import '../ERC20ForSPLMintable.sol';
 // !!!!!!!!!!!!!!!!!
 contract ERC20ForSPLMintableV2 is ERC20ForSPLMintable {
     function getDummyData() public pure returns(uint256) {
-        return 12345;
+        return 1112131415;
     }
 }

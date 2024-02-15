@@ -37,19 +37,17 @@ describe('Test init', async function () {
         const ERC20ForSPLContractFactory = await ethers.getContractFactory('ERC20ForSPL');
 
         if (ethers.isAddress(ERC20ForSPLAddress)) {
-            console.log('Creating instance of already deployed contract with address ', ERC20ForSPLAddress);
+            console.log('\nCreating instance of already deployed ERC20ForSPL contract with address', "\x1b[32m", ERC20ForSPLAddress, "\x1b[30m", '\n');
             ERC20ForSPL = ERC20ForSPLContractFactory.attach(ERC20ForSPLAddress);
             ERC20ForSPLFactory = ERC20ForSPLFactoryUUPSFactory.attach(await ERC20ForSPL.beacon());
         } else {
             // deploy Beacon's implementation
             const ERC20ForSPLImpl = await ethers.deployContract('ERC20ForSPL');
             await ERC20ForSPLImpl.waitForDeployment();
-            console.log(ERC20ForSPLImpl.target, 'Beacon\'s implementation');
 
             // deploy Factory's implementation
             const ERC20ForSPLFactoryImpl = await ethers.deployContract('ERC20ForSPLFactory');
             await ERC20ForSPLFactoryImpl.waitForDeployment();
-            console.log(ERC20ForSPLFactoryImpl.target, 'Factory\'s UUPS implementation');
 
             // deploy Factory's UUPS proxy
             const ERC1967Proxy = await ethers.getContractFactory('ERC1967Proxy');
@@ -61,37 +59,48 @@ describe('Test init', async function () {
 
             // create Factory's instance
             ERC20ForSPLFactory = ERC20ForSPLFactoryUUPSFactory.attach(ERC20ForSPLFactoryProxy.target);
-            console.log(ERC20ForSPLFactory.target, 'Factory\'s UUPS proxy address');
 
-            let tx = await ERC20ForSPLFactory.deploy(TOKEN_MINT);
+            let tx = await ERC20ForSPLFactory.addAlreadyExistingERC20ForSPL(
+                [
+                    '0x069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f00000000001'
+                ],
+                [
+                    '0xc7Fc9b46e479c5Cb42f6C458D1881e55E6B7986c'
+                ]
+            );
+            await tx.wait(RECEIPTS_COUNT);
+
+            tx = await ERC20ForSPLFactory.deploy(TOKEN_MINT);
             await tx.wait(RECEIPTS_COUNT);
 
             let tokensData = await ERC20ForSPLFactory.tokensData(TOKEN_MINT);
 
             ERC20ForSPL = ERC20ForSPLContractFactory.attach(tokensData[0]);
             ERC20ForSPLAddress = ERC20ForSPL.target;
-            console.log('Creating instance of just now deployed contract with address ', ERC20ForSPL.target); 
+            console.log('\nCreating instance of just now deployed ERC20ForSPL contract with address', "\x1b[32m", ERC20ForSPL.target, "\x1b[30m", '\n'); 
         }
 
-        console.log(await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.BEACON_IMPL), 'ERC20ForSPLFactory\'s BEACON_IMPL SLOT');
-        console.log(await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.UUPS_IMP), 'ERC20ForSPLFactory\'s UUPS_IMP SLOT');
-        console.log(await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.OWNER), 'ERC20ForSPLFactory\'s OWNER SLOT');
-        console.log(await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.ERC20_FOR_SPL.BEACON_ADDRESS), 'ERC20ForSPL\'s BEACON_ADDRESS SLOT');
+        console.log('ERC20ForSPLFactory\'s BEACON_IMPL SLOT -', await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.BEACON_IMPL));
+        console.log('ERC20ForSPLFactory\'s UUPS_IMP SLOT -', await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.UUPS_IMP));
+        console.log('ERC20ForSPLFactory\'s OWNER SLOT -', await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.FACTORY.OWNER));
+        console.log('ERC20ForSPL\'s BEACON_ADDRESS SLOT -', await ethers.provider.getStorage(ERC20ForSPLFactory.target, STORAGE_SLOTS.ERC20_FOR_SPL.BEACON_ADDRESS));
         
         const TokenMintAccount = await ERC20ForSPL.tokenMint();
         solanaProgramAddress = ethers.encodeBase58(TokenMintAccount);
         ownerSolanaPublicKey = ethers.encodeBase58(await ERC20ForSPL.solanaAccount(owner.address));
         user1SolanaPublicKey = ethers.encodeBase58(await ERC20ForSPL.solanaAccount(user1.address));
         user2SolanaPublicKey = ethers.encodeBase58(await ERC20ForSPL.solanaAccount(user2.address));
-        console.log(TokenMintAccount, 'TokenMintAccount');
-        console.log(ERC20ForSPLAddress, 'ERC20ForSPL address on Neon EVM');
-        console.log(solanaProgramAddress, 'ERC20ForSPL address on Solana');
-        console.log(owner.address, 'owner address on Neon EVM');
-        console.log(ownerSolanaPublicKey, 'owner address on Solana');
-        console.log(user1.address, 'user1 address on Neon EVM');
-        console.log(user1SolanaPublicKey, 'user1 address on Solana');
-        console.log(user2.address, 'user2 address on Neon EVM');
-        console.log(user2SolanaPublicKey, 'user2 address on Solana');
+        console.log('\nTokenMintAccount -', TokenMintAccount);
+        console.log('solanaProgramAddress -', solanaProgramAddress);
+        console.log('\nOwner addresses:');
+        console.log('Neon EVM address -', owner.address);
+        console.log('Solana data account -', ownerSolanaPublicKey);
+        console.log('\nUser1 addresses:');
+        console.log('Neon EVM address -', user1.address);
+        console.log('Solana data account -', user1SolanaPublicKey);
+        console.log('\nUser2 addresses:');
+        console.log('Neon EVM address -', user2.address);
+        console.log('Solana data account -', user2SolanaPublicKey);
 
         grantedTestersWithBalance = await ERC20ForSPL.balanceOf(owner.address) != 0 && await ERC20ForSPL.balanceOf(user1.address) != 0 && await ERC20ForSPL.balanceOf(user2.address) != 0;
     });
@@ -396,7 +405,6 @@ describe('Test init', async function () {
                 // deploy second dummy BeaconProxy
                 let USDT_TOKEN_MINT = '0x2b8a2abbc2878a0f97c79bbfcbf37a7e6ae3253c3a6287783812e4e359dfab4a'; // USDT on Solana devnet
                 let tokensData = await ERC20ForSPLFactory.tokensData(USDT_TOKEN_MINT);
-                console.log(tokensData, 'tokensData');
                 if (tokensData[0] == ethers.ZeroAddress) {
                     let tx = await ERC20ForSPLFactory.deploy(USDT_TOKEN_MINT);
                     await tx.wait(RECEIPTS_COUNT);
@@ -443,6 +451,29 @@ describe('Test init', async function () {
     });
 
     describe('ERC20ForSPLFactory tests', function() {
+        it('Deploying ERC20ForSPL for already existing TOKEN_MINT ( supposed to revert )', async function () {
+            // trying to add again wSOL even if it's already existing
+            await expect(
+                ERC20ForSPLFactory.addAlreadyExistingERC20ForSPL(
+                    ['0x069b8857feab8184fb687f634618c035dac439dc1aeb3b5598a0f00000000001'],
+                    ['0xc7Fc9b46e479c5Cb42f6C458D1881e55E6B7986c']
+                )
+            ).to.be.revertedWithCustomError(
+                ERC20ForSPLFactory,
+                'AlreadyExistingERC20ForSPL'
+            );
+        });
+
+        it('Malicious call to method addAlreadyExistingERC20ForSPL ( supposed to revert )', async function () {
+            // trying to add again wSOL even if it's already existing
+            await expect(
+                ERC20ForSPLFactory.connect(user1).addAlreadyExistingERC20ForSPL(
+                    ['0xd0d6b2043fb14bea672e7e74fa09ce4a42e384bdc302e6d1d854127039afe07a'],
+                    ['0x512E48836Cd42F3eB6f50CEd9ffD81E0a7F15103']
+                )
+            ).to.be.reverted;
+        });
+
         it('Malicious change of owner ( supposed to revert )', async function () {
             await expect(
                 ERC20ForSPLFactory.connect(user1).transferOwnership(user1.address)
