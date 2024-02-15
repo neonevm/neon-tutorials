@@ -2,7 +2,7 @@
 
 This repo contains an example of how to deploy and use the ERC20ForSPL standard. But first what is the difference between **ERC20ForSPL** and **ERC20ForSPLMintable**:
 * **ERC20ForSPL** - Allows you to deploy the standard on Neon EVM for an already existing SPLToken on Solana. This smart contract accepts only 1 constructor parameter _( `bytes32 _tokenMint` )_ which is the public address of the SPLToken on Solana _( HEX decoded )_.
-* **ERC20ForSPLMintable** - Allows you to deploy the standard on Neon EVM as well as deploying a new SPLToken on Solana. The constructor accepts 3 parameters _( ` string memory _name, string memory _symbol, uint8 _decimals `)_ which are needed to deploy the SPLToken and to submit the token metadata to the Metaplex protocol on Solana.
+* **ERC20ForSPLMintable** - Allows you to deploy the standard on Neon EVM as well as deploying a new SPLToken on Solana. The constructor accepts 4 parameters _( ` string memory _name, string memory _symbol, uint8 _decimals, address _owner `)_ which are needed to deploy the SPLToken and to submit the token metadata to the Metaplex protocol on Solana.
 
 Basically this standard allows you to interact with a token which exists natively on both chains of Neon and Solana. This token can be transferred between Neon and Solana EOAs, example:
 * Method to transfer tokens to Neon address - `function transfer(address to, uint256 amount) public returns (bool)`
