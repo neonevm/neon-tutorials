@@ -26,14 +26,14 @@ Another important thing worth mentioning is that this standard interacts with th
     USER3_KEY=XYZ
 ```
 
-#### ERC20ForSPL:
+### ERC20ForSPL:
 Like mentioned before ERC20ForSPL is used when we have an already existing SPLToken on Solana. For the sake of this demo we will be using this **[SPLToken](https://solscan.io/token/C5h24dhh9PjaVtHmf6CaqXbhi9SgrfwUSQt2MskWRLYr?cluster=devnet)**. The address of the token is already included in the testing script.
 1. Run `npx hardhat test --network neondevnet test/ERC20ForSPL.js` - this command will deploy ERC20ForSPL on the Neon EVM Devnet. You will notice that some of the tests are being skipped and this is because the Solana associated token accounts are not being initialized yet for our testers. _( This will be done in step 3. )_
 2. In the terminal output you should see an address labeled as _**ERC20ForSPL address on Neon EVM**_, take this address and place it as value for variable `ERC20ForSPLAddress` inside `test/ERC20ForSPL.js` and same thing should be done inside file `src/index.ts`.
 3. Next thing to do is in order to execute the tests we need some tokens balance for our testers. This can be done by executing the `src/index.ts` script with the following command `npx ts-node ./src/index.ts <OWNER_NEON_WALLET> <USER1_NEON_WALLET> <USER2_NEON_WALLET>`. Example - `npx ts-node ./src/index.ts 0xAB1c34b53F12980a4fa9043B70c864CEE6891c0C 0xb8f913C9AB9944891993F6c6fDAc421D98461294 0x358726276F5ea5dE31150D2BE61AC2a71F2ecE87`. This step is basically initializing the ATAs _( Associate token accounts )_ for our testers and initiating token transfer transactions with some testing amounts from Solana wallet to our tester wallets.
 4. Run again `npx hardhat test --network neondevnet test/ERC20ForSPL.js` and you will notice that now all of the tests are getting executed.
 
-#### ERC20ForSPLMintable:
+### ERC20ForSPLMintable:
 > [!IMPORTANT]  
 > When deploying the **ERC20ForSPLMintable** standard the maximum of decimals we are allowed to use for our token is 9, because the maximum number we can store on Solana is `uint64`.
 
