@@ -7,7 +7,7 @@ import './interfaces/IMetaplex.sol';
 
 /// @title ERC20ForSPLBackbone
 /// @author https://twitter.com/mnedelchev_
-/// @notice This contract serve as a backbone contract for both ERC20ForSPL and ERC20ForSPLMintable smart contracts. ERC20ForSPLBackbone contains the core logic of the ERC20ForSPL meanwhile in ERC20ForSPL and ERC20ForSPLMintable smart contracts 
+/// @notice This contract serves as a backbone contract for both ERC20ForSPL and ERC20ForSPLMintable smart contracts. ERC20ForSPLBackbone contains the core logic of the ERC20ForSPL meanwhile in ERC20ForSPL and ERC20ForSPLMintable smart contracts 
 /// @dev This contract is part of a BeaconProxy contract. The storage is defined in the following way:
 /// @dev Storage slot 0 - taken by the Beacon address.
 /// @dev Every next slot is defined by the needs of the ERC20ForSPL standard.
@@ -63,7 +63,7 @@ contract ERC20ForSPLBackbone {
         return _allowances[owner][spender];
     }
 
-    /// @notice Converts an address to uint and then converts the uint to bytes32
+    /// @notice Converts an address to uint and then converts uint to bytes32
     function _salt(address account) internal pure returns (bytes32) {
         return bytes32(uint256(uint160(account)));
     }
@@ -75,7 +75,7 @@ contract ERC20ForSPLBackbone {
     }
 
     /// @notice Returns the allowances made to Solana-like addresses
-    /// @dev Solana architecture is bit more different compared to Ethereum and we can actually have only 1 allowed address at time, every new approval overwrites the previous one
+    /// @dev Solana architecture is a bit different compared to Ethereum and we can actually have only 1 allowed address at a time. Every new approval overwrites the previous one
     function getAccountDelegateData(address who) public view returns(bytes32, uint64) {
         ISPLToken.Account memory account = SPL_TOKEN.getAccount(solanaAccount(who));
         return (account.delegate, account.delegated_amount);
@@ -110,7 +110,7 @@ contract ERC20ForSPLBackbone {
         return true;
     }
 
-    /// @notice ERC20's burnFrom method. Similar to transferFrom this method requires first the from address to approve the msg.sender before calling burnFrom
+    /// @notice ERC20's burnFrom method. Similar to transferFrom function, this method requires the from address to approve the msg.sender first, before calling burnFrom function
     /// @custom:getter balanceOf
     function burnFrom(address from, uint256 amount) public returns (bool) {
         _spendAllowance(from, msg.sender, amount);

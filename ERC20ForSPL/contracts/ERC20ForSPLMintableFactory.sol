@@ -10,7 +10,7 @@ import "./ERC20ForSPLMintable.sol";
 
 /// @title ERC20ForSPLMintableFactory
 /// @author https://twitter.com/mnedelchev_
-/// @notice This contract serve as a factory to deploy deploy SPLToken on Solana together with interface contract on Neon EVM.
+/// @notice This contract serves as a factory to deploy SPLToken on Solana together with interface contract on Neon EVM.
 /// @dev This contract is built with forked OpenZeppelin's UUPS standard and it's a Beacon contract at the same time. The storage is defined in the following way:
 /// @dev Storage slot 0 - taken by the forked BeaconProxy's implementation.
 /// @dev Storage slot 1 - taken by the forked UUPS's implementation.
@@ -30,7 +30,7 @@ contract ERC20ForSPLMintableFactory is OwnableUpgradeable, UUPSUpgradeable {
 
     error BeaconInvalidImplementation(address implementation);
 
-    /// @notice Disabling the initializers to prevent of implementation getting hijacked
+    /// @notice Disabling the initializers to prevent the implementation getting hijacked
     constructor() {
         _disableInitializers();
     }

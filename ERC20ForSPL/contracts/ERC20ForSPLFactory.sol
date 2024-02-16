@@ -41,7 +41,7 @@ contract ERC20ForSPLFactory is OwnableUpgradeable, UUPSUpgradeable {
     error AlreadyExistingERC20ForSPL();
     error BeaconInvalidImplementation(address implementation);
 
-    /// @notice Disabling the initializers to prevent of implementation getting hijacked
+    /// @notice Disabling the initializers to prevent the implementation getting hijacked
     constructor() {
         _disableInitializers();
     }

@@ -7,11 +7,11 @@ import './ERC20ForSPLBackbone.sol';
 
 /// @title ERC20ForSPL
 /// @author https://twitter.com/mnedelchev_
-/// @notice This contract serve as an interface contract of already deployed SPLToken on Solana. Thru this interface Ethereum-like address on Neon EVM chain can apply changes on SPLToken account on Solana.
+/// @notice This contract serves as an interface contract of already deployed SPLToken on Solana. Through this interface Ethereum-like address on Neon EVM chain can apply changes on SPLToken account on Solana.
 /// @dev This contract is being used as a BeaconProxy implementation. The Beacon is defined and inherited from ERC20ForSPLBackbone.sol at storage slot 0.
 /// @custom:oz-upgrades-unsafe-allow constructor
 contract ERC20ForSPL is ERC20ForSPLBackbone, Initializable {
-    /// @notice Disabling the initializers to prevent of implementation getting hijacked
+    /// @notice Disabling the initializers to prevent the implementation getting hijacked
     constructor() {
         _disableInitializers();
     }
