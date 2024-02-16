@@ -4,7 +4,7 @@ require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-    solidity: "0.8.23",
+    solidity: "0.8.24",
     etherscan: {
         apiKey: {
             neonevm: "test"
@@ -16,6 +16,14 @@ module.exports = {
                 urls: {
                     apiURL: "https://devnet-api.neonscan.org/hardhat/verify",
                     browserURL: "https://devnet.neonscan.org"
+                }
+            },
+            {
+                network: "neonevm",
+                chainId: 245022934,
+                urls: {
+                    apiURL: "https://api.neonscan.org/hardhat/verify",
+                    browserURL: "https://neonscan.org"
                 }
             }
         ]
