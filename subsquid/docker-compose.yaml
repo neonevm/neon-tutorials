@@ -1,0 +1,9 @@
+version: "3"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${DB_PORT}:5432"
