@@ -1,0 +1,6 @@
+type Transfer @entity {
+  id: ID!
+  src: String! @index
+  dst: String! @index
+  wad: BigInt!
+}
