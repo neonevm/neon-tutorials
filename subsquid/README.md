@@ -26,7 +26,7 @@ npm install
 ```
 
 **NOTE** Before starting, make a copy of .env.local.example file and rename it to .env
-
+<br><br><br>
 ### Steps to run the squid to get data for WNEON contract
 
 1. Start the database container -
@@ -55,7 +55,7 @@ npx squid-graphql-server
 ```
 
 The finished GraphQL API with GraphiQL will be available at localhost:4350/graphql.
-
+<br><br><br>
 ### Steps to run a squid on your own for any other contract data
 
 1. Change the properties in the "schema.graphql" according to the contract you want to get the data from.
