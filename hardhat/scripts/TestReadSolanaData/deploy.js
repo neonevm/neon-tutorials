@@ -10,8 +10,10 @@ const bs58 = require('bs58');
 async function main() {
     const TestReadSolanaDataFactory = await ethers.getContractFactory('TestReadSolanaData');
     const TestReadSolanaDataAddress = '';
-    const solanaAccount = '0x5181e94d818ee4f3f26c9fa90443d8b894de38fd19eb8274f3747aa1e5c053da'; //6VAvEN2x6bPxBDc6xcDtnzYUw7cLziBAuadRZmmM8GJD
+    const solanaTokenAccount = '6VAvEN2x6bPxBDc6xcDtnzYUw7cLziBAuadRZmmM8GJD';
     let TestReadSolanaData;
+    
+    const solanaTokenAccountHex = '0x' + bs58.decode(solanaTokenAccount).toString('hex');
 
     if (ethers.isAddress(TestReadSolanaDataAddress)) {
         TestReadSolanaData = TestReadSolanaDataFactory.attach(TestReadSolanaDataAddress);
@@ -25,19 +27,19 @@ async function main() {
     }
 
     let tokenAccountRawData = await TestReadSolanaData.readSolanaDataAccountRaw(
-        solanaAccount, 
+        solanaTokenAccountHex, 
         0, 
-        await TestReadSolanaData.readSolanaDataAccountLen(solanaAccount)
+        await TestReadSolanaData.readSolanaDataAccountLen(solanaTokenAccountHex)
     );
     console.log(tokenAccountRawData, 'tokenAccountRawData');
 
-    let mint = await TestReadSolanaData.readSolanaDataAccountPublicKey(solanaAccount, 0, 32);
+    let mint = await TestReadSolanaData.readSolanaDataAccountPublicKey(solanaTokenAccountHex, 0, 32);
     console.log(bs58.encode(Buffer.from(mint.slice(2), 'hex')), 'mint');
 
-    let owner = await TestReadSolanaData.readSolanaDataAccountPublicKey(solanaAccount, 32, 32);
+    let owner = await TestReadSolanaData.readSolanaDataAccountPublicKey(solanaTokenAccountHex, 32, 32);
     console.log(bs58.encode(Buffer.from(owner.slice(2), 'hex')), 'owner');
 
-    let amount = await TestReadSolanaData.readSolanaDataAccountAmount(solanaAccount, 64, 8);
+    let amount = await TestReadSolanaData.readSolanaDataAccountAmount(solanaTokenAccountHex, 64, 8);
     console.log(amount, 'amount');
 }
 
