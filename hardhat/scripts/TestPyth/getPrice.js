@@ -21,12 +21,8 @@ async function main() {
     "https://hermes.pyth.network"
   );
 
-  let priceIds;
-  if (network.name == "neondevnet") {
-    priceIds = NEON_CONFIG.DEVNET.PYTH.PRICE_FEEDS;
-  } else if (network.name == "neonmainnet") {
-    pythAddress = NEON_CONFIG.MAINNET.PYTH.PRICE_FEEDS;
-  }
+  let priceIds = NEON_CONFIG.PYTH_PRICE_FEEDS;
+
   const priceUpdateData = await connection.getPriceFeedsUpdateData(
     Object.values(priceIds)
   );
