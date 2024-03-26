@@ -21,7 +21,7 @@ async function main() {
     "https://hermes.pyth.network"
   );
 
-  let priceIds = NEON_CONFIG.PYTH_PRICE_FEEDS;
+  const priceIds = NEON_CONFIG.PYTH_PRICE_FEEDS;
 
   const priceUpdateData = await connection.getPriceFeedsUpdateData(
     Object.values(priceIds)
