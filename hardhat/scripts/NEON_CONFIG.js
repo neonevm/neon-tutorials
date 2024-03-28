@@ -42,6 +42,8 @@ const NEON_CONFIG = {
       "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
     SOL_USD:
       "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+    NEON_USD:
+      "0xd82183dd487bef3208a227bb25d748930db58862c5121198e723ed0976eb92b7",
     LINK_USD:
       "0x8ac0c70fff57e9aefdf5edf44b51d62c2d433653cbb2cf5cc06bb115af04d221",
     USDC_USD:
