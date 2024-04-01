@@ -1,17 +1,83 @@
 # Neon tutorials with Hardhat
-This directory contains several examples of how to deploy on Neon network.
 
-### Setup terminal commands:
-* ```npm install``` - Downloading required packages.
+This directory contains several examples to deploy smart contracts on Neon EVM Devnet or Mainnet.
 
-### Deployment terminal commands:
-The commands are pretty much the same for all of the examples, you only have to point to different files. This specific example shows you how to deploy OpenZeppelin's ERC20 on Neon Devnet.
-* ```npx hardhat run scripts/TestERC20/deploy.js --network neondevnet``` - Sample command of deploying ``contracts/TestERC20/TestERC20.sol`` on Neon Devnet network. If you wish to deploy on Neon Mainnet then change the ``--network`` parameter to ``neonmainnet``.
-* ```npx hardhat run scripts/TestERC20/transfer.js --network neondevnet``` - this command initiates a transfer from our user to randomly generated address. _( Before running this command you've to attach the address of the ERC20 contract which we deployed with the previous command )_
-* ```npx hardhat verify --network neondevnet <CONTRACT_ADDRESS>``` - Sample command of verifying a contract deployed on Neon Devnet network. ``<CONTRACT_ADDRESS>`` parameter has to be replaced with the smart contract address. If your contract has any constructor parameters you need change the command to ```npx hardhat verify --network neondevnet <CONTRACT_ADDRESS> <PARAM_1> <PARAM_2>```.
+## Install the required dependencies
+
+```sh
+npm install
+```
+
+## Deploy scripts
+
+### TestChainlink script
+
+```sh
+npx hardhat run scripts/TestChainlink/deploy.js --network neondevnet
+```
+
+### TestERC20 scripts
+
+1. Deploy TestERC20.sol
+
+```sh
+npx hardhat run scripts/TestERC20/deploy.js --network neondevnet
+```
+
+2. Initiate a transfer from the deployer address to a randomly generated address.
+
+```sh
+npx hardhat run scripts/TestERC20/transfer.js --network neondevnet
+```
+
+### TestERC721 scripts
+
+1. Deploy TestERC721.sol
+
+```sh
+npx hardhat run scripts/TestERC721/deploy.js --network neondevnet
+```
+
+2. Paste the deployed contract address from the above step in the `mint.js` file and mint some NFTs to the deployer address.
+
+```sh
+npx hardhat run scripts/TestERC721/mint.js --network neondevnet
+```
+
+### TestReadSolanaData scripts
+
+1. Read Pyth price feeds from Solana
+
+```sh
+npx hardhat run scripts/TestReadSolanaData/TestReadPythPriceFeed.js --network neondevnet
+```
+
+2. Read token account data from Solana
+
+```sh
+npx hardhat run scripts/TestReadSolanaData/TestReadTokenAccountData.js --network neondevnet
+```
+
+## Verify smart contracts on NeonScan
+
+```sh
+npx hardhat verify --network neondevnet <CONTRACT_ADDRESS>
+```
+
+If the smart contract has constructor parameters, then the command to verify is -
+
+```sh
+npx hardhat verify --network neondevnet <CONTRACT_ADDRESS> <PARAM_1> <PARAM_2>
+```
+
+`<CONTRACT_ADDRESS>`, `<PARAM_1>`, `<PARAM_2>` should be replaced with the smart contract address deployed and the constructor parameters for it.
+
+**Note:** To deploy the smart contracts on Neon EVM Mainnet, `--network neondevnet` should be replaced by `--network neonmainnet` while running the hardhat command for running the scripts.
 
 #### Before starting make sure to create .env file containing the following data ( make a copy of .env.example file and rename it to .env ):
+
 ```
     PRIVATE_KEY_OWNER=XYZ
 ```
-- *PRIVATE_KEY_OWNER - the private key used to deploy the contracts.*
+
+- _PRIVATE_KEY_OWNER - the private key used to deploy the contracts._
