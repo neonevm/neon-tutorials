@@ -101,15 +101,6 @@ library SolanaDataConverterLib {
         return tempUint;
     }
 
-    function readLittleEndianUnsigned16(uint16 input) internal pure returns (uint16) {
-        // swap bytes
-        return (input >> 8) | (input << 8);
-    }
-
-    function readLittleEndianSigned16(uint16 input) internal pure returns (int16) {
-        return int16((input << 8) | (input >> 8));
-    }
-
     function readLittleEndianUnsigned32(uint32 input) internal pure returns (uint32) {
         // swap bytes
         input = ((input & 0xFF00FF00) >> 8) | ((input & 0x00FF00FF) << 8);
@@ -120,7 +111,7 @@ library SolanaDataConverterLib {
 
     function readLittleEndianSigned32(uint32 input) internal pure returns (int32) {
         input = ((input << 8) & 0xFF00FF00) | ((input >> 8) & 0x00FF00FF);
-        return int32((input << 16) | (input >> 16));
+        return int32((input << 16) | ((input >> 16) & 0xFFFF));
     }
 
     function readLittleEndianUnsigned64(uint64 input) internal pure returns (uint64) {
@@ -137,7 +128,7 @@ library SolanaDataConverterLib {
     function readLittleEndianSigned64(uint64 input) internal pure returns (int64) {
         input = ((input << 8) & 0xFF00FF00FF00FF00) | ((input >> 8) & 0x00FF00FF00FF00FF);
         input = ((input << 16) & 0xFFFF0000FFFF0000) | ((input >> 16) & 0x0000FFFF0000FFFF);
-        return int64((input << 32) | (input >> 32));
+        return int64((input << 32) | ((input >> 32) & 0xFFFFFFFF));
     }
 
     function readLittleEndianUnsigned128(uint128 input) internal pure returns (uint128) {

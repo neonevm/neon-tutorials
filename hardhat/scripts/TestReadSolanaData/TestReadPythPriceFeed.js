@@ -8,23 +8,19 @@ const { ethers } = require("hardhat");
 const { NEON_CONFIG } = require("../NEON_CONFIG");
 
 async function main() {
-    const TestReadPythPriceFeedFactory = await ethers.getContractFactory(
-        "TestReadPythPriceFeed"
-    );
-    const TestReadPythPriceFeedAddress = "0xF9164b9bec1138922b3746567d2d44cd22e5Da7f";
+    const TestReadPythPriceFeedFactory = await ethers.getContractFactory("TestReadPythPriceFeed");
+    const TestReadPythPriceFeedAddress = "0x5347Fc89044D7e24EBBd23328B7f679d0E23a597";
     let TestReadPythPriceFeed;
 
     if (ethers.isAddress(TestReadPythPriceFeedAddress)) {
-        TestReadPythPriceFeed = TestReadPythPriceFeedFactory.attach(
-        TestReadPythPriceFeedAddress
-        );
+        TestReadPythPriceFeed = TestReadPythPriceFeedFactory.attach(TestReadPythPriceFeedAddress);
     } else {
         TestReadPythPriceFeed = await ethers.deployContract("TestReadPythPriceFeed");
         await TestReadPythPriceFeed.waitForDeployment();
 
         console.log(`TestReadPythPriceFeed deployed to ${TestReadPythPriceFeed.target}`);
     }
-
+    
     let neonPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
         NEON_CONFIG.PYTH_PRICE_FEEDS.NEON_USD,
         208, // offset for current updated price
