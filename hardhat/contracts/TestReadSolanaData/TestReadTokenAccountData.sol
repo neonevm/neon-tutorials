@@ -5,7 +5,7 @@ import "./SolanaDataConverterLib.sol";
 import "./QueryAccount.sol";
 
 
-contract TestReadSolanaData {
+contract TestReadTokenAccountData {
     using SolanaDataConverterLib for bytes;
     using SolanaDataConverterLib for uint64;
 

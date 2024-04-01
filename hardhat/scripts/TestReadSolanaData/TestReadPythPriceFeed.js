@@ -26,21 +26,21 @@ async function main() {
         208, // offset for current updated price
         8 // length of current updated price
     );
-    console.log(neonPrice);
+    console.log(neonPrice, 'neonPrice');
 
     let solPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
         NEON_CONFIG.PYTH_PRICE_FEEDS.SOL_USD,
         208, // offset for current updated price
         8 // length of current updated price
     );
-    console.log(solPrice);
+    console.log(solPrice, 'solPrice');
 
     let ethPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
         NEON_CONFIG.PYTH_PRICE_FEEDS.ETH_USD,
         208, // offset for current updated price
         8 // length of current updated price
     );
-    console.log(ethPrice);
+    console.log(ethPrice, 'ethPrice');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
