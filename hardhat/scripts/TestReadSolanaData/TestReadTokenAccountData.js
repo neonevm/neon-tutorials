@@ -37,32 +37,23 @@ async function main() {
     );
     console.log("Token account raw data:", tokenAccountRawData);
 
-    let mint = await TestReadTokenAccountData.readSolanaDataAccountPublicKey(
+    let tokenAccountData = await TestReadTokenAccountData.readSolanaTokenAccountData(
         solanaTokenAccountHex,
         0,
-        32
+        tokenAccountLength
     );
     console.log(
-        "Mint account public key:",
-        bs58.encode(Buffer.from(mint.slice(2), "hex"))
-    );
-
-    let owner = await TestReadTokenAccountData.readSolanaDataAccountPublicKey(
-        solanaTokenAccountHex,
-        32,
-        32
+        "Mint account public key: ",
+        bs58.encode(Buffer.from(tokenAccountData[0].slice(2), "hex"))
     );
     console.log(
         "Owner account public key: ",
-        bs58.encode(Buffer.from(owner.slice(2), "hex"))
+        bs58.encode(Buffer.from(tokenAccountData[1].slice(2), "hex"))
     );
-
-    let amount = await TestReadTokenAccountData.readSolanaDataAccountAmount(
-        solanaTokenAccountHex,
-        64,
-        8
+    console.log(
+        "Tokens amount: ",
+        tokenAccountData[2]
     );
-    console.log("Token amount:", amount);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

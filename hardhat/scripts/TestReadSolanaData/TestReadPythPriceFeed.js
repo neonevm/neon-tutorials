@@ -8,81 +8,60 @@ const { ethers, network } = require("hardhat");
 const { NEON_CONFIG } = require("../NEON_CONFIG");
 
 async function main() {
-  const TestReadPythPriceFeedFactory = await ethers.getContractFactory(
-    "TestReadPythPriceFeed"
-  );
-  const TestReadPythPriceFeedAddress = "";
-  let TestReadPythPriceFeed;
-  let PYTH_PRICE_FEEDS;
-  if (network.name == "neonmainnet") {
-    PYTH_PRICE_FEEDS = NEON_CONFIG.MAINNET.PYTH.PYTH_PRICE_FEEDS;
-  } else if (network.name == "neondevnet") {
-    PYTH_PRICE_FEEDS = NEON_CONFIG.DEVNET.PYTH.PYTH_PRICE_FEEDS;
-  }
-
-  if (ethers.isAddress(TestReadPythPriceFeedAddress)) {
-    TestReadPythPriceFeed = TestReadPythPriceFeedFactory.attach(
-      TestReadPythPriceFeedAddress
+    const TestReadPythPriceFeedFactory = await ethers.getContractFactory(
+        "TestReadPythPriceFeed"
     );
-  } else {
-    TestReadPythPriceFeed = await ethers.deployContract(
-      "TestReadPythPriceFeed"
+    const TestReadPythPriceFeedAddress = "";
+    let TestReadPythPriceFeed;
+    let PYTH_PRICE_FEEDS;
+    if (network.name == "neonmainnet") {
+        PYTH_PRICE_FEEDS = NEON_CONFIG.MAINNET.PYTH.PYTH_PRICE_FEEDS;
+    } else if (network.name == "neondevnet") {
+        PYTH_PRICE_FEEDS = NEON_CONFIG.DEVNET.PYTH.PYTH_PRICE_FEEDS;
+    }
+
+    if (ethers.isAddress(TestReadPythPriceFeedAddress)) {
+        TestReadPythPriceFeed = TestReadPythPriceFeedFactory.attach(
+            TestReadPythPriceFeedAddress
+        );
+    } else {
+        TestReadPythPriceFeed = await ethers.deployContract(
+            "TestReadPythPriceFeed"
+        );
+        await TestReadPythPriceFeed.waitForDeployment();
+
+        console.log(
+            `TestReadPythPriceFeed deployed to ${TestReadPythPriceFeed.target}`
+        );
+    }
+
+    let neonPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
+        PYTH_PRICE_FEEDS.NEON_USD,
+        0,
+        await TestReadPythPriceFeed.readSolanaDataAccountLen(PYTH_PRICE_FEEDS.NEON_USD)
     );
-    await TestReadPythPriceFeed.waitForDeployment();
+    console.log(neonPrice, 'neonPrice');
 
-    console.log(
-      `TestReadPythPriceFeed deployed to ${TestReadPythPriceFeed.target}`
+    let solPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
+        PYTH_PRICE_FEEDS.SOL_USD,
+        0,
+        await TestReadPythPriceFeed.readSolanaDataAccountLen(PYTH_PRICE_FEEDS.SOL_USD)
     );
-  }
+    console.log(solPrice, 'solPrice');
 
-  let neonPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.NEON_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(neonPrice, "neonPrice");
+    let ethPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
+        PYTH_PRICE_FEEDS.ETH_USD,
+        0,
+        await TestReadPythPriceFeed.readSolanaDataAccountLen(PYTH_PRICE_FEEDS.ETH_USD)
+    );
+    console.log(ethPrice, 'ethPrice');
 
-  let solPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.SOL_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(solPrice, "solPrice");
-
-  let ethPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.ETH_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(ethPrice, "ethPrice");
-
-  let btcPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.BTC_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(btcPrice, "btcPrice");
-
-  let linkPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.LINK_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(linkPrice, "linkPrice");
-
-  let usdcPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.USDC_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(usdcPrice, "usdcPrice");
-
-  let usdtPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
-    PYTH_PRICE_FEEDS.USDT_USD,
-    208, // offset for current updated price
-    8 // length of current updated price
-  );
-  console.log(usdtPrice, "usdtPrice");
+    let btcPrice = await TestReadPythPriceFeed.readSolanaPythPriceFeed(
+        PYTH_PRICE_FEEDS.BTC_USD,
+        0,
+        await TestReadPythPriceFeed.readSolanaDataAccountLen(PYTH_PRICE_FEEDS.BTC_USD)
+    );
+    console.log(btcPrice, 'btcPrice');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

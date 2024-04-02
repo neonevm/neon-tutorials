@@ -23,10 +23,10 @@ contract TestReadPythPriceFeed {
         return data;
     }
 
-    function readSolanaPythPriceFeed(bytes32 solanaAddress, uint64 offset, uint64 len) public view returns(int64) {
+    function readSolanaPythPriceFeed(bytes32 solanaAddress, uint64 offset, uint64 len) public view returns(int64, uint64) {
         (bool success, bytes memory data) = QueryAccount.data(uint256(solanaAddress), offset, len);
         require(success, "failed to query account data");
 
-        return (data.toUint64()).readLittleEndianSigned64();
+        return ((data.toUint64(208)).readLittleEndianSigned64(), (data.toUint64(200)).readLittleEndianUnsigned64());
     }
 }
