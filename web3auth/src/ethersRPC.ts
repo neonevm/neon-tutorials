@@ -130,10 +130,24 @@ export default class EthereumRpc {
       const signer = await ethersProvider.getSigner();
 
       const contractABI = [
-        { inputs: [{ internalType: "string", name: "initMessage", type: "string" }], stateMutability: "nonpayable", type: "constructor" },
-        { inputs: [], name: "message", outputs: [{ internalType: "string", name: "", type: "string" }], stateMutability: "view", type: "function" },
         {
-          inputs: [{ internalType: "string", name: "newMessage", type: "string" }],
+          inputs: [
+            { internalType: "string", name: "initMessage", type: "string" },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "message",
+          outputs: [{ internalType: "string", name: "", type: "string" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            { internalType: "string", name: "newMessage", type: "string" },
+          ],
           name: "update",
           outputs: [],
           stateMutability: "nonpayable",
@@ -141,7 +155,11 @@ export default class EthereumRpc {
         },
       ];
       const contractAddress = "0x04cA407965D60C2B39d892a1DFB1d1d9C30d0334";
-      const contract = new ethers.Contract(contractAddress, JSON.parse(JSON.stringify(contractABI)), signer);
+      const contract = new ethers.Contract(
+        contractAddress,
+        JSON.parse(JSON.stringify(contractABI)),
+        signer
+      );
 
       // Read message from smart contract
       const message = await contract.message();
@@ -158,10 +176,24 @@ export default class EthereumRpc {
       const signer = await ethersProvider.getSigner();
 
       const contractABI = [
-        { inputs: [{ internalType: "string", name: "initMessage", type: "string" }], stateMutability: "nonpayable", type: "constructor" },
-        { inputs: [], name: "message", outputs: [{ internalType: "string", name: "", type: "string" }], stateMutability: "view", type: "function" },
         {
-          inputs: [{ internalType: "string", name: "newMessage", type: "string" }],
+          inputs: [
+            { internalType: "string", name: "initMessage", type: "string" },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "message",
+          outputs: [{ internalType: "string", name: "", type: "string" }],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            { internalType: "string", name: "newMessage", type: "string" },
+          ],
           name: "update",
           outputs: [],
           stateMutability: "nonpayable",
@@ -169,7 +201,11 @@ export default class EthereumRpc {
         },
       ];
       const contractAddress = "0x04cA407965D60C2B39d892a1DFB1d1d9C30d0334";
-      const contract = new ethers.Contract(contractAddress, JSON.parse(JSON.stringify(contractABI)), signer);
+      const contract = new ethers.Contract(
+        contractAddress,
+        JSON.parse(JSON.stringify(contractABI)),
+        signer
+      );
       // Generate random number between 1000 and 9000
       const number = Math.floor(Math.random() * 9000) + 1000;
       // Send transaction to smart contract to update message
@@ -177,18 +213,6 @@ export default class EthereumRpc {
       // Wait for transaction to finish
       const receipt = await tx.wait();
       return receipt;
-    } catch (error) {
-      return error as string;
-    }
-  }
-
-  async getPrivateKey(): Promise<any> {
-    try {
-      const privateKey = await this.provider.request({
-        method: "eth_private_key",
-      });
-
-      return privateKey;
     } catch (error) {
       return error as string;
     }
