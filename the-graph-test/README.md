@@ -16,6 +16,9 @@ This is an example of how we can integrate **[the Graph](https://thegraph.com/)*
 * ```<IPFS_URL>``` - **https://ipfs.neonevm.org**
 * GraphQL can be accessed at url https://thegraph.neonevm.org/subgraphs/name/<SUBGRAPH_SLUG>/graphql
 
+> [!IMPORTANT]  
+> Currently the Neon EVM Mainnet version of The Graph is managed in a permissioned way. If your project requires the need of this tool please reach us out in [Discord](http://discord.com/invite/neonevm).
+
 #### Neon EVM Devnet data:
 * ```<SUBGRAPH_SLUG>``` - For the sake of the demo we will be using slug **neonlabs/usdc-token-subgraph**
 * ```<DEPLOYMENT_URL>``` - **https://ch2-graph.neontest.xyz/deploy/**
