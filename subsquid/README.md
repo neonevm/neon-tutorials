@@ -125,9 +125,9 @@ The finished GraphQL API with GraphiQL will be available at localhost:4350/graph
 
 > [!IMPORTANT]  
 > To run a squid on Neon EVM Mainnet, there needs to be some changes to some of the above mentioned steps.
-
-1. Replace `RPC_NEON_HTTP=https://devnet.neonevm.org` to `RPC_NEON_HTTP=https://neon-proxy-mainnet.solana.p2p.org` in the `.env`.
-2. Change the following in the `src/main.ts` file:
-
-- `setGateway("https://v2.archive.subsquid.io/network/neon-mainnet")`
-- `setBlockRange({ from: 195350522 })` (Neon EVM Mainnet genesis block)
+>
+> 1.  Replace `RPC_NEON_HTTP=https://devnet.neonevm.org` to `RPC_NEON_HTTP=https://neon-proxy-mainnet.solana.p2p.org` in the `.env`.
+> 2.  Change the following in the `src/main.ts` file:
+>
+> - `setGateway("https://v2.archive.subsquid.io/network/neon-mainnet")`
+> - `setBlockRange({ from: 195350522 })` (Neon EVM Mainnet genesis block)
