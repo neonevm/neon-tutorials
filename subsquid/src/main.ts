@@ -1,6 +1,5 @@
 import { EvmBatchProcessor } from "@subsquid/evm-processor";
 import { TypeormDatabase } from "@subsquid/typeorm-store";
-import { lookupArchive } from "@subsquid/archive-registry";
 import * as wneonAbi from "./abi/wneon";
 import { Transfer } from "./model";
 
