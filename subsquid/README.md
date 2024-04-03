@@ -27,6 +27,7 @@ npm install
 
 **NOTE** Before starting, make a copy of .env.local.example file and rename it to .env
 <br><br><br>
+
 ### Steps to run the squid to get data for WNEON contract
 
 1. Start the database container -
@@ -56,6 +57,7 @@ npx squid-graphql-server
 
 The finished GraphQL API with GraphiQL will be available at localhost:4350/graphql.
 <br><br><br>
+
 ### Steps to run a squid on your own for any other contract data
 
 1. Change the properties in the "schema.graphql" according to the contract you want to get the data from.
@@ -120,3 +122,12 @@ npx squid-graphql-server
 ```
 
 The finished GraphQL API with GraphiQL will be available at localhost:4350/graphql.
+
+> [!IMPORTANT]  
+> To run a squid on Neon EVM Mainnet, there needs to be some changes to some of the above mentioned steps.
+
+1. Replace `RPC_NEON_HTTP=https://devnet.neonevm.org` to `RPC_NEON_HTTP=https://neon-proxy-mainnet.solana.p2p.org` in the `.env`.
+2. Change the following in the `src/main.ts` file:
+
+- `setGateway("https://v2.archive.subsquid.io/network/neon-mainnet")`
+- `setBlockRange({ from: 195350522 })` (Neon EVM Mainnet genesis block)

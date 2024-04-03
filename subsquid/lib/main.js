@@ -25,11 +25,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const evm_processor_1 = require("@subsquid/evm-processor");
 const typeorm_store_1 = require("@subsquid/typeorm-store");
-const archive_registry_1 = require("@subsquid/archive-registry");
 const wneonAbi = __importStar(require("./abi/wneon"));
 const model_1 = require("./model");
 const processor = new evm_processor_1.EvmBatchProcessor()
-    .setGateway((0, archive_registry_1.lookupArchive)("neon-devnet"))
+    .setGateway("https://v2.archive.subsquid.io/network/neon-devnet")
     .setRpcEndpoint({
     // set RPC endpoint in .env
     url: process.env.RPC_NEON_HTTP,

@@ -5,7 +5,7 @@ import * as wneonAbi from "./abi/wneon";
 import { Transfer } from "./model";
 
 const processor = new EvmBatchProcessor()
-  .setGateway(lookupArchive("neon-devnet"))
+  .setGateway("https://v2.archive.subsquid.io/network/neon-devnet")
   .setRpcEndpoint({
     // set RPC endpoint in .env
     url: process.env.RPC_NEON_HTTP,
