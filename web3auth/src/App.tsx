@@ -152,6 +152,7 @@ function App() {
       return;
     }
     await web3auth.connect();
+    setLoggedIn(true);
   };
 
   const logout = async () => {
