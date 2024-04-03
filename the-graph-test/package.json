@@ -8,8 +8,6 @@
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.60.0",
-    "@graphprotocol/graph-ts": "0.30.0",
-    "@truffle/hdwallet-provider": "^2.1.14",
-    "dotenv": "^16.3.1"
+    "@graphprotocol/graph-ts": "0.30.0"
   }
 }
