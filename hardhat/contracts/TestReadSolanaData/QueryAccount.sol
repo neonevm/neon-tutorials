@@ -79,7 +79,8 @@ library QueryAccount {
      * @param len Length in bytes of the returning chunk.
      */
     function data(uint256 solana_address, uint64 offset, uint64 len) internal view returns (bool, bytes memory) {
-        return precompiled.staticcall(abi.encodeWithSignature("data(uint256,uint64,uint64)", solana_address, offset, len));
+        (bool success, bytes memory result) = precompiled.staticcall(abi.encodeWithSignature("data(uint256,uint64,uint64)", solana_address, offset, len));
+        return (success, result);
     }
 
     function to_uint256(bytes memory bb) private pure returns (uint256 result) {
