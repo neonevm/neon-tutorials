@@ -11,10 +11,14 @@ async function main() {
     const TestReadTokenAccountDataFactory = await ethers.getContractFactory("TestReadTokenAccountData");
     const TestReadTokenAccountDataAddress = "";
     const solanaTokenAccount = "6VAvEN2x6bPxBDc6xcDtnzYUw7cLziBAuadRZmmM8GJD";
+    const tokenProgramAccount = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
     let TestReadTokenAccountData;
 
     const solanaTokenAccountHex = "0x" + bs58.decode(solanaTokenAccount).toString("hex");
     console.log("Solana token account converted to hex: ", solanaTokenAccountHex);
+
+    const tokenProgramAccountHex = "0x" + bs58.decode(tokenProgramAccount).toString("hex");
+    console.log("Token mint account converted to hex: ", tokenProgramAccountHex);
 
     if (ethers.isAddress(TestReadTokenAccountDataAddress)) {
         TestReadTokenAccountData = TestReadTokenAccountDataFactory.attach(TestReadTokenAccountDataAddress);
@@ -29,6 +33,21 @@ async function main() {
 
     const tokenAccountLength = await TestReadTokenAccountData.readSolanaDataAccountLen(solanaTokenAccountHex);
     console.log("Token account length:", tokenAccountLength);
+
+    const readSolanaAccountLamports = await TestReadTokenAccountData.readSolanaAccountLamports(solanaTokenAccountHex);
+    console.log("Token account lamports:", readSolanaAccountLamports);
+
+    const readSolanaAccountOwner = await TestReadTokenAccountData.readSolanaAccountOwner(solanaTokenAccountHex);
+    console.log("Token account owner:", bs58.encode(Buffer.from(readSolanaAccountOwner.slice(2), "hex")));
+
+    const readSolanaTokenMintAccountOwner = await TestReadTokenAccountData.readSolanaAccountOwner(tokenProgramAccountHex);
+    console.log("Token Mint account owner:", bs58.encode(Buffer.from(readSolanaTokenMintAccountOwner.slice(2), "hex")));
+
+    const checkIfSolanaAccountIsExecutable = await TestReadTokenAccountData.checkIfSolanaAccountIsExecutable(solanaTokenAccountHex);
+    console.log("Token account check if executable:", checkIfSolanaAccountIsExecutable);
+
+    const checkIfSolanaTokenMintAccountIsExecutable = await TestReadTokenAccountData.checkIfSolanaAccountIsExecutable(tokenProgramAccountHex);
+    console.log("Token Mint account check if executable:", checkIfSolanaTokenMintAccountIsExecutable);
 
     let tokenAccountRawData = await TestReadTokenAccountData.readSolanaDataAccountRaw(
         solanaTokenAccountHex,
