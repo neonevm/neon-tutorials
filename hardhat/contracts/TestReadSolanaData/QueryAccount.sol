@@ -31,9 +31,9 @@ library QueryAccount {
      * @dev Returns the account's owner Solana address.
      * @param solana_address Address of an account.
      */
-    function owner(uint256 solana_address) internal view returns (bool, uint256) {
+    function owner(uint256 solana_address) internal view returns (bool,  bytes memory) {
         (bool success, bytes memory result) = precompiled.staticcall(abi.encodeWithSignature("owner(uint256)", solana_address));
-        return (success, to_uint256(result));
+        return (success, result);
     }
 
     /**

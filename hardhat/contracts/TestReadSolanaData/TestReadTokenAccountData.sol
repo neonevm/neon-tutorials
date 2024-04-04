@@ -16,6 +16,27 @@ contract TestReadTokenAccountData {
         return data;
     }
 
+    function readSolanaAccountLamports(bytes32 solanaAddress) public view returns(uint256) {
+        (bool success, uint256 data) = QueryAccount.lamports(uint256(solanaAddress));
+        require(success, "failed to query account data");
+
+        return data;
+    }
+
+    function readSolanaAccountOwner(bytes32 solanaAddress) public view returns(bytes memory) {
+        (bool success, bytes memory data) = QueryAccount.owner(uint256(solanaAddress));
+        require(success, "failed to query account data");
+
+        return data;
+    }
+
+    function checkIfSolanaAccountIsExecutable(bytes32 solanaAddress) public view returns(bool) {
+        (bool success, bool data) = QueryAccount.executable(uint256(solanaAddress));
+        require(success, "failed to query account data");
+
+        return data;
+    }
+
     function readSolanaDataAccountRaw(bytes32 solanaAddress, uint64 offset, uint64 len) public view returns(bytes memory) {
         (bool success, bytes memory data) = QueryAccount.data(uint256(solanaAddress), offset, len);
         require(success, "failed to query account data");
