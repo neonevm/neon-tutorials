@@ -28,7 +28,7 @@ npm install
 > [!NOTE]  
 > Before starting, make a copy of .env.local.example file and rename it to .env
 
-<br><br><br>
+<br>
 
 ### Steps to run the squid to get data for WNEON contract
 
