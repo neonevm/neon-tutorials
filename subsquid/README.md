@@ -15,8 +15,8 @@ Run command
 ```sh
 git clone https://github.com/neonlabsorg/neon-tutorials.git
 ```
-
-**NOTE** All the next operations must be performed from the **neon-tutorials/subsquid** directory.
+> [!NOTE]  
+> All the next operations must be performed from the **neon-tutorials/subsquid** directory.
 
 ## Install the required dependencies
 
@@ -25,7 +25,8 @@ cd neon-tutorials/subsquid
 npm install
 ```
 
-**NOTE** Before starting, make a copy of .env.local.example file and rename it to .env
+> [!NOTE]  
+> Before starting, make a copy of .env.local.example file and rename it to .env
 <br><br><br>
 
 ### Steps to run the squid to get data for WNEON contract
