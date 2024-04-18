@@ -8,5 +8,4 @@
 - **[Foundry examples](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry)**:
   - **[Deploy ERC20](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry/src/TestERC20)**
 - **[Integrate the Graph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
-- **[Integrate Covalent](https://github.com/neonlabsorg/neon-tutorials/tree/main/covalent)**
 - **[Integrate Subsquid](https://github.com/neonlabsorg/neon-tutorials/tree/main/subsquid)**
