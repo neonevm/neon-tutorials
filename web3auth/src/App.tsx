@@ -160,7 +160,8 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    await web3auth.logout();
+    //await web3auth.logout();
+    localStorage.clear(); // fix because logout have issues with social logins
     setLoggedIn(false);
   };
 
