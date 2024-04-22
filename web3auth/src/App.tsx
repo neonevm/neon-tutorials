@@ -162,6 +162,7 @@ function App() {
     }
     //await web3auth.logout();
     localStorage.clear(); // fix because logout have issues with social logins
+    window.location.reload(); // reloads the page and displays the login pop up again
     setLoggedIn(false);
   };
 
