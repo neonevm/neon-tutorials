@@ -7,5 +7,7 @@
   - **Integrate Pyth** - [Contract](https://github.com/neonlabsorg/neon-tutorials/tree/main/hardhat/contracts/TestReadSolanaData/TestReadPythPriceFeed.sol) &nbsp;|&nbsp; [Script](https://github.com/neonlabsorg/neon-tutorials/tree/main/hardhat/scripts/TestReadSolanaData/TestReadPythPriceFeed.js)
 - **[Foundry examples](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry)**:
   - **[Deploy ERC20](https://github.com/neonlabsorg/neon-tutorials/tree/main/foundry/src/TestERC20)**
-- **[Integrate the Graph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
+- **[Integrate The Graph](https://github.com/neonlabsorg/neon-tutorials/tree/main/the-graph-test)**
 - **[Integrate Subsquid](https://github.com/neonlabsorg/neon-tutorials/tree/main/subsquid)**
+- **[Integrate Web3Auth](https://github.com/neonlabsorg/neon-tutorials/tree/main/web3auth)**
+- **[go-ethereum examples (dApp development using Go)](https://github.com/neonlabsorg/go-ethereum-tutorial)**
