@@ -11,7 +11,7 @@ async function main() {
     const TestReadPythPriceFeedFactory = await ethers.getContractFactory(
         "TestReadPythPriceFeed"
     );
-    const TestReadPythPriceFeedAddress = "0x758D4c0aB6F6CD1AA5C70cA80231bD014D3142DB";
+    const TestReadPythPriceFeedAddress = "";
     let TestReadPythPriceFeed;
     let PYTH_PRICE_FEEDS;
     if (network.name == "neonmainnet") {
