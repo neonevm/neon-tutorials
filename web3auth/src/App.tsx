@@ -4,13 +4,9 @@ import { Web3Auth, Web3AuthOptions } from "@web3auth/modal";
 import { OpenloginAdapter } from "@web3auth/openlogin-adapter";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
-// import RPC from "./ethersRPC"; // for using ethers.js
 
 // Providers
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-
-// Wallet Services
-import { WalletServicesPlugin } from "@web3auth/wallet-services-plugin";
 
 // Adapters
 import { getDefaultExternalAdapters } from "@web3auth/default-evm-adapter";
@@ -69,8 +65,6 @@ const web3AuthOptions: Web3AuthOptions = {
 
 function App() {
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
-  const [walletServicesPlugin, setWalletServicesPlugin] =
-    useState<WalletServicesPlugin | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -116,13 +110,7 @@ function App() {
         });
         web3auth.configureAdapter(openloginAdapter);
 
-        // Wallet Services Plugin
-        const walletServicesPlugin = new WalletServicesPlugin();
-        setWalletServicesPlugin(walletServicesPlugin);
-        web3auth.addPlugin(walletServicesPlugin);
-
         // read more about adapters here: https://web3auth.io/docs/sdk/pnp/web/adapters/
-
         // Only when you want to add External default adapters, which includes WalletConnect, Metamask, Torus EVM Wallet
         const adapters = await getDefaultExternalAdapters({
           options: web3AuthOptions,
