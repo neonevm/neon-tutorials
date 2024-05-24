@@ -28,14 +28,21 @@ module.exports = {
         ]
     },
     networks: {
+        neonnight: {
+            url: "http://proxy.night.stand.neontest.xyz/solana",
+            accounts: [process.env.PRIVATE_KEY_OWNER],
+            chainId: 111,
+            allowUnlimitedContractSize: false,
+            gas: "auto",
+            gasPrice: "auto"
+        },
         neondevnet: {
             url: "https://devnet.neonevm.org",
             accounts: [process.env.PRIVATE_KEY_OWNER],
             chainId: 245022926,
             allowUnlimitedContractSize: false,
             gas: "auto",
-            gasPrice: "auto",
-            isFork: true
+            gasPrice: "auto"
         },
         neonmainnet: {
             url: "https://neon-proxy-mainnet.solana.p2p.org",
@@ -43,8 +50,7 @@ module.exports = {
             chainId: 245022934,
             allowUnlimitedContractSize: false,
             gas: "auto",
-            gasPrice: "auto",
-            isFork: true
+            gasPrice: "auto"
         }
     }
 };

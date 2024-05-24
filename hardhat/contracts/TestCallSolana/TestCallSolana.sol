@@ -4,9 +4,17 @@ pragma solidity 0.8.21;
 import './interfaces/ICallSolana.sol';
 
 contract TestCallSolana {
-    ICallSolana public constant CALL_SOLANA = ICallSolana(0xFf00000000000000000000000000000000000006);
+    ICallSolana public constant CALL_SOLANA = ICallSolana(0xFF00000000000000000000000000000000000006);
 
-    function execute(bytes32 program_id, ICallSolana.AccountMeta[] memory accounts, bytes instruction_data, uint64 lamports) external {
+    function getPayer() public view returns(bytes32) {
+        return CALL_SOLANA.getPayer();
+    }
+
+    function getNeonAddress(address _address) public view returns(bytes32) {
+        return CALL_SOLANA.getNeonAddress(_address);
+    }
+
+    function execute(bytes32 program_id, ICallSolana.AccountMeta[] memory accounts, bytes memory instruction_data, uint64 lamports) external {
         ICallSolana.Instruction memory instruction = ICallSolana.Instruction({
             program_id: program_id,
             accounts: accounts,
