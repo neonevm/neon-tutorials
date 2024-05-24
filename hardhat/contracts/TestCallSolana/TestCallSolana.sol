@@ -14,7 +14,21 @@ contract TestCallSolana {
         return CALL_SOLANA.getNeonAddress(_address);
     }
 
-    function execute(bytes32 program_id, ICallSolana.AccountMeta[] memory accounts, bytes memory instruction_data, uint64 lamports) external {
+    function execute(
+        bytes32 program_id, 
+        ICallSolana.AccountMeta[] memory accounts, 
+        bytes memory instruction_data, 
+        uint64 lamports
+    ) external {
+        _execute(program_id, accounts, instruction_data, lamports);
+    }
+
+    function _execute(
+        bytes32 program_id, 
+        ICallSolana.AccountMeta[] memory accounts, 
+        bytes memory instruction_data, 
+        uint64 lamports
+    ) internal {
         ICallSolana.Instruction memory instruction = ICallSolana.Instruction({
             program_id: program_id,
             accounts: accounts,

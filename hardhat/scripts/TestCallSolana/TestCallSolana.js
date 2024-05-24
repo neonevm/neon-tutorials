@@ -8,8 +8,10 @@ const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
     getAssociatedTokenAddress,
+    getAccount,
+    createAssociatedTokenAccountInstruction,
     createTransferInstruction,
-    getAccount
+    createApproveInstruction
  } = require('@solana/spl-token');
 
 async function main() {
@@ -19,46 +21,110 @@ async function main() {
     const token = new web3.PublicKey('AE25jac7VDNAuWz7P8fCV16YuXxhKKPmk7gsHt5sJH1e'); // SPLToken on the night stand
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    const TestCallSolanaAddress = "0x40e33C96bd3ffcD4E3ee2c67b3A750D46282EF2E";
+    let TestCallSolanaAddress = "0x56f30F1a39054020be1E2D1dDE7F32B2255D1CdE";
     let TestCallSolana;
+    let solanaTx;
+    let response;
 
     if (ethers.isAddress(TestCallSolanaAddress)) {
-        TestCallSolana = TestCallSolanaFactory.attach(
-            TestCallSolanaAddress
-        );
+        TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
     } else {
         TestCallSolana = await ethers.deployContract("TestCallSolana");
         await TestCallSolana.waitForDeployment();
 
+        TestCallSolanaAddress = TestCallSolana.target;
         console.log(
             `TestCallSolana deployed to ${TestCallSolana.target}`
         );
     }
 
+    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    console.log(payer, 'payer');
+
     let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
+
     let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
     let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
     console.log(ownerPublicKey, 'ownerPublicKey');
 
+    // ============================= SPLTOKEN DEPLOY EXAMPLE??? ====================================
+    /* solanaTx = new web3.Transaction();
+    let mintKeypair = web3.Keypair.generate();
+     // calculate minimum balance to make account rent-exempt
+    const tokenMintDataSize = 84;
+    const minBalance = await connection.getMinimumBalanceForRentExemption(tokenMintDataSize);
+    const seed = "123";
+    let createWithSeed = await web3.PublicKey.createWithSeed(mintKeypair.publicKey, seed, new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'));
+    console.log(createWithSeed, 'createWithSeed');
+    
+    solanaTx.add(
+        web3.SystemProgram.createAccountWithSeed({
+            fromPubkey: new web3.PublicKey(payer),
+            newAccountPubkey: createWithSeed,
+            basePubkey: mintKeypair.publicKey,
+            seed: seed,
+            lamports: minBalance,
+            space: tokenMintDataSize,
+            programId: new web3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+        })
+    );
+    response = await executeComposabilityMethod(solanaTx.instructions[0], minBalance);
+    console.log(response, 'response');
+    // createInitializeMint2Instruction(keypair.publicKey, decimals, mintAuthority, freezeAuthority, programId) */
+
+    // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
     let ataContract = await getAssociatedTokenAddress(
         token,
         new web3.PublicKey(contractPublicKey),
         true
     );
-    console.log(await getAccount(connection, ataContract), 'getAccount contract');
+    console.log(ataContract, 'ataContract');
+
+    const contractInfo = await connection.getAccountInfo(ataContract);
+    console.log(contractInfo, 'contractInfo');
+    if (!contractInfo || !contractInfo.data) {
+        // initialize contract's Token Account
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            createAssociatedTokenAccountInstruction(
+                new web3.PublicKey(payer),
+                ataContract,
+                new web3.PublicKey(contractPublicKey),
+                token
+            )
+        );
+        response = await executeComposabilityMethod(solanaTx.instructions[0], 1000000000);
+        console.log(response, 'response');
+    }
 
     let ataOwner = await getAssociatedTokenAddress(
         token,
         new web3.PublicKey(ownerPublicKey),
         true
     );
-    console.log(await getAccount(connection, ataOwner), 'getAccount owner');
+    const ownerInfo = await connection.getAccountInfo(ataContract);
+    console.log(ownerInfo, 'ownerInfo');
+    if (!ownerInfo || !ownerInfo.data) {
+        // initialize contract's Token Account
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            createAssociatedTokenAccountInstruction(
+                new web3.PublicKey(payer),
+                ataContract,
+                new web3.PublicKey(ownerPublicKey),
+                token
+            )
+        );
+        response = await executeComposabilityMethod(solanaTx.instructions[0], 1000000000);
+        console.log(response, 'response');
+    }
 
-    const transaction = new web3.Transaction();
-    // token transfer instruction from the contract to owner
-    transaction.add(
+    // ============================= SPLTOKEN ACCOUNT TRANSFER EXAMPLE ====================================
+    /* console.log(await getAccount(connection, ataOwner), 'ataOwner');
+    solanaTx = new web3.Transaction();
+    solanaTx.add(
         createTransferInstruction(
             ataContract,
             ataOwner,
@@ -67,39 +133,45 @@ async function main() {
             []
         )
     );
+    response = await executeComposabilityMethod(solanaTx.instructions[0], 1000000000);
+    console.log(response, 'response');
+    console.log(await getAccount(connection, ataOwner), 'ataOwner'); */
 
-    let instruction = transaction.instructions[0];
-    let keys = [];
-    for (let i = 0, len = instruction.keys.length; i < len; ++i) {
-        keys.push({
-            account: ethers.toBeHex(ethers.decodeBase58(instruction.keys[i].pubkey.toString())),
-            is_signer: instruction.keys[i].isSigner,
-            is_writable: instruction.keys[i].isWritable
-        });
+    // ============================= SPLTOKEN ACCOUNT APPROVE EXAMPLE ====================================
+    /* console.log(await getAccount(connection, ataContract), 'ataContract getAccount');
+    solanaTx = new web3.Transaction();
+    solanaTx.add(
+        createApproveInstruction(
+            ataContract,
+            ataOwner,
+            contractPublicKey,
+            2000000 * 10 ** 6
+        )
+    );
+    response = await executeComposabilityMethod(solanaTx.instructions[0], 1000000000);
+    console.log(response, 'response');
+    console.log(await getAccount(connection, ataContract), 'ataContract getAccount'); */
+
+    async function executeComposabilityMethod(instruction, lamports) {
+        let keys = [];
+        for (let i = 0, len = instruction.keys.length; i < len; ++i) {
+            keys.push({
+                account: ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(instruction.keys[i].pubkey.toString())), 32),
+                is_signer: instruction.keys[i].isSigner,
+                is_writable: instruction.keys[i].isWritable
+            });
+        }
+
+        let tx = await TestCallSolana.execute(
+            ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(instruction.programId.toString())), 32),
+            keys,
+            instruction.data,
+            lamports // lamports
+        );
+        await tx.wait(3);
+        return tx;
     }
-
-    let tx = await TestCallSolana.execute(
-        ethers.toBeHex(ethers.decodeBase58(instruction.programId.toString())),
-        keys,
-        instruction.data,
-        0 // lamports
-    );
-    await tx.wait(3);
-    console.log(tx, 'tx');
-
-    console.log(await getAccount(connection, ataOwner), 'getAccount owner');
-
-    /* let ata = await getOrCreateAssociatedTokenAccount(
-        connection,
-        keypair,
-        token,
-        new web3.PublicKey(ownerPublicKey),
-        true // allow to create ATA for PDAs ( for off-curve accounts )
-    );
-    console.log(ata, 'ata');
-
-    return; */
-
+    return;
 
     // ============================= SOL TRANSFER ====================================
     // prepare instruction data
@@ -174,33 +246,3 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-
-/* 
-
-curl -X POST --data '{"jsonrpc":"2.0","method":"neon_getTransactionReceipt","params":["0x8c5d43c886aeafdce3bf1fcea32ce13da073046faf5d8a9fb18395d933bedf41"],"id":1}' -H "Content-Type: application/json" http://proxy.night.stand.neontest.xyz/solana | jq
-
-
-// https://explorer.solana.com/?cluster=custom&customUrl=http://proxy.release.stand.neontest.xyz/node-solana
-
-
-curl http://proxy.night.stand.neontest.xyz/node-solana -X POST -H "Content-Type: application/json" -d '
-  {
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "getTransaction",
-    "params": [
-      "3YHsTkyvfgRTwe2qTmKiZFAaSLSKBfthqc7vAFXpDhzDuXa9BwfMe4obmTrNXdQmtdEhCqNPqPQuPFJWkr66FSd1",
-      "json"
-    ]
-  }
-' */
-
-
-
-    /* let execute = await TestCallSolana.execute(
-        "0x0306466fe5211732ffecadba72c39be7bc8ce5bbc5f7126b2c439b3a40000000",
-        [],
-        "0x0240420f00",
-        0
-    );
-    console.log(execute, 'execute'); */
