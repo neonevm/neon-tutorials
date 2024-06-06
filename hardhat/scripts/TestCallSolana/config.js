@@ -1,6 +1,6 @@
 const config = {
     SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0x9c88B69c6f7CE22Ba18Cb6857C9BbA71f7DB7F6D',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0xae77695Be546Dd3DD410fEb948940578e478cDea',
     SIZES: {
         SPLTOKEN: 84,
         SPLTOKEN_ACOUNT: 165
@@ -39,7 +39,7 @@ const config = {
                     });
                 }
                 keysArr.push(keys);
-                programIds.push(config.utils.publicKeyToBytes32(nstructions[i].programId.toString()));
+                programIds.push(config.utils.publicKeyToBytes32(instructions[i].programId.toString()));
                 instructionsData.push(instructions[i].data);
             }
     
@@ -65,5 +65,9 @@ const config = {
 // Solana can't allow transfer from accounts with data
 // createAccount + SOL transfer - not working, becuase we cannot attach private key
 // createAccountWithSeed + SOL transferWithSeed - not working if account has data
-    // 1 400 000 compute units = ~8 instructions
-    // you cant execute more than 1 instruction into call to 006 precompile, but you can make multiple calls to the precompile inside single solidity method call
+// 1 400 000 compute units = ~8 instructions
+// you cant execute more than 1 instruction into call to 006 precompile, but you can make multiple calls to the precompile inside single solidity method call
+// List with instructions that are currently not supported:
+// transfer
+// setComputeUnitLimit
+// setComputeUnitPrice

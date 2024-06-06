@@ -6,12 +6,16 @@ import './interfaces/ICallSolana.sol';
 contract TestCallSolana {
     ICallSolana public constant CALL_SOLANA = ICallSolana(0xFF00000000000000000000000000000000000006);
 
+    function getNeonAddress(address _address) public view returns(bytes32) {
+        return CALL_SOLANA.getNeonAddress(_address);
+    }
+
     function getPayer() public view returns(bytes32) {
         return CALL_SOLANA.getPayer();
     }
 
-    function getNeonAddress(address _address) public view returns(bytes32) {
-        return CALL_SOLANA.getNeonAddress(_address);
+    function getSolanaPDA(bytes32 program_id, bytes memory seeds) external view returns (bytes32) {
+        return CALL_SOLANA.getSolanaPDA(program_id, seeds);
     }
 
     function execute(
@@ -35,6 +39,15 @@ contract TestCallSolana {
         }
     }
 
+    function createResource(bytes32 salt, uint64 space, uint64 lamports, bytes32 owner) external returns (bytes32) {
+        bytes32 response = CALL_SOLANA.createResource(
+            salt, 
+            space,
+            lamports,
+            owner
+        );
+    }
+
     function _execute(
         bytes32 program_id, 
         ICallSolana.AccountMeta[] memory accounts, 
@@ -46,7 +59,10 @@ contract TestCallSolana {
             accounts: accounts,
             instruction_data: instruction_data
         });
-        bytes memory response = CALL_SOLANA.execute(lamports, instruction);
+        bytes memory response = CALL_SOLANA.execute(
+            lamports, 
+            instruction
+        );
         (bytes32 data1, bytes memory data2) = CALL_SOLANA.getReturnData();
     }
 }
