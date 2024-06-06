@@ -20,7 +20,7 @@ async function main() {
     const token = new web3.PublicKey('3Dt135DpvL2BHmHADFwQJPjPBSXJy2BNYygZvRDCRAws'); // SPLToken
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = "0xE932db55483ce550779416b3EBbe8b93C028A887";
+    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
     let response;

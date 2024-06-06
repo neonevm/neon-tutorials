@@ -23,6 +23,18 @@ contract TestCallSolana {
         _execute(program_id, accounts, instruction_data, lamports);
     }
 
+    function batchExecute(
+        bytes32[] memory program_id,
+        ICallSolana.AccountMeta[][] memory accounts, 
+        bytes[] memory instruction_data, 
+        uint64[] memory lamports
+    ) external {
+        uint len = program_id.length;
+        for (uint i = 0; i < len; ++i) {
+            _execute(program_id[i], accounts[i], instruction_data[i], lamports[i]);
+        }
+    }
+
     function _execute(
         bytes32 program_id, 
         ICallSolana.AccountMeta[] memory accounts, 

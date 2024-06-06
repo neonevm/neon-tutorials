@@ -6,10 +6,6 @@
 // global scope, and execute the script.
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
-const {
-    getAssociatedTokenAddress,
-    createAssociatedTokenAccountInstruction
-} = require('@solana/spl-token');
 const { config } = require('./config');
 
 async function main() {
@@ -46,54 +42,21 @@ async function main() {
     let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
     console.log(ownerPublicKey, 'ownerPublicKey');
 
-    // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
-    let ataContract = await getAssociatedTokenAddress(
-        token,
-        new web3.PublicKey(contractPublicKey),
-        true
+    solanaTx = new web3.Transaction();
+    solanaTx.add(
+        web3.ComputeBudgetProgram.setComputeUnitLimit({ 
+            units: 300000 // default is 200 000
+        })
     );
-    console.log(ataContract, 'ataContract');
 
-    const contractInfo = await connection.getAccountInfo(ataContract);
-    console.log(contractInfo, 'contractInfo');
-    if (!contractInfo || !contractInfo.data) {
-        // initialize contract's Token Account
-        solanaTx = new web3.Transaction();
-        solanaTx.add(
-            createAssociatedTokenAccountInstruction(
-                new web3.PublicKey(payer),
-                ataContract,
-                new web3.PublicKey(contractPublicKey),
-                token
-            )
-        );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 1000000000, TestCallSolana);
-        console.log(response, 'response');
-    }
+    /* solanaTx.add(
+        ComputeBudgetProgram.setComputeUnitPrice({ 
+            microLamports: 1000000 // default is 0
+        })
+    ); */
 
-    let ataOwner = await getAssociatedTokenAddress(
-        token,
-        new web3.PublicKey(ownerPublicKey),
-        true
-    );
-    console.log(ataOwner, 'ataOwner');
-    
-    const ownerInfo = await connection.getAccountInfo(ataOwner);
-    console.log(ownerInfo, 'ownerInfo');
-    if (!ownerInfo || !ownerInfo.data) {
-        // initialize contract's Token Account
-        solanaTx = new web3.Transaction();
-        solanaTx.add(
-            createAssociatedTokenAccountInstruction(
-                new web3.PublicKey(payer),
-                ataOwner,
-                new web3.PublicKey(ownerPublicKey),
-                token
-            )
-        );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 1000000000, TestCallSolana);
-        console.log(response, 'response');
-    }
+    response = await config.utils.batchExecuteComposabilityMethod(solanaTx.instructions, [0], TestCallSolana);
+    console.log(response, 'response');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

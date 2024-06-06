@@ -13,7 +13,7 @@ async function main() {
     const [owner] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = "0x36Bd884EA5098c77C3E3A9e2Fdc76e4C2E94d9a8";
+    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
     let response;
