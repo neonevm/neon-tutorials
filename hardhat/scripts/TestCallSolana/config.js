@@ -1,9 +1,12 @@
 const config = {
     SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
     CALL_SOLANA_SAMPLE_CONTRACT: '0xae77695Be546Dd3DD410fEb948940578e478cDea',
+    ACCOUNTS: {
+        TOKEN_PROGRAM: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
+    },
     SIZES: {
-        SPLTOKEN: 84,
-        SPLTOKEN_ACOUNT: 165
+        SPLTOKEN: 82, // needed bytes for SPLToken mint and initialization
+        SPLTOKEN_ACOUNT: 165 // needed bytes to initalize a Token Account
     },
     utils: {
         executeComposabilityMethod: async function(instruction, lamports, contractInstance) {
@@ -56,9 +59,8 @@ const config = {
             return ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(pubkey)), 32);
         }
     }
-  };
-  
-  module.exports = { config };
+};
+module.exports = { config };
   
 
 // default size of every Solana account is 128 bytes
@@ -67,7 +69,11 @@ const config = {
 // createAccountWithSeed + SOL transferWithSeed - not working if account has data
 // 1 400 000 compute units = ~8 instructions
 // you cant execute more than 1 instruction into call to 006 precompile, but you can make multiple calls to the precompile inside single solidity method call
+//
 // List with instructions that are currently not supported:
+// createAccount :
+//    ( createResource + getResourceAddress ) + transfer
+//    ( test with getExtAuthority + executeWithSeed )
 // transfer
 // setComputeUnitLimit
 // setComputeUnitPrice

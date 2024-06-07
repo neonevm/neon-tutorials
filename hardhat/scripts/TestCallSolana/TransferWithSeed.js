@@ -43,10 +43,10 @@ async function main() {
 
     // ============================= SOL TRANSFER EXAMPLE ( createAccountWithSeed + transferWithSeed ) ====================================
      // calculate minimum balance to make account rent-exempt
-    const minBalance = await connection.getMinimumBalanceForRentExemption(0); // 165 bytes for lamports calculation of Token Account
+    const minBalance = await connection.getMinimumBalanceForRentExemption(0);
     console.log(minBalance, 'minBalance');
 
-    const seedSender = "seed123";
+    const seedSender = "seed1234";
     const seedReceiver = seedSender + "1";
 
     let createWithSeedSender = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedSender, web3.SystemProgram.programId);
