@@ -16,7 +16,8 @@ async function main() {
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
-    let response;
+    let tx;
+    let receipt;
 
     if (ethers.isAddress(TestCallSolanaAddress)) {
         TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
@@ -74,8 +75,9 @@ async function main() {
                 programId: web3.SystemProgram.programId
             })
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
-        console.log(response, 'response');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
     }
     
     if (receiverAccount == null) {
@@ -92,8 +94,9 @@ async function main() {
                 programId: web3.SystemProgram.programId
             })
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
-        console.log(response, 'response');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
     }
 
     senderAccount = await connection.getAccountInfo(createWithSeedSender);
@@ -116,8 +119,9 @@ async function main() {
                 programId: web3.SystemProgram.programId
             })
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-        console.log(response, 'response');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
     }
 }
 

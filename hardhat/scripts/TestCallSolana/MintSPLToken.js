@@ -7,7 +7,10 @@
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
-    createInitializeMint2Instruction
+    createInitializeMint2Instruction,
+    createAssociatedTokenAccountInstruction,
+    getAssociatedTokenAddress,
+    createMintToInstruction
 } = require('@solana/spl-token');
 const { config } = require('./config');
 
@@ -19,7 +22,8 @@ async function main() {
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
-    let response;
+    let tx;
+    let receipt;
 
     if (ethers.isAddress(TestCallSolanaAddress)) {
         TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
@@ -49,8 +53,8 @@ async function main() {
     console.log(createWithSeed, 'createWithSeed');
 
     const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN);
-    console.log(minBalance, 'minBalance');
 
+    // CREATE MINT ACCOUNT
     solanaTx = new web3.Transaction();
     solanaTx.add(
         web3.SystemProgram.createAccountWithSeed({
@@ -64,20 +68,53 @@ async function main() {
         })
     );
 
+    // INITIALIZE THE MINT
     solanaTx.add(
         createInitializeMint2Instruction(
             createWithSeed, 
             9, // decimals
-            new web3.PublicKey(ownerPublicKey), // mintAuthority
-            new web3.PublicKey(ownerPublicKey), // freezeAuthority
+            new web3.PublicKey(contractPublicKey), // mintAuthority
+            new web3.PublicKey(contractPublicKey), // freezeAuthority
             new web3.PublicKey(config.ACCOUNTS.TOKEN_PROGRAM) // programId
         )
     );
 
-    response = await config.utils.batchExecuteComposabilityMethod(solanaTx.instructions, [minBalance, 0], TestCallSolana);
-    console.log(response, 'response');
+    // CREATE ASSOCIATE TOKEN ACCOUNT FOR THE CONTRACT ACCOUNT
+    let ataContract = await getAssociatedTokenAddress(
+        createWithSeed,
+        new web3.PublicKey(contractPublicKey),
+        true
+    );
+    const minBalanceForATA = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
+    solanaTx.add(
+        createAssociatedTokenAccountInstruction(
+            new web3.PublicKey(payer),
+            ataContract,
+            new web3.PublicKey(contractPublicKey),
+            createWithSeed
+        )
+    );
 
-    // Metaplex instruction
+    // MINT TO CONTRACT's ATA ACCOUNT
+    solanaTx.add(
+        createMintToInstruction(
+            createWithSeed,
+            ataContract,
+            new web3.PublicKey(contractPublicKey),
+            1000 * 10 ** 9 // mint 1000 tokens
+        )
+    );
+
+    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+        solanaTx.instructions, 
+        [minBalance, 0, minBalanceForATA, 0], 
+        TestCallSolana
+    );
+    console.log(tx, 'tx');
+    console.log(receipt.logs[0].args, 'createAccountWithSeed receipt args');
+    console.log(receipt.logs[1].args, 'createInitializeMint2Instruction receipt args');
+    console.log(receipt.logs[2].args, 'createAssociatedTokenAccountInstruction receipt args');
+    console.log(receipt.logs[3].args, 'createMintToInstruction receipt args');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

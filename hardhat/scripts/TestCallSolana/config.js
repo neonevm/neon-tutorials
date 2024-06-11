@@ -1,10 +1,12 @@
 const config = {
     SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0xae77695Be546Dd3DD410fEb948940578e478cDea',
+    //SOLANA_NODE: 'https://api.mainnet-beta.solana.com/',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0xE41A9faeb17bfAb7f4F6c4CE201c05ED5F1B4eeA',
     ACCOUNTS: {
         TOKEN_PROGRAM: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     },
     SIZES: {
+        ACCOUNT: 70,
         SPLTOKEN: 82, // needed bytes for SPLToken mint and initialization
         SPLTOKEN_ACOUNT: 165 // needed bytes to initalize a Token Account
     },
@@ -19,14 +21,15 @@ const config = {
                 });
             }
     
-            let tx = await contractInstance.execute(
+            const tx = await contractInstance.execute(
                 config.utils.publicKeyToBytes32(instruction.programId.toString()),
                 keys,
                 instruction.data,
                 lamports
             );
-            await tx.wait(3);
-            return tx;
+            const receipt = await tx.wait(3);
+
+            return [tx, receipt];
         },
         batchExecuteComposabilityMethod: async function(instructions, lamports, contractInstance) {
             let keysArr = [];
@@ -46,14 +49,15 @@ const config = {
                 instructionsData.push(instructions[i].data);
             }
     
-            let tx = await contractInstance.batchExecute(
+            const tx = await contractInstance.batchExecute(
                 programIds,
                 keysArr,
                 instructionsData,
                 lamports
             );
-            await tx.wait(3);
-            return tx;
+            const receipt = await tx.wait(3);
+
+            return [tx, receipt];
         },
         publicKeyToBytes32(pubkey) {
             return ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(pubkey)), 32);

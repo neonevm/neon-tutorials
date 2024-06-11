@@ -15,13 +15,14 @@ const { config } = require('./config');
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
-    const token = new web3.PublicKey('3Dt135DpvL2BHmHADFwQJPjPBSXJy2BNYygZvRDCRAws'); // SPLToken
+    const token = new web3.PublicKey('BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k'); // SPLToken
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
-    let response;
+    let tx;
+    let receipt;
 
     if (ethers.isAddress(TestCallSolanaAddress)) {
         TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
@@ -46,6 +47,9 @@ async function main() {
     let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
     console.log(ownerPublicKey, 'ownerPublicKey');
 
+    const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
+    console.log(minBalance, 'minBalance');
+
     // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
     let ataContract = await getAssociatedTokenAddress(
         token,
@@ -67,8 +71,9 @@ async function main() {
                 token
             )
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 1000000000, TestCallSolana);
-        console.log(response, 'response');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
     }
 
     let ataOwner = await getAssociatedTokenAddress(
@@ -91,8 +96,9 @@ async function main() {
                 token
             )
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 1000000000, TestCallSolana);
-        console.log(response, 'response');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
     }
 }
 

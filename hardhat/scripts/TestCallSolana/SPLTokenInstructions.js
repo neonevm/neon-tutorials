@@ -23,7 +23,8 @@ async function main() {
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
-    let response;
+    let tx;
+    let receipt;
 
     if (ethers.isAddress(TestCallSolanaAddress)) {
         TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
@@ -77,8 +78,9 @@ async function main() {
             parseInt(getAccountAtaContract.delegatedAmount) + 1000
         )
     );
-    response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-    console.log(response, 'response createApproveInstruction');
+    [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
+    console.log(tx, 'tx createApproveInstruction');
+    console.log(receipt.logs[0].args, 'receipt args createApproveInstruction');
     getAccountAtaContract = await getAccount(connection, ataContract);
     console.log(getAccountAtaContract.delegate, 'getAccountAtaContract.delegate');
     console.log(getAccountAtaContract.delegatedAmount, 'getAccountAtaContract.delegatedAmount');
@@ -98,8 +100,9 @@ async function main() {
                 []
             )
         );
-        response = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-        console.log(response, 'response createTransferInstruction');
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
+        console.log(tx, 'tx createTransferInstruction');
+        console.log(receipt.logs[0].args, 'receipt args createTransferInstruction');
         console.log(await getAccount(connection, ataOwner), 'ataOwner');
     }
 }

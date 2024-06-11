@@ -6,6 +6,9 @@ import './interfaces/ICallSolana.sol';
 contract TestCallSolana {
     ICallSolana public constant CALL_SOLANA = ICallSolana(0xFF00000000000000000000000000000000000006);
 
+    event LogData(bytes response, bytes32 programId, bytes data);
+    event CreateResource(bytes32 salt, uint64 space, uint64 lamports, bytes32 programId, bytes32 response);
+
     function getNeonAddress(address _address) public view returns(bytes32) {
         return CALL_SOLANA.getNeonAddress(_address);
     }
@@ -16,6 +19,14 @@ contract TestCallSolana {
 
     function getSolanaPDA(bytes32 program_id, bytes memory seeds) external view returns (bytes32) {
         return CALL_SOLANA.getSolanaPDA(program_id, seeds);
+    }
+
+    function getResourceAddress(bytes32 salt) external view returns (bytes32) {
+        return CALL_SOLANA.getResourceAddress(salt);
+    }
+
+    function getExtAuthority(bytes32 salt) external view returns (bytes32) {
+        return CALL_SOLANA.getExtAuthority(salt);
     }
 
     function execute(
@@ -39,13 +50,21 @@ contract TestCallSolana {
         }
     }
 
-    function createResource(bytes32 salt, uint64 space, uint64 lamports, bytes32 owner) external returns (bytes32) {
+    function createResource(
+        bytes32 salt, 
+        uint64 space, 
+        uint64 lamports, 
+        bytes32 program_id
+    ) external returns (bytes32) {
         bytes32 response = CALL_SOLANA.createResource(
             salt, 
             space,
             lamports,
-            owner
+            program_id
         );
+
+        emit CreateResource(salt, space, lamports, program_id, response);
+        return response;
     }
 
     function _execute(
@@ -53,7 +72,7 @@ contract TestCallSolana {
         ICallSolana.AccountMeta[] memory accounts, 
         bytes memory instruction_data, 
         uint64 lamports
-    ) internal {
+    ) internal returns(bytes memory, bytes32, bytes memory) {
         ICallSolana.Instruction memory instruction = ICallSolana.Instruction({
             program_id: program_id,
             accounts: accounts,
@@ -63,6 +82,9 @@ contract TestCallSolana {
             lamports, 
             instruction
         );
-        (bytes32 data1, bytes memory data2) = CALL_SOLANA.getReturnData();
+        (bytes32 programId, bytes memory data) = CALL_SOLANA.getReturnData();
+        
+        emit LogData(response, programId, data);
+        return (response, programId, data);
     }
 }
