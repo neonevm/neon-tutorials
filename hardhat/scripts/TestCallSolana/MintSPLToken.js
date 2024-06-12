@@ -7,11 +7,10 @@
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
-    createInitializeMint2Instruction,
-    createAssociatedTokenAccountInstruction,
-    getAssociatedTokenAddress,
-    createMintToInstruction
+    createInitializeMint2Instruction
 } = require('@solana/spl-token');
+const { Metaplex } = require("@metaplex-foundation/js");
+const { createCreateMetadataAccountV3Instruction } = require('@metaplex-foundation/mpl-token-metadata');
 const { config } = require('./config');
 
 async function main() {
@@ -54,7 +53,7 @@ async function main() {
 
     const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN);
 
-    // CREATE MINT ACCOUNT
+    // ============================= createAccountWithSeed INSTRUCTION ====================================
     solanaTx = new web3.Transaction();
     solanaTx.add(
         web3.SystemProgram.createAccountWithSeed({
@@ -68,7 +67,7 @@ async function main() {
         })
     );
 
-    // INITIALIZE THE MINT
+    // ============================= InitializeMint2 INSTRUCTION ====================================
     solanaTx.add(
         createInitializeMint2Instruction(
             createWithSeed, 
@@ -79,42 +78,46 @@ async function main() {
         )
     );
 
-    // CREATE ASSOCIATE TOKEN ACCOUNT FOR THE CONTRACT ACCOUNT
-    let ataContract = await getAssociatedTokenAddress(
-        createWithSeed,
-        new web3.PublicKey(contractPublicKey),
-        true
-    );
-    const minBalanceForATA = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
+    // ============================= CreateMetadataAccountV3Instruction INSTRUCTION ====================================
+    const metaplex = new Metaplex(connection);
+    const metadata = metaplex.nfts().pdas().metadata({mint: createWithSeed});
     solanaTx.add(
-        createAssociatedTokenAccountInstruction(
-            new web3.PublicKey(payer),
-            ataContract,
-            new web3.PublicKey(contractPublicKey),
-            createWithSeed
+        createCreateMetadataAccountV3Instruction(
+            {
+                metadata: metadata,
+                mint: createWithSeed,
+                mintAuthority: new web3.PublicKey(contractPublicKey),
+                payer: new web3.PublicKey(payer),
+                updateAuthority: new web3.PublicKey(contractPublicKey)
+            },
+            {
+                createMetadataAccountArgsV3: {
+                    data: {
+                        name: "Doge coin on Neon EVM",
+                        symbol: "DOGE",
+                        uri: 'https://ipfs.io/ipfs/QmW2JdmwWsTVLw1Gx4ympCn1VHJiuojfNLS5ZNLEPcBd5x/doge.json',
+                        sellerFeeBasisPoints: 0,
+                        collection: null,
+                        creators: null,
+                        uses: null
+                    },
+                    isMutable: true,
+                    collectionDetails: null
+                },
+            },
         )
     );
 
-    // MINT TO CONTRACT's ATA ACCOUNT
-    solanaTx.add(
-        createMintToInstruction(
-            createWithSeed,
-            ataContract,
-            new web3.PublicKey(contractPublicKey),
-            1000 * 10 ** 9 // mint 1000 tokens
-        )
-    );
-
+    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
     [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
         solanaTx.instructions, 
-        [minBalance, 0, minBalanceForATA, 0], 
+        [minBalance, 0, 100000000], 
         TestCallSolana
     );
     console.log(tx, 'tx');
-    console.log(receipt.logs[0].args, 'createAccountWithSeed receipt args');
-    console.log(receipt.logs[1].args, 'createInitializeMint2Instruction receipt args');
-    console.log(receipt.logs[2].args, 'createAssociatedTokenAccountInstruction receipt args');
-    console.log(receipt.logs[3].args, 'createMintToInstruction receipt args');
+    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
+        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
+    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

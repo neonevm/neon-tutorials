@@ -15,7 +15,11 @@ const { config } = require('./config');
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
-    const token = new web3.PublicKey('BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k'); // SPLToken
+    const tokenAddress = '';
+    if (tokenAddress == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
+    }
+    const token = new web3.PublicKey(tokenAddress);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;

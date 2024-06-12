@@ -8,7 +8,7 @@ const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const { config } = require('./config');
 const { AnchorProvider } = require("@coral-xyz/anchor");
-const { WhirlpoolContext, buildWhirlpoolClient, ORCA_WHIRLPOOL_PROGRAM_ID, PDAUtil, swapQuoteByInputToken, IGNORE_CACHE, getAllWhirlpoolAccountsForConfig } = require("@orca-so/whirlpools-sdk");
+const { WhirlpoolContext, buildWhirlpoolClient, ORCA_WHIRLPOOL_PROGRAM_ID, PDAUtil, swapQuoteByInputToken, IGNORE_CACHE, getAllWhirlpoolAccountsForConfig, WhirlpoolIx, SwapUtils } = require("@orca-so/whirlpools-sdk");
 const { DecimalUtil, Percentage } = require("@orca-so/common-sdk");
 const { Decimal } = require("decimal.js");
 
@@ -106,9 +106,22 @@ async function main() {
     console.log("estimatedAmountOut:", DecimalUtil.fromBN(quote.estimatedAmountOut, TokenA.decimals).toString(), "TokenA");
     console.log("otherAmountThreshold:", DecimalUtil.fromBN(quote.otherAmountThreshold, TokenA.decimals).toString(), "TokenA");
 
+    let instruction = WhirlpoolIx.swapIx(
+        ctx.program,
+        SwapUtils.getSwapParamsFromQuote(
+            quote,
+            ctx,
+            whirlpool,
+            yourInputTokenAccount,
+            yourOutputTokenAccount,
+            ctx.wallet.publicKey
+        )
+    )
+    console.log(instruction, 'instruction');
+
     //tx = await whirlpool.swap(quote, new web3.PublicKey('DHaMF8ZrvrADBo8xmDRVHXzrZQkpSGuaYAoTYxkMrv3H'));
-    tx = await whirlpool.swap(quote);
-    console.log(tx, 'tx');
+    /* tx = await whirlpool.swap(quote);
+    console.log(tx, 'tx'); */
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -11,13 +11,18 @@ const {
     getAccount,
     createTransferInstruction,
     createApproveInstruction,
+    createMintToInstruction
 } = require('@solana/spl-token');
 const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
-    const token = new web3.PublicKey('3Dt135DpvL2BHmHADFwQJPjPBSXJy2BNYygZvRDCRAws'); // SPLToken
+    const tokenAddress = '';
+    if (tokenAddress == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
+    }
+    const token = new web3.PublicKey(tokenAddress);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -38,9 +43,6 @@ async function main() {
         );
     }
 
-    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
-    console.log(payer, 'payer');
-
     let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
@@ -54,57 +56,68 @@ async function main() {
         new web3.PublicKey(contractPublicKey),
         true
     );
-    console.log(await getAccount(connection, ataContract), 'ataContract');
 
     let ataOwner = await getAssociatedTokenAddress(
         token,
         new web3.PublicKey(ownerPublicKey),
         true
     );
-    console.log(await getAccount(connection, ataOwner), 'ataOwner');
 
-    // ============================= SPLTOKEN ACCOUNT APPROVE EXAMPLE ====================================
-    console.log('Broadcasting createApproveInstruction instruction ...');
+    const contractInfo = await connection.getAccountInfo(ataContract);
+    const ownerInfo = await connection.getAccountInfo(ataOwner);
+    if ((!contractInfo || !contractInfo.data) || (!ownerInfo || !ownerInfo.data)) {
+        return console.error('Before proceeding with instructions execution you need to make sure about contract & owner have their ATAs intialized, this can be done at CreateATA.js file.');
+    }
+
     console.log(await getAccount(connection, ataContract), 'ataContract getAccount');
-    let getAccountAtaContract = await getAccount(connection, ataContract);
-    console.log(getAccountAtaContract.delegate, 'getAccountAtaContract.delegate');
-    console.log(getAccountAtaContract.delegatedAmount, 'getAccountAtaContract.delegatedAmount');
+    console.log(await getAccount(connection, ataOwner), 'ataOwner getAccount');
+
     solanaTx = new web3.Transaction();
+
+    // ============================= SPLTOKEN MINT INSTRUCTION ====================================
+    solanaTx.add(
+        createMintToInstruction(
+            token,
+            ataContract,
+            new web3.PublicKey(contractPublicKey),
+            1000 * 10 ** 9 // mint 1000 tokens
+        )
+    );
+
+    // ============================= SPLTOKEN TRANSFER INSTRUCTION ====================================
+    solanaTx.add(
+        createTransferInstruction(
+            ataContract,
+            ataOwner,
+            contractPublicKey,
+            10 * 10 ** 9, // transfers 10 tokens
+            []
+        )
+    );
+
+    // ============================= SPLTOKEN APPROVE INSTRUCTION ====================================
     solanaTx.add(
         createApproveInstruction(
             ataContract,
             ataOwner,
             contractPublicKey,
-            parseInt(getAccountAtaContract.delegatedAmount) + 1000
+            Date.now() // approve amount !!! CHANGE THIS IN PRODUCTION !!!
         )
     );
-    [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-    console.log(tx, 'tx createApproveInstruction');
-    console.log(receipt.logs[0].args, 'receipt args createApproveInstruction');
-    getAccountAtaContract = await getAccount(connection, ataContract);
-    console.log(getAccountAtaContract.delegate, 'getAccountAtaContract.delegate');
-    console.log(getAccountAtaContract.delegatedAmount, 'getAccountAtaContract.delegatedAmount');
-    
-    // ============================= SPLTOKEN ACCOUNT TRANSFER EXAMPLE ====================================
-    if (getAccountAtaContract.amount < 1000000000) {
-        console.log('In order to proceed with the transfer test please fill in at least 0.1 of the SPLToken to account ', contractPublicKey.toString());
-    } else {
-        console.log('Broadcasting createTransferInstruction instruction ...');
-        solanaTx = new web3.Transaction();
-        solanaTx.add(
-            createTransferInstruction(
-                ataContract,
-                ataOwner,
-                contractPublicKey,
-                10000000,
-                []
-            )
-        );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-        console.log(tx, 'tx createTransferInstruction');
-        console.log(receipt.logs[0].args, 'receipt args createTransferInstruction');
-        console.log(await getAccount(connection, ataOwner), 'ataOwner');
+
+    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
+    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+        solanaTx.instructions, 
+        [0, 0, 0], 
+        TestCallSolana
+    );
+    console.log(tx, 'tx');
+    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
+        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
     }
+
+    console.log(await getAccount(connection, ataContract), 'ataContract getAccount after execution');
+    console.log(await getAccount(connection, ataOwner), 'ataOwner getAccount after execution');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

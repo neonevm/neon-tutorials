@@ -42,7 +42,7 @@ module.exports = {
             chainId: 245022926,
             allowUnlimitedContractSize: false,
             gas: "auto",
-            gasPrice: "auto"
+            gasPrice: 5000000000000
         },
         neonmainnet: {
             url: "https://neon-proxy-mainnet.solana.p2p.org",
