@@ -50,6 +50,9 @@ async function main() {
     receipt = await tx.wait(3);
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
+    
+    let getResourceAddress = await TestCallSolana.getResourceAddress(salt);
+    console.log(getResourceAddress, 'getResourceAddress');
 
     // ============================= ACCOUNT CREATION EXAMPLE ====================================
     console.log('Creating Account through createResource method ...');
@@ -63,6 +66,9 @@ async function main() {
     receipt = await tx.wait(3);
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
+    
+    getResourceAddress = await TestCallSolana.getResourceAddress(salt);
+    console.log(getResourceAddress, 'getResourceAddress');
 }
 
 // We recommend this pattern to be able to use async/await everywhere

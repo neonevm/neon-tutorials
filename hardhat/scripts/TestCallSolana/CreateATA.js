@@ -14,8 +14,8 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
-    const tokenAddress = '';
+    const [owner, user1] = await ethers.getSigners();
+    const tokenAddress = 'DfdFjN5mw77Qv5zGZC7Pz3XwMaEThTDVmxWBaZq3AiP4';
     if (tokenAddress == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
     }
@@ -50,6 +50,10 @@ async function main() {
     let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
     let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
     console.log(ownerPublicKey, 'ownerPublicKey');
+
+    let userPublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    let user1PublicKey = ethers.encodeBase58(userPublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
 
     const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
     console.log(minBalance, 'minBalance');
@@ -97,6 +101,30 @@ async function main() {
                 new web3.PublicKey(payer),
                 ataOwner,
                 new web3.PublicKey(ownerPublicKey),
+                token
+            )
+        );
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
+    }
+
+    let ataUser1 = await getAssociatedTokenAddress(
+        token,
+        new web3.PublicKey(user1PublicKey),
+        true
+    );
+    
+    const user1Info = await connection.getAccountInfo(ataUser1);
+    console.log(user1Info, 'user1Info');
+    if (!user1Info || !user1Info.data) {
+        // initialize contract's Token Account
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            createAssociatedTokenAccountInstruction(
+                new web3.PublicKey(payer),
+                ataUser1,
+                new web3.PublicKey(user1PublicKey),
                 token
             )
         );

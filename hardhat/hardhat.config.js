@@ -28,17 +28,9 @@ module.exports = {
         ]
     },
     networks: {
-        neonnight: {
-            url: "http://proxy.night.stand.neontest.xyz/solana",
-            accounts: [process.env.PRIVATE_KEY_OWNER],
-            chainId: 111,
-            allowUnlimitedContractSize: false,
-            gas: "auto",
-            gasPrice: "auto"
-        },
         neondevnet: {
             url: "https://devnet.neonevm.org",
-            accounts: [process.env.PRIVATE_KEY_OWNER],
+            accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
             chainId: 245022926,
             allowUnlimitedContractSize: false,
             gas: "auto",

@@ -33,20 +33,22 @@ contract TestCallSolana {
         bytes32 program_id, 
         ICallSolana.AccountMeta[] memory accounts, 
         bytes memory instruction_data, 
-        uint64 lamports
+        uint64 lamports,
+        bytes32 salt
     ) external {
-        _execute(program_id, accounts, instruction_data, lamports);
+        _execute(program_id, accounts, instruction_data, lamports, salt);
     }
 
     function batchExecute(
         bytes32[] memory program_id,
         ICallSolana.AccountMeta[][] memory accounts, 
         bytes[] memory instruction_data, 
-        uint64[] memory lamports
+        uint64[] memory lamports,
+        bytes32[] memory salt
     ) external {
         uint len = program_id.length;
         for (uint i = 0; i < len; ++i) {
-            _execute(program_id[i], accounts[i], instruction_data[i], lamports[i]);
+            _execute(program_id[i], accounts[i], instruction_data[i], lamports[i], salt[i]);
         }
     }
 
@@ -71,17 +73,28 @@ contract TestCallSolana {
         bytes32 program_id, 
         ICallSolana.AccountMeta[] memory accounts, 
         bytes memory instruction_data, 
-        uint64 lamports
+        uint64 lamports,
+        bytes32 salt
     ) internal returns(bytes memory, bytes32, bytes memory) {
         ICallSolana.Instruction memory instruction = ICallSolana.Instruction({
             program_id: program_id,
             accounts: accounts,
             instruction_data: instruction_data
         });
-        bytes memory response = CALL_SOLANA.execute(
-            lamports, 
-            instruction
-        );
+
+        bytes memory response;
+        if (salt != bytes32(0)) {
+            response = CALL_SOLANA.executeWithSeed(
+                lamports, 
+                salt,
+                instruction
+            );
+        } else {
+            response = CALL_SOLANA.execute(
+                lamports, 
+                instruction
+            );
+        }
         (bytes32 programId, bytes memory data) = CALL_SOLANA.getReturnData();
         
         emit LogData(response, programId, data);
