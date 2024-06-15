@@ -18,7 +18,7 @@ const { config } = require('./config');
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
-    const tokenAddress = 'DfdFjN5mw77Qv5zGZC7Pz3XwMaEThTDVmxWBaZq3AiP4';
+    const tokenAddress = '';
     if (tokenAddress == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
     }

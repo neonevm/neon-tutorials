@@ -2,7 +2,7 @@ const config = {
     //SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
     SOLANA_NODE: 'https://api.devnet.solana.com',
     //SOLANA_NODE: 'https://api.mainnet-beta.solana.com/',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0xC5Fb64088C632f6E5Ced6f383088241F44A333A0',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0xF8cBC697aE538Ae98F0F36e74088F0a1E3b8aE1F',
     ACCOUNTS: {
         TOKEN_PROGRAM: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     },
