@@ -59,8 +59,8 @@ async function main() {
     salt = ethers.encodeBytes32String('salt' + Date.now().toString()); // random seed on each script call
     tx = await TestCallSolana.createResource(
         salt,
-        config.SIZES.ACCOUNT,
-        await connection.getMinimumBalanceForRentExemption(config.SIZES.ACCOUNT),
+        0,
+        await connection.getMinimumBalanceForRentExemption(0),
         config.utils.publicKeyToBytes32(web3.SystemProgram.programId)
     );
     receipt = await tx.wait(3);

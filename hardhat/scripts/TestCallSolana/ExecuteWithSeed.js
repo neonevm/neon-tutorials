@@ -8,15 +8,12 @@ const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
     getAssociatedTokenAddress,
-    getAccount,
     createTransferInstruction,
-    createApproveInstruction,
-    createMintToInstruction
+    createApproveInstruction
 } = require('@solana/spl-token');
 const { config } = require('./config');
 
 async function main() {
-    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
     const tokenAddress = '';
     if (tokenAddress == '') {

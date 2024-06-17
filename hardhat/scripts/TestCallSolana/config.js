@@ -2,12 +2,11 @@ const config = {
     //SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
     SOLANA_NODE: 'https://api.devnet.solana.com',
     //SOLANA_NODE: 'https://api.mainnet-beta.solana.com/',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0xF8cBC697aE538Ae98F0F36e74088F0a1E3b8aE1F',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0xc4958A61B091ae2cd423a128D545D67672cE96dd',
     ACCOUNTS: {
         TOKEN_PROGRAM: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     },
     SIZES: {
-        ACCOUNT: 70,
         SPLTOKEN: 82, // needed bytes for SPLToken mint and initialization
         SPLTOKEN_ACOUNT: 165 // needed bytes to initalize a Token Account
     },
