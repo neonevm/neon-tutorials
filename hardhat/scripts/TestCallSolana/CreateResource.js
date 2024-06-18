@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will requesting the createResource method of the SolanaCall precompile. This method can be used to create account with any size defined by us ( can be used instead of createAccountWithSeed )
+// Test purpose - in this script we will requesting the createResource method of the SolanaCall precompile. We will be passing a random generated salt which can also be passed to method getResourceAddress in order to get the account address previously made by the createResource instruction. This method can be used to create account with any size defined by us ( can be used instead of createAccountWithSeed )
 //
 //
 

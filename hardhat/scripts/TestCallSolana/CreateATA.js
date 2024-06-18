@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will be creating ATA account instructions for the contract and the contract's owner ONLY if their ATA accounts are not currently made yet. The Token Mint address have to be defined in the tokenAddress variable.
+// Test purpose - in this script we will be creating ATA account instructions for the contract and the contract's owner ONLY if their ATA accounts are not currently made yet. ATA account is a primary Token Account. The Token Mint address have to be defined in the tokenAddress variable. You can place any SPLToken address in that variable or head to MintSPLToken.js test and deploy a SPLToken there. Anyone can create ATA for any account for any Token Mint.
 //
 //
 

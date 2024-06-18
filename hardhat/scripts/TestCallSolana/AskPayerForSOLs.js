@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will ask Payer for 1 SOL and we will submit it to the contract's account address
+// Test purpose - in this script we will ask Payer for 1 SOL and we will submit it to the contract's account address. You will notice how high is the tx fee of the Neon EVM transaction, why? Because we requested 1 SOL to be given to us.
 //
 //
 

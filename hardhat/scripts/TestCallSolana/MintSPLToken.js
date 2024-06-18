@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will be minting a new SPLToken instance and adding a metaplex data to it
+// Test purpose - in this script we will be minting a new SPLToken instance and adding a Metaplex data to it. Mint & freeze authorities are given to the contract account.
 //
 //
 
