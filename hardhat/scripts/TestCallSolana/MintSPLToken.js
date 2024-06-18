@@ -1,9 +1,9 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
 //
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
+//
+// Test purpose - in this script we will be minting a new SPLToken instance and adding a metaplex data to it
+//
+//
+
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
@@ -104,7 +104,7 @@ async function main() {
                     isMutable: true,
                     collectionDetails: null
                 },
-            },
+            }
         )
     );
 

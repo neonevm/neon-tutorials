@@ -1,9 +1,9 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
 //
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
+//
+// Test purpose - in this test we demonstrate 2 accounts ( accounts X & Z ) creation through createAccountWithSeed instruction and then we ask operator to grant payer with 1 SOL, we transfer the 1 SOL from payer to account X and then we execute another transfer from account X to account Y
+//
+//
+
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const { config } = require('./config');
@@ -104,24 +104,35 @@ async function main() {
     receiverAccount = await connection.getAccountInfo(createWithSeedReceiver);
     console.log(receiverAccount, 'getAccountInfo createWithSeedSender');
 
-    if (senderAccount.lamports < 10000000) {
-        console.log('In order to proceed with the transferFromSeed test please fill in at least 0.01 SOL to account ', createWithSeedSender.toString());
-    } else {
-        console.log('Executing transferWithSeed instruction ...');
-        solanaTx = new web3.Transaction();
-        solanaTx.add(
-            web3.SystemProgram.transfer({
-                fromPubkey: createWithSeedSender,
-                basePubkey: new web3.PublicKey(contractPublicKey),
-                toPubkey: createWithSeedReceiver,
-                lamports: 10000,
-                seed: seedSender,
-                programId: web3.SystemProgram.programId
-            })
-        );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
-        console.log(tx, 'tx');
-        console.log(receipt.logs[0].args, 'receipt args');
+    const amount = 1000000000; // 1 SOL, changing this value will reflect on the fee of the transaction on Neon EVM
+    solanaTx = new web3.Transaction();
+    solanaTx.add(
+        web3.SystemProgram.transfer({
+            fromPubkey: new web3.PublicKey(payer),
+            toPubkey: new web3.PublicKey(createWithSeedSender),
+            lamports: amount
+        })
+    );
+
+    solanaTx.add(
+        web3.SystemProgram.transfer({
+            fromPubkey: createWithSeedSender,
+            basePubkey: new web3.PublicKey(contractPublicKey),
+            toPubkey: createWithSeedReceiver,
+            lamports: amount,
+            seed: seedSender,
+            programId: web3.SystemProgram.programId
+        })
+    );
+    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
+    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+        solanaTx.instructions, 
+        [amount, 0], 
+        TestCallSolana
+    );
+    console.log(tx, 'tx');
+    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
+        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
     }
 }
 

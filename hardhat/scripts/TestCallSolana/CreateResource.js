@@ -1,9 +1,9 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
 //
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
+//
+// Test purpose - in this script we will requesting the createResource method of the SolanaCall precompile. This method can be used to create account with any size defined by us ( can be used instead of createAccountWithSeed )
+//
+//
+
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const { config } = require('./config');

@@ -1,9 +1,9 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
 //
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
+//
+// Test purpose - in this script we will be creating ATA account instructions for the contract and the contract's owner ONLY if their ATA accounts are not currently made yet. The Token Mint address have to be defined in the tokenAddress variable.
+//
+//
+
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
@@ -11,10 +11,11 @@ const {
     createAssociatedTokenAccountInstruction
 } = require('@solana/spl-token');
 const { config } = require('./config');
+const { SOL } = require("@metaplex-foundation/js");
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner, user1] = await ethers.getSigners();
+    const [owner] = await ethers.getSigners();
     const tokenAddress = '';
     if (tokenAddress == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
@@ -51,15 +52,11 @@ async function main() {
     let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
     console.log(ownerPublicKey, 'ownerPublicKey');
 
-    let userPublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
-    let user1PublicKey = ethers.encodeBase58(userPublicKeyInBytes);
-    console.log(user1PublicKey, 'user1PublicKey');
-
     const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
     console.log(minBalance, 'minBalance');
 
     // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
-    let ataContract = await getAssociatedTokenAddress(
+    let ataContract = await getAssociatedTokenAddress( // calculates Token Account PDA of some account
         token,
         new web3.PublicKey(contractPublicKey),
         true
@@ -79,7 +76,7 @@ async function main() {
                 token
             )
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 100000000, TestCallSolana);
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }
@@ -101,30 +98,6 @@ async function main() {
                 new web3.PublicKey(payer),
                 ataOwner,
                 new web3.PublicKey(ownerPublicKey),
-                token
-            )
-        );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
-        console.log(tx, 'tx');
-        console.log(receipt.logs[0].args, 'receipt args');
-    }
-
-    let ataUser1 = await getAssociatedTokenAddress(
-        token,
-        new web3.PublicKey(user1PublicKey),
-        true
-    );
-    
-    const user1Info = await connection.getAccountInfo(ataUser1);
-    console.log(user1Info, 'user1Info');
-    if (!user1Info || !user1Info.data) {
-        // initialize contract's Token Account
-        solanaTx = new web3.Transaction();
-        solanaTx.add(
-            createAssociatedTokenAccountInstruction(
-                new web3.PublicKey(payer),
-                ataUser1,
-                new web3.PublicKey(user1PublicKey),
                 token
             )
         );

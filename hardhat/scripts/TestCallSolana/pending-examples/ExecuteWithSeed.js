@@ -11,7 +11,7 @@ const {
     createTransferInstruction,
     createApproveInstruction
 } = require('@solana/spl-token');
-const { config } = require('./config');
+const { config } = require('../config');
 
 async function main() {
     const [owner] = await ethers.getSigners();
