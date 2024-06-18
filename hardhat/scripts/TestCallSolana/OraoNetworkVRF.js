@@ -18,7 +18,7 @@ async function main() {
     const provider = AnchorProvider.env();
     const vrf = new Orao(provider);
 
-    const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
+    const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana"); 
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT; 
     let TestCallSolana;
     let solanaTx;
