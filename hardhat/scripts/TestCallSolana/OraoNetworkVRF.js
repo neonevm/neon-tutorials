@@ -15,6 +15,7 @@ const { AnchorProvider } = require("@coral-xyz/anchor");
 const { Orao } = require("@orao-network/solana-vrf");
 
 async function main() {
+    const [user1] = await ethers.getSigners();
     const provider = AnchorProvider.env();
     const vrf = new Orao(provider);
 
@@ -89,7 +90,13 @@ async function main() {
         })
     );
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 7103920, TestCallSolana);
+    [tx, receipt] = await config.utils.executeComposabilityMethod(
+        solanaTx.instructions[0], 
+        7103920, 
+        TestCallSolana,
+        undefined,
+        user1
+    );
     console.log(tx, 'tx');
 
     const randomness = await vrf.waitFulfilled(seed);

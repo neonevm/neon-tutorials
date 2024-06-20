@@ -30,7 +30,7 @@ module.exports = {
     networks: {
         neondevnet: {
             url: "https://devnet.neonevm.org",
-            accounts: [process.env.PRIVATE_KEY_OWNER],
+            accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
             chainId: 245022926,
             allowUnlimitedContractSize: false,
             gas: "auto",
@@ -38,7 +38,7 @@ module.exports = {
         },
         neonmainnet: {
             url: "https://neon-proxy-mainnet.solana.p2p.org",
-            accounts: [process.env.PRIVATE_KEY_OWNER],
+            accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
             chainId: 245022934,
             allowUnlimitedContractSize: false,
             gas: "auto",

@@ -2,7 +2,7 @@ const config = {
     //SOLANA_NODE: 'https://personal-access-devnet.sol-rpc.neoninfra.xyz:8513/FB2702O22GSyGdGOpaAj2J723mZASFmBWdeTiXas',
     SOLANA_NODE: 'https://api.devnet.solana.com',
     //SOLANA_NODE: 'https://api.mainnet-beta.solana.com/',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0xc2cf5104Fad148f2B673bCcaff8552Dc4A299c6A',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0xb43121583c834EfBCD175E47E15D4Ec7a74A3eC5',
     ACCOUNTS: {
         TOKEN_PROGRAM: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
     },
@@ -11,7 +11,7 @@ const config = {
         SPLTOKEN_ACOUNT: 165 // needed bytes to initalize a Token Account ( ~ATA )
     },
     utils: {
-        executeComposabilityMethod: async function(instruction, lamports, contractInstance, seed) {
+        executeComposabilityMethod: async function(instruction, lamports, contractInstance, seed, msgSender) {
             let keys = [];
             for (let i = 0, len = instruction.keys.length; i < len; ++i) {
                 keys.push({
@@ -24,7 +24,7 @@ const config = {
             if (seed == undefined) {
                 seed = '0x0000000000000000000000000000000000000000000000000000000000000000';
             }
-            const tx = await contractInstance.execute(
+            const tx = await contractInstance.connect(msgSender).execute(
                 config.utils.publicKeyToBytes32(instruction.programId.toString()),
                 keys,
                 instruction.data,
@@ -35,7 +35,7 @@ const config = {
 
             return [tx, receipt];
         },
-        batchExecuteComposabilityMethod: async function(instructions, lamports, contractInstance, seeds) {
+        batchExecuteComposabilityMethod: async function(instructions, lamports, contractInstance, seeds, msgSender) {
             let keysArr = [];
             let programIds = [];
             let instructionsData = [];
@@ -62,7 +62,7 @@ const config = {
                 }
             }
     
-            const tx = await contractInstance.batchExecute(
+            const tx = await contractInstance.connect(msgSender).batchExecute(
                 programIds,
                 keysArr,
                 instructionsData,
@@ -75,6 +75,9 @@ const config = {
         },
         publicKeyToBytes32(pubkey) {
             return ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(pubkey)), 32);
+        },
+        addressToBytes32(address) {
+            return ethers.zeroPadValue(ethers.toBeHex(address), 32);
         }
     }
 };

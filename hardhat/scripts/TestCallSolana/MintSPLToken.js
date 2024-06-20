@@ -15,7 +15,7 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
+    const [user1] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -43,9 +43,9 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
+    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
 
     const seed = 'seed' + Date.now().toString(); // random seed on each script call
     const createWithSeed = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seed, new web3.PublicKey(config.ACCOUNTS.TOKEN_PROGRAM));
@@ -112,7 +112,9 @@ async function main() {
     [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
         solanaTx.instructions, 
         [minBalance, 0, 100000000], 
-        TestCallSolana
+        TestCallSolana,
+        undefined,
+        user1
     );
     console.log(tx, 'tx');
     for (let i = 0, len = receipt.logs.length; i < len; ++i) {

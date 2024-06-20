@@ -91,7 +91,7 @@ contract TestCallSolana {
             );
         } else {
             response = CALL_SOLANA.execute(
-                lamports, // GIVE TO THE PAYER THIS AMOUNT OF LAMPORTS
+                lamports,
                 instruction
             );
         }

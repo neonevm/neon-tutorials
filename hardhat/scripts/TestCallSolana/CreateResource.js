@@ -10,7 +10,7 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
+    const [user1] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -34,10 +34,6 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
-
     // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
     console.log('Creating SPLToken account through createResource method ...');
     let salt = ethers.encodeBytes32String('salt' + Date.now().toString()); // random seed on each script call
@@ -51,7 +47,7 @@ async function main() {
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
     
-    let getResourceAddress = await TestCallSolana.getResourceAddress(salt);
+    let getResourceAddress = await TestCallSolana.connect(user1).getResourceAddress(salt);
     console.log(getResourceAddress, 'getResourceAddress');
 
     // ============================= ACCOUNT CREATION EXAMPLE ====================================
@@ -67,7 +63,7 @@ async function main() {
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
     
-    getResourceAddress = await TestCallSolana.getResourceAddress(salt);
+    getResourceAddress = await TestCallSolana.connect(user1).getResourceAddress(salt);
     console.log(getResourceAddress, 'getResourceAddress');
 }
 

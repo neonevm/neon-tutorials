@@ -10,7 +10,7 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
+    const [user1, user2] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -38,38 +38,45 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
+    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
+    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
+
+    let user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
+    let user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
+    console.log(user2PublicKey, 'user2PublicKey');
 
     // ============================= SOL TRANSFER EXAMPLE ( createAccountWithSeed + transferWithSeed ) ====================================
      // calculate minimum balance to make account rent-exempt
     const minBalance = await connection.getMinimumBalanceForRentExemption(0);
     console.log(minBalance, 'minBalance');
 
-    const seedSender = 'salt' + Date.now().toString(); // random seed on each script call
-    const seedReceiver = seedSender + "1";
+    let user1Salt = ethers.sha256(user1.address);
+    user1Salt = user1Salt.slice(2, 34);
 
-    let createWithSeedSender = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedSender, web3.SystemProgram.programId);
-    console.log(createWithSeedSender, 'createWithSeedSender');
+    let user2Salt = ethers.sha256(user2.address);
+    user2Salt = user2Salt.slice(2, 34);
 
-    let createWithSeedReceiver = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedReceiver, web3.SystemProgram.programId);
-    console.log(createWithSeedReceiver, 'createWithSeedReceiver');
+    let user1SeedAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), user1Salt, web3.SystemProgram.programId);
+    console.log(user1SeedAccount, 'user1SeedAccount');
+
+    let user2SeedAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), user2.address, web3.SystemProgram.programId);
+    console.log(user2SeedAccount, 'user2SeedAccount');
     
-    let senderAccount = await connection.getAccountInfo(createWithSeedSender);
-    console.log(senderAccount, 'getAccountInfo createWithSeedSender');
-    let receiverAccount = await connection.getAccountInfo(createWithSeedReceiver);
-    console.log(receiverAccount, 'getAccountInfo createWithSeedSender');
+    let user1Account = await connection.getAccountInfo(user1SeedAccount);
+    console.log(user1Account, 'getAccountInfo user1Account');
+    let user2Account = await connection.getAccountInfo(user2SeedAccount);
+    console.log(user2Account, 'getAccountInfo user2Account');
 
-    if (senderAccount == null) {
-        console.log('Creating senderAccount through createAccountWithSeed instruction ...');
+    if (user1Account == null) {
+        console.log('Creating user1Account through createAccountWithSeed instruction ...');
         solanaTx = new web3.Transaction();
         solanaTx.add(
             web3.SystemProgram.createAccountWithSeed({
                 fromPubkey: new web3.PublicKey(payer),
                 basePubkey: new web3.PublicKey(contractPublicKey),
-                newAccountPubkey: createWithSeedSender,
-                seed: seedSender,
+                newAccountPubkey: user1SeedAccount,
+                seed: user1Salt,
                 lamports: minBalance, // rent exempt
                 space: 0,
                 programId: web3.SystemProgram.programId
@@ -78,23 +85,23 @@ async function main() {
         [tx, receipt] = await config.utils.executeComposabilityMethod(
             solanaTx.instructions[0], 
             minBalance, 
-            TestCallSolana, 
-            undefined, 
-            owner
+            TestCallSolana,
+            undefined,
+            user1
         );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }
     
-    if (receiverAccount == null) {
-        console.log('Creating receiverAccount through createAccountWithSeed instruction ...');
+    if (user2Account == null) {
+        console.log('Creating user2Account through createAccountWithSeed instruction ...');
         solanaTx = new web3.Transaction();
         solanaTx.add(
             web3.SystemProgram.createAccountWithSeed({
                 fromPubkey: new web3.PublicKey(payer),
                 basePubkey: new web3.PublicKey(contractPublicKey),
-                newAccountPubkey: createWithSeedReceiver,
-                seed: seedReceiver,
+                newAccountPubkey: user2SeedAccount,
+                seed: user2Salt,
                 lamports: minBalance, // rent exempt
                 space: 0,
                 programId: web3.SystemProgram.programId
@@ -103,53 +110,20 @@ async function main() {
         [tx, receipt] = await config.utils.executeComposabilityMethod(
             solanaTx.instructions[0], 
             minBalance, 
-            TestCallSolana, 
-            undefined, 
-            owner
+            TestCallSolana,
+            undefined,
+            user2
         );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }
 
-    senderAccount = await connection.getAccountInfo(createWithSeedSender);
-    console.log(senderAccount, 'getAccountInfo createWithSeedSender');
-    receiverAccount = await connection.getAccountInfo(createWithSeedReceiver);
-    console.log(receiverAccount, 'getAccountInfo createWithSeedSender');
+    user1Account = await connection.getAccountInfo(user1SeedAccount);
+    console.log(user1Account, 'getAccountInfo user1SeedAccount');
+    user2Account = await connection.getAccountInfo(user2SeedAccount);
+    console.log(user2Account, 'getAccountInfo user1SeedAccount');
 
-    // fill in some SOLs into createWithSeedSender
-    const amount = 1000000000; // 1 SOL, changing this value will reflect on the fee of the transaction on Neon EVM
-    solanaTx = new web3.Transaction();
-    solanaTx.add(
-        web3.SystemProgram.transfer({
-            fromPubkey: new web3.PublicKey(payer),
-            toPubkey: new web3.PublicKey(createWithSeedSender),
-            lamports: amount
-        })
-    );
 
-    // initiate SOL transfer from createWithSeedSender to createWithSeedReceiver
-    solanaTx.add(
-        web3.SystemProgram.transfer({
-            fromPubkey: createWithSeedSender,
-            basePubkey: new web3.PublicKey(contractPublicKey),
-            toPubkey: createWithSeedReceiver,
-            lamports: amount,
-            seed: seedSender,
-            programId: web3.SystemProgram.programId
-        })
-    );
-    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
-    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
-        solanaTx.instructions, 
-        [amount, 0], 
-        TestCallSolana, 
-        undefined, 
-        owner
-    );
-    console.log(tx, 'tx');
-    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
-        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
-    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

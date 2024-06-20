@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will be creating ATA account instructions for the contract and the contract's owner ONLY if their ATA accounts are not currently made yet. ATA account is a primary Token Account. The Token Mint address have to be defined in the tokenAddress variable. You can place any SPLToken address in that variable or head to MintSPLToken.js test and deploy a SPLToken there. Anyone can create ATA for any account for any Token Mint.
+// Test purpose - in this script we will be creating ATA account instructions for the contract and the contract's owner ONLY if their ATA accounts are not currently made yet. ATA account is a primary Token Account. The Token Mint address have to be defined in the tokenMintPublicKey variable. You can place any SPLToken address in that variable or head to MintSPLToken.js test and deploy a SPLToken there. Anyone can create ATA for any account for any Token Mint.
 //
 //
 
@@ -15,12 +15,12 @@ const { SOL } = require("@metaplex-foundation/js");
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
-    const tokenAddress = '';
-    if (tokenAddress == '') {
-        return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
+    const [user1, user2] = await ethers.getSigners();
+    const tokenMintPublicKey = '';
+    if (tokenMintPublicKey == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
     }
-    const token = new web3.PublicKey(tokenAddress);
+    const token = new web3.PublicKey(tokenMintPublicKey);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -48,9 +48,13 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
+    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
+
+    let user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
+    let user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
+    console.log(user2PublicKey, 'user2PublicKey');
 
     const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
     console.log(minBalance, 'minBalance');
@@ -76,32 +80,75 @@ async function main() {
                 token
             )
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 100000000, TestCallSolana);
+        [tx, receipt] = await config.utils.executeComposabilityMethod(
+            solanaTx.instructions[0], 
+            minBalance, 
+            TestCallSolana,
+            undefined,
+            user1
+        );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }
 
-    let ataOwner = await getAssociatedTokenAddress(
+    let ataUser1 = await getAssociatedTokenAddress(
         token,
-        new web3.PublicKey(ownerPublicKey),
+        new web3.PublicKey(user1PublicKey),
         true
     );
-    console.log(ataOwner, 'ataOwner');
+    console.log(ataUser1, 'ataUser1');
     
-    const ownerInfo = await connection.getAccountInfo(ataOwner);
-    console.log(ownerInfo, 'ownerInfo');
-    if (!ownerInfo || !ownerInfo.data) {
+    const user1Info = await connection.getAccountInfo(ataUser1);
+    console.log(user1Info, 'user1Info');
+    if (!user1Info || !user1Info.data) {
         // initialize contract's Token Account
         solanaTx = new web3.Transaction();
         solanaTx.add(
             createAssociatedTokenAccountInstruction(
                 new web3.PublicKey(payer),
-                ataOwner,
-                new web3.PublicKey(ownerPublicKey),
+                ataUser1,
+                new web3.PublicKey(user1PublicKey),
                 token
             )
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], minBalance, TestCallSolana);
+        [tx, receipt] = await config.utils.executeComposabilityMethod(
+            solanaTx.instructions[0], 
+            minBalance, 
+            TestCallSolana,
+            undefined,
+            user1
+        );
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
+    }
+
+    let ataUser2 = await getAssociatedTokenAddress(
+        token,
+        new web3.PublicKey(user1PublicKey),
+        true
+    );
+    console.log(ataUser2, 'ataUser2');
+    
+    const user2Info = await connection.getAccountInfo(ataUser2);
+    console.log(user2Info, 'user2Info');
+    if (!user2Info || !user2Info.data) {
+        // initialize contract's Token Account
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            createAssociatedTokenAccountInstruction(
+                new web3.PublicKey(payer),
+                ataUser2,
+                new web3.PublicKey(user2PublicKey),
+                token
+            )
+        );
+        [tx, receipt] = await config.utils.executeComposabilityMethod(
+            solanaTx.instructions[0], 
+            minBalance, 
+            TestCallSolana,
+            undefined,
+            user2
+        );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }

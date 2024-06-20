@@ -22,6 +22,7 @@ const { DecimalUtil, Percentage } = require("@orca-so/common-sdk");
 const { Decimal } = require("decimal.js");
 
 async function main() {
+    const [user1] = await ethers.getSigners();
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const provider = AnchorProvider.env();
     const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID);
@@ -126,7 +127,13 @@ async function main() {
         )
     );
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], 0, TestCallSolana);
+    [tx, receipt] = await config.utils.executeComposabilityMethod(
+        solanaTx.instructions[0], 
+        0, 
+        TestCallSolana,
+        undefined,
+        user1
+    );
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
 }

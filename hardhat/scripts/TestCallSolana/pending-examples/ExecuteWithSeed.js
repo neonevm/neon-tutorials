@@ -9,17 +9,19 @@ const web3 = require("@solana/web3.js");
 const {
     getAssociatedTokenAddress,
     createTransferInstruction,
-    createApproveInstruction
+    createApproveInstruction,
+    getAccount
 } = require('@solana/spl-token');
-const { config } = require('../config');
+const { config } = require('./config');
 
 async function main() {
+    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
     const [owner] = await ethers.getSigners();
-    const tokenAddress = '';
-    if (tokenAddress == '') {
-        return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
+    const tokenMintPublicKey = '2s3eVZaszuYW1PkhEjTUP4UxMUXAv3uWM6DGQEPq1h5y';
+    if (tokenMintPublicKey == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
     }
-    const token = new web3.PublicKey(tokenAddress);
+    const token = new web3.PublicKey(tokenMintPublicKey);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -53,25 +55,27 @@ async function main() {
 
     const salt = ethers.encodeBytes32String('salt' + Date.now().toString()); // random seed on each script call
     let getExtAuthority = await TestCallSolana.getExtAuthority(salt);
-    console.log(getExtAuthority, 'getExtAuthority');
+    console.log(getExtAuthority, 'getExtAuthority'); //bytes32
 
     let ataContract = await getAssociatedTokenAddress(
         token,
         new web3.PublicKey(contractPublicKey),
         true
     );
+    console.log(await getAccount(connection, ataContract), 'ataContract');
 
     let ataOwner = await getAssociatedTokenAddress(
         token,
         new web3.PublicKey(ownerPublicKey),
         true
     );
+    console.log(await getAccount(connection, ataOwner), 'ataOwner');
 
     solanaTx = new web3.Transaction();
     solanaTx.add(
         createApproveInstruction(
-            ataContract,
-            ethers.encodeBase58(getExtAuthority),
+            ataContract, // ATA of Contract
+            ethers.encodeBase58(getExtAuthority), // publicKey
             contractPublicKey,
             2 * 10 ** 9
         )
@@ -87,15 +91,27 @@ async function main() {
     console.log(receipt.logs[0].args, 'receipt');
 
     solanaTx = new web3.Transaction();
+    // option 1 with executeWithSeed - PDA([ACCOUNT_SEED_VERSION, "AUTH", address(this), msg.sender], evm_loader_id)
     solanaTx.add(
         createTransferInstruction(
-            ataContract,
+            ataContract, 
+            ataOwner,
+            ethers.encodeBase58(getExtAuthority),
+            2 * 10 ** 9, // transfers 10 tokens
+            []
+        )
+    );
+
+    // option 2 with execute - PDA([ACCOUNT_SEED_VERSION, address(this)], evm_loader_id)
+    /* solanaTx.add(
+        createTransferInstruction(
+            ataContract, 
             ataOwner,
             contractPublicKey,
             2 * 10 ** 9, // transfers 10 tokens
             []
         )
-    );
+    ); */
 
     console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
     [tx, receipt] = await config.utils.executeComposabilityMethod(

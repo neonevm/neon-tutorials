@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this script we will perform some of the SPLToken instructions - mintTo, transfers and approve. The Token Mint address have to be defined in the tokenAddress variable and the Token Mint has to be created by the contract, because the MintTo instruction will fail. First head to MintSPLToken.js test and deploy a SPLToken there.
+// Test purpose - in this script we will perform some of the SPLToken instructions - mintTo, transfers and approve. The Token Mint address have to be defined in the tokenMintPublicKey variable and the Token Mint has to be created by the contract, because the MintTo instruction will fail. First head to MintSPLToken.js test and deploy a SPLToken there.
 //
 //
 
@@ -17,12 +17,12 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
-    const tokenAddress = '';
-    if (tokenAddress == '') {
-        return console.error('Before proceeding with instructions execution please set value for the tokenAddress variable.');
+    const [user1] = await ethers.getSigners();
+    const tokenMintPublicKey = '';
+    if (tokenMintPublicKey == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
     }
-    const token = new web3.PublicKey(tokenAddress);
+    const token = new web3.PublicKey(tokenMintPublicKey);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -47,9 +47,9 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
+    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
 
     let ataContract = await getAssociatedTokenAddress(
         token,
@@ -57,20 +57,20 @@ async function main() {
         true
     );
 
-    let ataOwner = await getAssociatedTokenAddress(
+    let ataUser1 = await getAssociatedTokenAddress(
         token,
-        new web3.PublicKey(ownerPublicKey),
+        new web3.PublicKey(user1PublicKey),
         true
     );
 
     const contractInfo = await connection.getAccountInfo(ataContract);
-    const ownerInfo = await connection.getAccountInfo(ataOwner);
-    if ((!contractInfo || !contractInfo.data) || (!ownerInfo || !ownerInfo.data)) {
-        return console.error('Before proceeding with instructions execution you need to make sure about contract & owner have their ATAs intialized, this can be done at CreateATA.js file.');
+    const user1Info = await connection.getAccountInfo(ataUser1);
+    if ((!contractInfo || !contractInfo.data) || (!user1Info || !user1Info.data)) {
+        return console.error('Before proceeding with instructions execution you need to make sure that contract & user1 have their ATAs intialized, this can be done at CreateATA.js file.');
     }
 
     console.log(await getAccount(connection, ataContract), 'ataContract getAccount');
-    console.log(await getAccount(connection, ataOwner), 'ataOwner getAccount');
+    console.log(await getAccount(connection, ataUser1), 'ataUser1 getAccount');
 
     solanaTx = new web3.Transaction();
 
@@ -88,7 +88,7 @@ async function main() {
     solanaTx.add(
         createTransferInstruction(
             ataContract,
-            ataOwner,
+            ataUser1,
             contractPublicKey,
             10 * 10 ** 9, // transfers 10 tokens
             []
@@ -99,7 +99,7 @@ async function main() {
     solanaTx.add(
         createApproveInstruction(
             ataContract,
-            ataOwner,
+            ataUser1,
             contractPublicKey,
             Date.now() // approve amount !!! CHANGE THIS IN PRODUCTION !!!
         )
@@ -109,7 +109,9 @@ async function main() {
     [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
         solanaTx.instructions, 
         [0, 0, 0], 
-        TestCallSolana
+        TestCallSolana,
+        undefined,
+        user1
     );
     console.log(tx, 'tx');
     for (let i = 0, len = receipt.logs.length; i < len; ++i) {
@@ -117,7 +119,7 @@ async function main() {
     }
 
     console.log(await getAccount(connection, ataContract), 'ataContract getAccount after execution');
-    console.log(await getAccount(connection, ataOwner), 'ataOwner getAccount after execution');
+    console.log(await getAccount(connection, ataUser1), 'ataUser1 getAccount after execution');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
