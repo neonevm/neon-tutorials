@@ -48,8 +48,8 @@ async function main() {
         );
     }
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
     const TokenA = {mint: new web3.PublicKey("Jd4M8bfJG3sAkd82RsGWyEXoaBXQP7njFzBwEaCTuDa"), decimals: 9}; // devSAMO
@@ -58,8 +58,8 @@ async function main() {
     const whirlpool_pubkey = PDAUtil.getWhirlpool(
         ORCA_WHIRLPOOL_PROGRAM_ID,
         DEVNET_WHIRLPOOLS_CONFIG,
-        TokenA.mint, 
-        TokenB.mint, 
+        TokenA.mint, // devSAMO
+        TokenB.mint, // devUSDC
         64 // tick spacing
     ).publicKey;
     const whirlpool = await client.getPool(whirlpool_pubkey);
@@ -79,6 +79,7 @@ async function main() {
         true
     );
 
+    // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
     let ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
     if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
@@ -96,12 +97,12 @@ async function main() {
     // Obtain swap estimation (run simulation)
     const quote = await swapQuoteByInputToken(
         whirlpool,
-        TokenB.mint, // Input Token Mint
+        TokenB.mint, // devUSDC
         DecimalUtil.toBN(amountIn, TokenB.decimals), // Input Token Mint amount
         Percentage.fromFraction(10, 1000), // Acceptable slippage (10/1000 = 1%)
         ctx.program.programId,
         ctx.fetcher,
-        IGNORE_CACHE,
+        IGNORE_CACHE
     );
     console.log(quote, 'quote');
 

@@ -1,0 +1,189 @@
+//
+//
+// Test purpose - in this test we demonstrate 2 accounts ( accounts X & Z ) creation through createAccountWithSeed instruction and then we ask operator to grant payer with 1 SOL, we transfer the 1 SOL from payer to account X and then we execute another transfer from account X to account Y.
+//
+//
+
+const { ethers } = require("hardhat");
+const web3 = require("@solana/web3.js");
+const { config } = require('../config');
+const {
+    ACCOUNT_SIZE,
+    createMintToInstruction, 
+    createTransferInstruction,
+    getAssociatedTokenAddress, 
+    createAssociatedTokenAccountInstruction,
+    createInitializeAccount2Instruction
+} = require("@solana/spl-token");
+
+async function main() {
+    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
+    const [user1, user2] = await ethers.getSigners();
+    const tokenMintPublicKey = '8LkbY4Q1jGEF1BwedHz1ALM3q4zZRhZpCMWRe6SbrbKj';
+    if (tokenMintPublicKey == '') {
+        return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
+    }
+    const token = new web3.PublicKey(tokenMintPublicKey);
+
+    const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
+    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
+    let TestCallSolana;
+    let solanaTx;
+    let tx;
+    let receipt;
+
+    if (ethers.isAddress(TestCallSolanaAddress)) {
+        TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
+    } else {
+        TestCallSolana = await ethers.deployContract("TestCallSolana");
+        await TestCallSolana.waitForDeployment();
+
+        TestCallSolanaAddress = TestCallSolana.target;
+        console.log(
+            `TestCallSolana deployed to ${TestCallSolana.target}`
+        );
+    }
+
+    const payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    console.log(payer, 'payer');
+
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    console.log(contractPublicKey, 'contractPublicKey');
+
+    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
+
+    const user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
+    const user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
+    console.log(user2PublicKey, 'user2PublicKey');
+
+    /* const [pdaUser1,] = web3.PublicKey.findProgramAddressSync(
+        [Buffer.from(user1Salt)],
+        new web3.PublicKey(contractPublicKey)
+    ); */
+
+    // calculate minimum balance to make account rent-exempt
+    const minBalance = await connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE);
+    console.log(minBalance, 'minBalance');
+
+    const seedSender = 'salt' + Date.now().toString(); // random seed on each script call
+    const seedReceiver = seedSender + "1";
+
+    const SenderAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedSender, web3.SystemProgram.programId);
+    console.log(SenderAccount, 'SenderAccount');
+
+    const ReceiverAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedReceiver, web3.SystemProgram.programId);
+    console.log(ReceiverAccount, 'ReceiverAccount');
+    
+    const senderAccountData = await connection.getAccountInfo(SenderAccount);
+    const receiverAccountData = await connection.getAccountInfo(ReceiverAccount);
+ 
+    // if sender's account has not been created yet
+    if (senderAccountData == null) {
+        console.log('Creating SenderAccount through createAccountWithSeed instruction ...');
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            web3.SystemProgram.createAccountWithSeed({
+                fromPubkey: new web3.PublicKey(payer),
+                basePubkey: new web3.PublicKey(contractPublicKey),
+                newAccountPubkey: SenderAccount,
+                seed: seedSender,
+                lamports: minBalance, // rent exempt
+                space: ACCOUNT_SIZE,
+                programId: web3.SystemProgram.programId
+            })
+        );
+
+        solanaTx.add(
+            createInitializeAccount2Instruction(
+                SenderAccount, 
+                token, 
+                new web3.PublicKey(contractPublicKey)
+            )
+        );
+
+        [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+            solanaTx.instructions, 
+            [minBalance, 0], 
+            TestCallSolana, 
+            undefined, 
+            user1
+        );
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
+        console.log(receipt.logs[1].args, 'receipt args');
+    }
+    return;
+    
+    // if receiver's account has not been created yet
+    if (receiverAccountData == null) {
+        console.log('Creating ReceiverAccount through createAccountWithSeed instruction ...');
+        solanaTx = new web3.Transaction();
+        solanaTx.add(
+            web3.SystemProgram.createAccountWithSeed({
+                fromPubkey: new web3.PublicKey(payer),
+                basePubkey: new web3.PublicKey(contractPublicKey),
+                newAccountPubkey: ReceiverAccount,
+                seed: seedReceiver,
+                lamports: minBalance, // rent exempt
+                space: ACCOUNT_SIZE,
+                programId: web3.SystemProgram.programId
+            })
+        );
+        [tx, receipt] = await config.utils.executeComposabilityMethod(
+            solanaTx.instructions[0], 
+            minBalance, 
+            TestCallSolana, 
+            undefined, 
+            user2
+        );
+        console.log(tx, 'tx');
+        console.log(receipt.logs[0].args, 'receipt args');
+    }
+ 
+    console.log(await connection.getAccountInfo(SenderAccount), 'getAccountInfo SenderAccount');
+    console.log(await connection.getAccountInfo(ReceiverAccount), 'getAccountInfo SenderAccount');
+
+    /* solanaTx = new web3.Transaction();
+    // This instruction is only to fill in some SPLTokens into ataUser1
+    solanaTx.add(
+        createMintToInstruction(
+            token,
+            ataUser1,
+            new web3.PublicKey(contractPublicKey),
+            1000 * 10 ** 9 // mint 1000 tokens
+        )
+    );
+
+    solanaTx.add(
+        createTransferInstruction(
+            ataUser1,
+            ataUser2,
+            contractPublicKey,
+            10 * 10 ** 9, // transfers 10 tokens
+            []
+        )
+    );
+
+    console.log('Executing batchExecuteComposabilityMethod ...');
+    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+        solanaTx.instructions, 
+        [0, 0], 
+        TestCallSolana,
+        undefined,
+        user1
+    );
+    console.log(tx, 'tx');
+    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
+        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
+    } */
+}
+
+// We recommend this pattern to be able to use async/await everywhere
+// and properly handle errors.
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

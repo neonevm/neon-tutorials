@@ -6,6 +6,10 @@
 
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
+const {
+    ACCOUNT_SIZE,
+    TOKEN_PROGRAM_ID
+} = require("@solana/spl-token");
 const { config } = require('./config');
 
 async function main() {
@@ -30,8 +34,8 @@ async function main() {
         );
     }
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
     // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================
@@ -39,9 +43,9 @@ async function main() {
     let salt = ethers.encodeBytes32String('salt' + Date.now().toString()); // random seed on each script call
     tx = await TestCallSolana.createResource(
         salt,
-        config.SIZES.SPLTOKEN_ACOUNT,
-        await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT),
-        config.utils.publicKeyToBytes32(config.ACCOUNTS.TOKEN_PROGRAM)
+        ACCOUNT_SIZE,
+        await connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE),
+        config.utils.publicKeyToBytes32(TOKEN_PROGRAM_ID)
     );
     receipt = await tx.wait(3);
     console.log(tx, 'tx');

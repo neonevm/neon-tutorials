@@ -28,14 +28,15 @@ async function main() {
         );
     }
 
-    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    const payer = ethers.encodeBase58(await TestCallSolana.getPayer());
     console.log(payer, 'payer');
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
     const amount = 1000000000; // 1 SOL, changing this value will reflect on the fee of the transaction on Neon EVM
+    // example if we ask for 5 SOLs and we use them then our NEON transaction fee will increase with the equivalence of 5 SOLs in NEONs
 
     solanaTx = new web3.Transaction();
     solanaTx.add(

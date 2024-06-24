@@ -7,6 +7,7 @@
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
+    ACCOUNT_SIZE,
     getAssociatedTokenAddress,
     createAssociatedTokenAccountInstruction
 } = require('@solana/spl-token');
@@ -41,22 +42,22 @@ async function main() {
         );
     }
 
-    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    const payer = ethers.encodeBase58(await TestCallSolana.getPayer());
     console.log(payer, 'payer');
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
-    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
     console.log(user1PublicKey, 'user1PublicKey');
 
-    let user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
-    let user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
+    const user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
+    const user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
     console.log(user2PublicKey, 'user2PublicKey');
 
-    const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN_ACOUNT);
+    const minBalance = await connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE);
     console.log(minBalance, 'minBalance');
 
     // ============================= SPLTOKEN ACCOUNT ATA CREATION EXAMPLE ====================================

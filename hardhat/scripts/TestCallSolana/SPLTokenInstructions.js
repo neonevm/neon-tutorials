@@ -43,12 +43,12 @@ async function main() {
         );
     }
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
-    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
     console.log(user1PublicKey, 'user1PublicKey');
 
     let ataContract = await getAssociatedTokenAddress(

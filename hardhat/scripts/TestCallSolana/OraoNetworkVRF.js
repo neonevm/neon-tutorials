@@ -38,11 +38,11 @@ async function main() {
         );
     }
 
-    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    const payer = ethers.encodeBase58(await TestCallSolana.getPayer());
     console.log(payer, 'payer');
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
     const randomKeypair = web3.Keypair.generate();
@@ -98,6 +98,7 @@ async function main() {
         user1
     );
     console.log(tx, 'tx');
+    console.log(receipt.logs[0].args, 'receipt args');
 
     const randomness = await vrf.waitFulfilled(seed);
     console.log(Buffer.from(randomness.randomness).readBigUInt64LE(), 'randomness');

@@ -7,6 +7,7 @@
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
+    MINT_SIZE,
     createInitializeMint2Instruction
 } = require('@solana/spl-token');
 const { Metaplex } = require("@metaplex-foundation/js");
@@ -36,22 +37,22 @@ async function main() {
         );
     }
 
-    let payer = ethers.encodeBase58(await TestCallSolana.getPayer());
+    const payer = ethers.encodeBase58(await TestCallSolana.getPayer());
     console.log(payer, 'payer');
 
-    let contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
-    let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
+    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
-    let user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
     console.log(user1PublicKey, 'user1PublicKey');
 
     const seed = 'seed' + Date.now().toString(); // random seed on each script call
-    const createWithSeed = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seed, new web3.PublicKey(config.ACCOUNTS.TOKEN_PROGRAM));
+    const createWithSeed = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seed, new web3.PublicKey(TOKEN_PROGRAM_ID));
     console.log(createWithSeed, 'createWithSeed');
 
-    const minBalance = await connection.getMinimumBalanceForRentExemption(config.SIZES.SPLTOKEN);
+    const minBalance = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
 
     // ============================= createAccountWithSeed INSTRUCTION ====================================
     solanaTx = new web3.Transaction();
@@ -62,8 +63,8 @@ async function main() {
             newAccountPubkey: createWithSeed,
             seed: seed,
             lamports: minBalance, // enough lamports to make the account rent exempt
-            space: config.SIZES.SPLTOKEN,
-            programId: new web3.PublicKey(config.ACCOUNTS.TOKEN_PROGRAM) // programId
+            space: MINT_SIZE,
+            programId: new web3.PublicKey(TOKEN_PROGRAM_ID) // programId
         })
     );
 
@@ -74,7 +75,7 @@ async function main() {
             9, // decimals
             new web3.PublicKey(contractPublicKey), // mintAuthority
             new web3.PublicKey(contractPublicKey), // freezeAuthority
-            new web3.PublicKey(config.ACCOUNTS.TOKEN_PROGRAM) // programId
+            new web3.PublicKey(TOKEN_PROGRAM_ID) // programId
         )
     );
 
