@@ -6,13 +6,12 @@
 
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
-const { config } = require('../config');
+const { config } = require('./config');
 const {
     ACCOUNT_SIZE,
+    TOKEN_PROGRAM_ID,
     createMintToInstruction, 
     createTransferInstruction,
-    getAssociatedTokenAddress, 
-    createAssociatedTokenAccountInstruction,
     createInitializeAccount2Instruction
 } = require("@solana/spl-token");
 
@@ -59,11 +58,6 @@ async function main() {
     const user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
     console.log(user2PublicKey, 'user2PublicKey');
 
-    /* const [pdaUser1,] = web3.PublicKey.findProgramAddressSync(
-        [Buffer.from(user1Salt)],
-        new web3.PublicKey(contractPublicKey)
-    ); */
-
     // calculate minimum balance to make account rent-exempt
     const minBalance = await connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE);
     console.log(minBalance, 'minBalance');
@@ -71,10 +65,10 @@ async function main() {
     const seedSender = 'salt' + Date.now().toString(); // random seed on each script call
     const seedReceiver = seedSender + "1";
 
-    const SenderAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedSender, web3.SystemProgram.programId);
+    const SenderAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedSender, TOKEN_PROGRAM_ID);
     console.log(SenderAccount, 'SenderAccount');
 
-    const ReceiverAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedReceiver, web3.SystemProgram.programId);
+    const ReceiverAccount = await web3.PublicKey.createWithSeed(new web3.PublicKey(contractPublicKey), seedReceiver, TOKEN_PROGRAM_ID);
     console.log(ReceiverAccount, 'ReceiverAccount');
     
     const senderAccountData = await connection.getAccountInfo(SenderAccount);
@@ -90,12 +84,12 @@ async function main() {
                 basePubkey: new web3.PublicKey(contractPublicKey),
                 newAccountPubkey: SenderAccount,
                 seed: seedSender,
-                lamports: minBalance, // rent exempt
+                lamports: minBalance,
                 space: ACCOUNT_SIZE,
-                programId: web3.SystemProgram.programId
+                programId: TOKEN_PROGRAM_ID
             })
         );
-
+        
         solanaTx.add(
             createInitializeAccount2Instruction(
                 SenderAccount, 
@@ -103,7 +97,7 @@ async function main() {
                 new web3.PublicKey(contractPublicKey)
             )
         );
-
+        
         [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
             solanaTx.instructions, 
             [minBalance, 0], 
@@ -115,7 +109,6 @@ async function main() {
         console.log(receipt.logs[0].args, 'receipt args');
         console.log(receipt.logs[1].args, 'receipt args');
     }
-    return;
     
     // if receiver's account has not been created yet
     if (receiverAccountData == null) {
@@ -127,31 +120,43 @@ async function main() {
                 basePubkey: new web3.PublicKey(contractPublicKey),
                 newAccountPubkey: ReceiverAccount,
                 seed: seedReceiver,
-                lamports: minBalance, // rent exempt
+                lamports: minBalance,
                 space: ACCOUNT_SIZE,
-                programId: web3.SystemProgram.programId
+                programId: TOKEN_PROGRAM_ID
             })
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(
-            solanaTx.instructions[0], 
-            minBalance, 
+
+        solanaTx.add(
+            createInitializeAccount2Instruction(
+                ReceiverAccount, 
+                token, 
+                new web3.PublicKey(contractPublicKey)
+            )
+        );
+        
+        [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+            solanaTx.instructions, 
+            [minBalance, 0], 
             TestCallSolana, 
             undefined, 
-            user2
+            user1
         );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
+        console.log(receipt.logs[1].args, 'receipt args');
     }
  
     console.log(await connection.getAccountInfo(SenderAccount), 'getAccountInfo SenderAccount');
     console.log(await connection.getAccountInfo(ReceiverAccount), 'getAccountInfo SenderAccount');
 
-    /* solanaTx = new web3.Transaction();
+
+    console.log('Minting SPLTokens to SenderAccount and transfering them to ReceiverAccount ...');
+    solanaTx = new web3.Transaction();
     // This instruction is only to fill in some SPLTokens into ataUser1
     solanaTx.add(
         createMintToInstruction(
             token,
-            ataUser1,
+            SenderAccount,
             new web3.PublicKey(contractPublicKey),
             1000 * 10 ** 9 // mint 1000 tokens
         )
@@ -159,8 +164,8 @@ async function main() {
 
     solanaTx.add(
         createTransferInstruction(
-            ataUser1,
-            ataUser2,
+            SenderAccount,
+            ReceiverAccount,
             contractPublicKey,
             10 * 10 ** 9, // transfers 10 tokens
             []
@@ -178,7 +183,7 @@ async function main() {
     console.log(tx, 'tx');
     for (let i = 0, len = receipt.logs.length; i < len; ++i) {
         console.log(receipt.logs[i].args, ' receipt args instruction #', i);
-    } */
+    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

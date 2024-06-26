@@ -8,6 +8,7 @@ const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
     MINT_SIZE,
+    TOKEN_PROGRAM_ID,
     createInitializeMint2Instruction
 } = require('@solana/spl-token');
 const { Metaplex } = require("@metaplex-foundation/js");
