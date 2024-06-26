@@ -1,6 +1,6 @@
 //
 //
-// Test purpose - in this test we demonstrate 2 accounts ( accounts X & Z ) creation through createAccountWithSeed instruction and then we ask operator to grant payer with 1 SOL, we transfer the 1 SOL from payer to account X and then we execute another transfer from account X to account Y.
+// Test purpose - in this test we demonstrate 2 accounts ( accounts X & Z ) creation through createAccountWithSeed instruction and then we mint some tokens to account X and initiate a transfer from account to account Y. The idea is to demonstrate a SPLToken transfer between accounts.
 //
 //
 
