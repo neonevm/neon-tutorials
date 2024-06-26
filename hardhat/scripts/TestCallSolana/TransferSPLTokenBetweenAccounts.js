@@ -50,14 +50,6 @@ async function main() {
     const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
-    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
-    console.log(user1PublicKey, 'user1PublicKey');
-
-    const user2PublicKeyInBytes = await TestCallSolana.getNeonAddress(user2.address);
-    const user2PublicKey = ethers.encodeBase58(user2PublicKeyInBytes);
-    console.log(user2PublicKey, 'user2PublicKey');
-
     // calculate minimum balance to make account rent-exempt
     const minBalance = await connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE);
     console.log(minBalance, 'minBalance');
@@ -175,7 +167,7 @@ async function main() {
     console.log('Executing batchExecuteComposabilityMethod ...');
     [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
         solanaTx.instructions, 
-        [0, 0], 
+        [0, 0, 0, 0, 0], 
         TestCallSolana,
         undefined,
         user1
