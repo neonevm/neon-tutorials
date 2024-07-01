@@ -16,7 +16,7 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
+    const [user1] = await ethers.getSigners();
     const tokenMintPublicKey = '2s3eVZaszuYW1PkhEjTUP4UxMUXAv3uWM6DGQEPq1h5y';
     if (tokenMintPublicKey == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
@@ -49,9 +49,9 @@ async function main() {
     let contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    let ownerPublicKeyInBytes = await TestCallSolana.getNeonAddress(owner.address);
-    let ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
-    console.log(ownerPublicKey, 'ownerPublicKey');
+    const user1PublicKeyInBytes = await TestCallSolana.getNeonAddress(user1.address);
+    const user1PublicKey = ethers.encodeBase58(user1PublicKeyInBytes);
+    console.log(user1PublicKey, 'user1PublicKey');
 
     const salt = ethers.encodeBytes32String('salt' + Date.now().toString()); // random seed on each script call
     let getExtAuthority = await TestCallSolana.getExtAuthority(salt);
@@ -64,12 +64,12 @@ async function main() {
     );
     console.log(await getAccount(connection, ataContract), 'ataContract');
 
-    let ataOwner = await getAssociatedTokenAddress(
+    let ataUser1 = await getAssociatedTokenAddress(
         token,
-        new web3.PublicKey(ownerPublicKey),
+        new web3.PublicKey(user1PublicKey),
         true
     );
-    console.log(await getAccount(connection, ataOwner), 'ataOwner');
+    console.log(await getAccount(connection, ataUser1), 'ataUser1');
 
     solanaTx = new web3.Transaction();
     solanaTx.add(
@@ -85,7 +85,9 @@ async function main() {
     [tx, receipt] = await config.utils.executeComposabilityMethod(
         solanaTx.instructions[0], 
         0, 
-        TestCallSolana
+        TestCallSolana,
+        undefined,
+        user1
     );
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt');
@@ -95,7 +97,7 @@ async function main() {
     solanaTx.add(
         createTransferInstruction(
             ataContract, 
-            ataOwner,
+            ataUser1,
             ethers.encodeBase58(getExtAuthority),
             2 * 10 ** 9, // transfers 10 tokens
             []
@@ -106,7 +108,7 @@ async function main() {
     /* solanaTx.add(
         createTransferInstruction(
             ataContract, 
-            ataOwner,
+            ataUser1,
             contractPublicKey,
             2 * 10 ** 9, // transfers 10 tokens
             []
@@ -118,7 +120,8 @@ async function main() {
         solanaTx.instructions[0], 
         0, 
         TestCallSolana,
-        salt
+        salt,
+        user1
     );
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt');

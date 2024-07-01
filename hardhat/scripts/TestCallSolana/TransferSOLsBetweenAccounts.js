@@ -10,7 +10,7 @@ const { config } = require('./config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
-    const [owner] = await ethers.getSigners();
+    const [user1] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
@@ -74,7 +74,7 @@ async function main() {
             minBalance, 
             TestCallSolana, 
             undefined, 
-            owner
+            user1
         );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
@@ -100,7 +100,7 @@ async function main() {
             minBalance, 
             TestCallSolana, 
             undefined, 
-            owner
+            user1
         );
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
@@ -139,7 +139,7 @@ async function main() {
         [amount, 0], 
         TestCallSolana, 
         undefined, 
-        owner
+        user1
     );
     console.log(tx, 'tx');
     for (let i = 0, len = receipt.logs.length; i < len; ++i) {

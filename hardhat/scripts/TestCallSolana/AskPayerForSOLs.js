@@ -9,6 +9,8 @@ const web3 = require("@solana/web3.js");
 const { config } = require('./config');
 
 async function main() {
+    const [user1] = await ethers.getSigners();
+
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
     let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
@@ -35,7 +37,7 @@ async function main() {
     const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    const amount = 1000000000; // 1 SOL, changing this value will reflect on the fee of the transaction on Neon EVM
+    const amount = 10000000; // 0.01 SOL, changing this value will reflect on the fee of the transaction on Neon EVM
     // example if we ask for 5 SOLs and we use them then our NEON transaction fee will increase with the equivalence of 5 SOLs in NEONs
 
     solanaTx = new web3.Transaction();
@@ -46,7 +48,13 @@ async function main() {
             lamports: amount
         })
     );
-    [tx, receipt] = await config.utils.executeComposabilityMethod(solanaTx.instructions[0], amount, TestCallSolana);
+    [tx, receipt] = await config.utils.executeComposabilityMethod(
+        solanaTx.instructions[0], 
+        amount, 
+        TestCallSolana,
+        undefined,
+        user1
+    );
     console.log(tx, 'tx');
     console.log(receipt.logs[0].args, 'receipt args');
 }
