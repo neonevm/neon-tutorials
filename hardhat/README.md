@@ -16,6 +16,12 @@ npm install
 npx hardhat run scripts/TestChainlink/deploy.js --network neondevnet
 ```
 
+### TestAPI3 script
+
+```sh
+npx hardhat run scripts/TestAPI3/deploy.js --network neondevnet
+```
+
 ### TestERC20 scripts
 
 1. Deploy TestERC20.sol
