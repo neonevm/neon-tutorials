@@ -30,7 +30,7 @@ npx hardhat run scripts/TestAPI3/deploy.js --network neondevnet
 npx hardhat run scripts/TestERC20/deploy.js --network neondevnet
 ```
 
-2. Initiate a transfer from the deployer address to a randomly generated address.
+2. Initiate a transfer from the deployer address to a randomly generated address. Add the deployed address from the above step in the `transfer.js` file and run -
 
 ```sh
 npx hardhat run scripts/TestERC20/transfer.js --network neondevnet
@@ -65,6 +65,52 @@ npx hardhat run scripts/TestReadSolanaData/TestReadTokenAccountData.js --network
 ```
 
 ## Verify smart contracts on NeonScan
+
+```sh
+npx hardhat verify --network neondevnet <CONTRACT_ADDRESS>
+```
+
+If the smart contract has constructor parameters, then the command to verify is -
+
+```sh
+npx hardhat verify --network neondevnet <CONTRACT_ADDRESS> <PARAM_1> <PARAM_2>
+```
+
+`<CONTRACT_ADDRESS>`, `<PARAM_1>`, `<PARAM_2>` should be replaced with the smart contract address deployed and the constructor parameters for it.
+
+## Verify smart contracts on Blockscout
+
+By default, `hardhat.config.js` file includes the verification details on NeonScan. However, smart contracts can also be verified on Blockscout.
+
+Please replace the following lines in `hardhat.config.js` -
+
+```sh
+etherscan: {
+    apiKey: {
+      neonevm: "test",
+    },
+    customChains: [
+      {
+        network: "neonevm",
+        chainId: 245022926,
+        urls: {
+          apiURL: "https://neon-devnet.blockscout.com/api",
+          browserURL: "https://neon-devnet.blockscout.com",
+        },
+      },
+      {
+        network: "neonevm",
+        chainId: 245022934,
+        urls: {
+          apiURL: "https://neon.blockscout.com/api",
+          browserURL: "https://neon.blockscout.com",
+        },
+      },
+    ],
+},
+```
+
+Run the following to verify -
 
 ```sh
 npx hardhat verify --network neondevnet <CONTRACT_ADDRESS>
