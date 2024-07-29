@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.21;
+pragma solidity >=0.8.26;
 
 library SolanaDataConverterLib {
     function toAddress(bytes memory _bytes, uint256 _start) internal pure returns (address) {
