@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.26;
+pragma solidity ^0.8.26;
 
 import "@api3/contracts/api3-server-v1/proxies/interfaces/IProxy.sol";
 
