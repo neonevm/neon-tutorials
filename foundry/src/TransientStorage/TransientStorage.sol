@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity ^0.8.26;
 
 contract TransientStorage {
     uint256 private constant NOT_ENTERED = 1;

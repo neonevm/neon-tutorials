@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.26;
+pragma solidity ^0.8.26;
 
 import "forge-std/Test.sol";
 import "../../src/TransientStorage/TransientStorage.sol";
@@ -22,14 +22,12 @@ contract TransientStorageTest is Test {
     function testReentrancyProtection1() public {
         // Call test_gas_1 twice to check reentrancy protection
         transientStorage.test_gas_1();
-        //vm.expectRevert(TransientStorage.ReentrancyGuardReentrantCall.selector);
         transientStorage.test_gas_1();
     }
 
     function testReentrancyProtection2() public {
         // Call test_gas_2 twice to check reentrancy protection
         transientStorage.test_gas_2();
-        //vm.expectRevert();
         transientStorage.test_gas_2();
     }
 }
