@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.21;
+pragma solidity ^0.8.26;
 
 import "../../lib/forge-std/src/Script.sol";
 import "../../src/TestERC20/TestERC20.sol";
