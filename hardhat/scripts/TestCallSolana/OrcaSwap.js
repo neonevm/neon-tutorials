@@ -1,7 +1,7 @@
 //
 //
 // !!! Important !!! - this script used the Anchor SDK and have to define ANCHOR_PROVIDER_URL & ANCHOR_WALLET shell variables. ANCHOR_PROVIDER_URL is Solana's RPC URL and ANCHOR_WALLET is Solana's private key in json format. Name the private key file id.json and place him in the root of hardhat project folder. This key will be used only for the Anchor SDK initialization, it does not sign or submit any transactions.
-// Test purpose - in this script we will be performing a swap in Orca DEX. Input swap token is devUSDC and output swap token is devSAMO. You can request devUSDCs at https://everlastingsong.github.io/nebula/. In order to initiate the swap the contract's account must have both ATA's initialized before the swap execution ( ATA for devSAMO and ATA for dev USDC )
+// Test purpose - in this script we will be performing a swap in Orca DEX. Input swap token is devUSDC and output swap token is devSAMO. You can request devUSDCs at https://everlastingsong.github.io/nebula/. In order to initiate the swap the contract's account must have both ATA's initialized before the swap execution ( ATA for devSAMO and ATA for devUSDC )
 //
 //
 
@@ -71,16 +71,16 @@ async function main() {
         new web3.PublicKey(contractPublicKey),
         true
     );
-    let ataContractTokenAInfo = await connection.getAccountInfo(ataContractTokenA);
+    const ataContractTokenAInfo = await connection.getAccountInfo(ataContractTokenA);
 
     const ataContractTokenB = await getAssociatedTokenAddress(
         TokenB.mint,
         new web3.PublicKey(contractPublicKey),
         true
     );
+    const ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
 
     // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
-    let ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
     if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
             console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA.');
