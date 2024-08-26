@@ -1,9 +1,5 @@
 # Foundry Examples
 
-# Example deploying ERC20 to Neon EVM Devnet using Foundry
-
-This directory contains all the files necessary to deploy simplest ERC20-like contract using Neon onto the Solana blockchain.
-
 ## Prerequisites
 
 To use this project, Foundry must be installed on the machine.
@@ -59,80 +55,83 @@ Then run this -
 source .env
 ```
 
-## Building contracts and running tests on devnet
-
-1. Compiling contract
+## Building contracts
 
 ```sh
-forge build
+forge build --evm-version cancun
 ```
 
 This command will compile all the contracts. After successfully running this step you should get console output similar to:
 
 ```sh
 [⠢] Compiling...
-[⠒] Compiling 24 files with 0.8.21
-[⠃] Solc 0.8.21 finished in 2.48s
+[⠒] Compiling 56 files with 0.8.26
+[⠃] Solc 0.8.26 finished in 2.48s
 Compiler run successful!
 ```
 
-2. Running tests
+**_NOTE_:** The commands include the flag `--evm-version cancun` because the Transient Storage example needs the evm version to be mentioned explicitly as `cancun`. You can learn more about in the official page [Transient Storage](https://soliditylang.org/blog/2024/01/26/transient-storage/)
+
+## Example deploying ERC20 to Neon EVM Devnet using Foundry
+
+This example contains all the files necessary to deploy simplest ERC20-like contract using Neon onto the Solana blockchain.
+
+### Running tests
 
 ```sh
-forge test
+forge test --match-contract ContractTest --gas-report --rpc-url $RPC_URL_DEVNET --evm-version cancun
 ```
 
-This command runs the test file ./test/MyToken.t.sol. After successfully running this step you should get console output similar to:
+This command runs the test file ./test/TestERC20/TestERC20.t.sol. After successfully running this step you should get console output similar to:
 
 ```sh
-[⠰] Compiling...
+[[⠊] Compiling...
 No files changed, compilation skipped
 
-Running 26 tests for test/TestERC20/TestERC20.t.sol:ContractTest
-[PASS] testApprove() (gas: 33708)
-[PASS] testBurn() (gas: 61142)
-[PASS] testFailApproveFromZeroAddress() (gas: 10679)
-[PASS] testFailApproveToZeroAddress() (gas: 5665)
-[PASS] testFailBurnFromZero() (gas: 5765)
-[PASS] testFailBurnInsufficientBalance() (gas: 60789)
-[PASS] testFailFuzzBurnInsufficientBalance(address,uint256,uint256) (runs: 256, μ: 55030, ~: 57952)
-[PASS] testFailFuzzTransferFromInsufficientApprove(address,address,uint256,uint256) (runs: 256, μ: 81261, ~: 86014)
-[PASS] testFailFuzzTransferFromInsufficientBalance(address,address,uint256,uint256) (runs: 256, μ: 82024, ~: 86415)
-[PASS] testFailMintToZero() (gas: 5764)
-[PASS] testFailTransferFromInsufficientApprove() (gas: 88211)
-[PASS] testFailTransferFromInsufficientBalance() (gas: 88524)
-[PASS] testFailTransferFromZeroAddress() (gas: 65190)
-[PASS] testFailTransferInsufficientBalance() (gas: 62680)
-[PASS] testFailTransferInsufficientBalance(address,uint256,uint256) (runs: 256, μ: 55465, ~: 57650)
-[PASS] testFailTransferToZeroAddress() (gas: 60184)
-[PASS] testFuzzApprove(address,uint256) (runs: 256, μ: 33509, ~: 34598)
-[PASS] testFuzzBurn(address,uint256,uint256) (runs: 256, μ: 61918, ~: 64926)
-[PASS] testFuzzMint(address,uint256) (runs: 256, μ: 55528, ~: 57083)
-[PASS] testFuzzTransfer(address,uint256) (runs: 256, μ: 62703, ~: 63636)
-[PASS] testFuzzTransferFrom(address,address,uint256,uint256) (runs: 256, μ: 92421, ~: 96757)
-[PASS] testMint() (gas: 56198)
-[PASS] testName() (gas: 9585)
-[PASS] testSymbol() (gas: 9607)
-[PASS] testTransfer() (gas: 89918)
-[PASS] testTransferFrom() (gas: 117412)
-Test result: ok. 26 passed; 0 failed; 0 skipped; finished in 37.04ms
-Ran 1 test suites: 26 tests passed, 0 failed, 0 skipped (26 total tests)
+Ran 26 tests for test/TestERC20/TestERC20.t.sol:ContractTest
+[PASS] testApprove() (gas: 58558)
+[PASS] testBurn() (gas: 122193)
+[PASS] testFailApproveFromZeroAddress() (gas: 32333)
+[PASS] testFailApproveToZeroAddress() (gas: 27079)
+[PASS] testFailBurnFromZero() (gas: 29276)
+[PASS] testFailBurnInsufficientBalance() (gas: 108513)
+[PASS] testFailFuzzBurnInsufficientBalance(address,uint256,uint256) (runs: 256, μ: 105800, ~: 107249)
+[PASS] testFailFuzzTransferFromInsufficientApprove(address,address,uint256,uint256) (runs: 256, μ: 154056, ~: 155585)
+[PASS] testFailFuzzTransferFromInsufficientBalance(address,address,uint256,uint256) (runs: 256, μ: 154616, ~: 157973)
+[PASS] testFailMintToZero() (gas: 29386)
+[PASS] testFailTransferFromInsufficientApprove() (gas: 158214)
+[PASS] testFailTransferFromInsufficientBalance() (gas: 160826)
+[PASS] testFailTransferFromZeroAddress() (gas: 145323)
+[PASS] testFailTransferInsufficientBalance() (gas: 110649)
+[PASS] testFailTransferInsufficientBalance(address,uint256,uint256) (runs: 256, μ: 103623, ~: 105072)
+[PASS] testFailTransferToZeroAddress() (gas: 105909)
+[PASS] testFuzzApprove(address,uint256) (runs: 256, μ: 56860, ~: 56951)
+[PASS] testFuzzBurn(address,uint256,uint256) (runs: 256, μ: 121277, ~: 122669)
+[PASS] testFuzzMint(address,uint256) (runs: 256, μ: 81141, ~: 81478)
+[PASS] testFuzzTransfer(address,uint256) (runs: 256, μ: 125248, ~: 125360)
+[PASS] testFuzzTransferFrom(address,address,uint256,uint256) (runs: 256, μ: 183810, ~: 186066)
+[PASS] testMint() (gas: 83084)
+[PASS] testName() (gas: 12470)
+[PASS] testSymbol() (gas: 12492)
+[PASS] testTransfer() (gas: 141569)
+[PASS] testTransferFrom() (gas: 196574)
+Suite result: ok. 26 passed; 0 failed; 0 skipped; finished in 79.58s (232.19s CPU time)
 ```
 
-## Deploying contract, minting tokens, transferring tokens using Foundry Scripts
+### Deploying contract, minting tokens, transferring tokens using Foundry Scripts
 
-### Deploy contract
+1. Deploy contract
 
 ```sh
-forge script script/TestERC20/DeployTestERC20.s.sol:DeployTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation
+forge script script/TestERC20/DeployTestERC20.s.sol:DeployTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation --evm-version cancun
 ```
 
 After successfully running this step you should get console output similar to:
 
 ```sh
 [⠢] Compiling...
-[⠒] Compiling 2 files with 0.8.21
-[⠢] Solc 0.8.21 finished in 842.35ms
+[⠒] Compiling 2 files with 0.8.26
+[⠢] Solc 0.8.26 finished in 842.35ms
 Compiler run successful!
 Script ran successfully.
 
@@ -159,10 +158,10 @@ ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
 Total Paid: 5.7943561133217 ETH (33229200 gas * avg 174.37543225 gwei)
 ```
 
-### Mint tokens to the deployer account and transfer tokens from the deployer account to another account
+2. Mint tokens to the deployer account and transfer tokens from the deployer account to another account
 
 ```sh
-forge script script/TestERC20/MintTestERC20.s.sol:MintTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation
+forge script script/TestERC20/MintTestERC20.s.sol:MintTestERC20Script --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation --evm-version cancun
 ```
 
 After successfully running this step you should get console output similar to:
@@ -212,11 +211,11 @@ ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
 Total Paid: 0.0034876870402 ETH (20000 gas * avg 174.38435201 gwei)
 ```
 
-**_NOTE_** The native token displayed above should be NEON instead of ETH and the unit should be Galan instead of gwei (It is not possible to customize the display).
+**_NOTE_:** The native token displayed above should be NEON instead of ETH and the unit should be Galan instead of gwei (It is not possible to customize the display).
 
-## Deploying contract, minting tokens, transferring tokens without using Foundry Scripts
+### Deploying contract, minting tokens, transferring tokens without using Foundry Scripts
 
-### Deploy contract
+1. Deploy contract
 
 ```sh
 forge create --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY src/TestERC20/TestERC20.sol:TestERC20 --constructor-args "Test ERC20 Token" "TERC20" --legacy
@@ -232,7 +231,7 @@ Deployed to: 0x5537599aa2F97Dd60a66342522a465A7f2e40Ff9
 Transaction hash: 0x6de9dab8a526cbac33008056d185b93dff725605efb791bf116b6bece4f0c486
 ```
 
-### Send a transaction with a deployed smart contract mint function
+2. Send a transaction with a deployed smart contract mint function
 
 ```sh
 cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "mint(address,uint256)" <deployer_address> 20000000000000000000 --legacy
@@ -256,7 +255,7 @@ transactionIndex        0
 type                    0
 ```
 
-### Call a deployed smart contract function
+3. Call a deployed smart contract function
 
 ```sh
 cast call <contract_address> --rpc-url $RPC_URL_DEVNET "balanceOf(address) (uint256)" <account_address>
@@ -268,7 +267,7 @@ After successfully running this step you should get console output similar to:
 20000000000000000000
 ```
 
-### Transfer the ERC20 token to another address
+4. Transfer the ERC20 token to another address
 
 ```sh
 cast send <contract_address> --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY "transfer(address,uint256)" <receiver_address> 10000000000000000000 --legacy
@@ -292,7 +291,105 @@ transactionIndex        0
 type                    0
 ```
 
+## Example deploying an example contract that uses Transient Storage to Neon EVM Devnet using Foundry
+
+This example contains all the files necessary to deploy and test Transient Storage example contract using Neon onto the Solana blockchain. It demonstrates a nonreentrancy lock using Transient Storage as well as using traditional locks and compares the gas consumption between the two methods.
+
+### Running tests
+
+```sh
+forge test --match-contract TransientStorageTest --gas-report --rpc-url $RPC_URL_DEVNET --evm-version cancun
+```
+
+This command runs the test file ./test/TransientStorage.t.sol. After successfully running this step you should get console output similar to:
+
+```sh
+[⠊] Compiling...
+[⠘] Compiling 25 files with Solc 0.8.26
+[⠃] Solc 0.8.26 finished in 778.71ms
+Compiler run successful!
+
+Ran 4 tests for test/TransientStorage/TransientStorage.t.sol:TransientStorageTest
+[PASS] testNonReentrant1() (gas: 48592)
+[PASS] testNonReentrant2() (gas: 26793)
+[PASS] testReentrancyProtection1() (gas: 72523)
+[PASS] testReentrancyProtection2() (gas: 48848)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 2.24s (1.78ms CPU time)
+
+Ran 1 test suite in 3.55s (2.24s CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)
+```
+
+### Deploying contract using Foundry Scripts
+
+```sh
+forge script script/TransientStorage/DeployTransientStorage.s.sol:DeployTransientStorage --broadcast --rpc-url $RPC_URL_DEVNET --legacy --skip-simulation --evm-version cancun
+```
+
+After successfully running this step you should get console output similar to:
+
+```sh
+[⠊] Compiling...
+No files changed, compilation skipped
+Script ran successfully.
+
+SKIPPING ON CHAIN SIMULATION.
+⠠ Sequence #1 on 245022926 | Waiting for pending transactions
+    ⢀ [Pending] 0xb2b191b82592a060efbae77aa243179cfb40970572e4127a8446beefa459c134
+    ⠙ [00:00:02] [###########################################>--------------------------------------------------------------------------------------] 1/3 txes (4.0s)
+
+##### 245022926
+✅  [Success]Hash: 0xb2b191b82592a060efbae77aa243179cfb40970572e4127a8446beefa459c134
+Contract Address: 0x05104950D0229E4b4a9Dcb8950C4A2D5fffc6017
+Block: 315546046
+Paid: 6.77508275311385984 ETH (18064240 gas * 375.054956816 gwei)
+
+
+##### 245022926
+✅  [Success]Hash: 0xe729b41ce3f077eac94c2adcb24f955b172154a55303ed1ecf928e4471d11770
+Block: 315546104
+Paid: 0.00375054956816 ETH (10000 gas * 375.054956816 gwei)
+
+
+##### 245022926
+✅  [Success]Hash: 0x8b52973f4290baccded8a6fa267b7536313a91f7f9c3ad3dd5a6e367484153c1
+Block: 315546164
+Paid: 0.00375054956816 ETH (10000 gas * 375.054956816 gwei)
+
+✅ Sequence #1 on 245022926 | Total Paid: 6.78258385225017984 ETH (18084240 gas * avg 375.054956816 gwei)
+
+==========================
+
+ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+
+Transactions saved to: /Users/sukanyaparashar/Desktop/NeonLabs/NeonInternalRepositories/neon-tutorials/foundry/broadcast/DeployTransientStorage.s.sol/245022926/run-latest.json
+
+Sensitive values saved to: /Users/sukanyaparashar/Desktop/NeonLabs/NeonInternalRepositories/neon-tutorials/foundry/cache/DeployTransientStorage.s.sol/245022926/run-latest.json
+
+```
+
+**_NOTE_** The native token displayed above should be NEON instead of ETH and the unit should be Galan instead of gwei (It is not possible to customize the display).
+
+### Deploying contract without using Foundry Scripts
+
+1. Deploy contract
+
+```sh
+forge create --rpc-url $RPC_URL_DEVNET --private-key $PRIVATE_KEY src/TransientStorage/TransientStorage.sol:TransientStorage --legacy --evm-version cancun
+```
+
+After successfully running this step you should get console output similar to:
+
+```sh
+[⠊] Compiling...
+No files changed, compilation skipped
+Deployer: 0x9CE2A03A7a258fB96d04Afb8Dd84b69A748B5959
+Deployed to: 0x751F0fDeA0E8C358f6dcBA8f359B5bcab113e227
+Transaction hash: 0x0096a77a8979e701ca6e01b13c7f79872bef1ca1e89c4f954fceb1cd8eae7873
+```
+
 ## Verify deployed contract on Blockscout
+
+This is an example for verification of smart contracts on Blockcout using Foundry.
 
 ```sh
 forge verify-contract --chain-id $CHAIN_ID_DEVNET <contract_address> src/TestERC20/TestERC20.sol:TestERC20 --verifier-url $VERIFIER_URL_BLOCKSCOUT --verifier blockscout
