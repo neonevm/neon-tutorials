@@ -69,7 +69,7 @@ async function main() {
                 programId: web3.SystemProgram.programId
             })
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(
+        [tx, receipt] = await config.utils.execute(
             solanaTx.instructions[0], 
             minBalance, 
             TestCallSolana, 
@@ -95,7 +95,7 @@ async function main() {
                 programId: web3.SystemProgram.programId
             })
         );
-        [tx, receipt] = await config.utils.executeComposabilityMethod(
+        [tx, receipt] = await config.utils.execute(
             solanaTx.instructions[0], 
             minBalance, 
             TestCallSolana, 
@@ -133,8 +133,8 @@ async function main() {
         })
     );
     
-    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
-    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+    console.log('Processing batchExecute method with all instructions ...');
+    [tx, receipt] = await config.utils.batchExecute(
         solanaTx.instructions, 
         [amount, 0], 
         TestCallSolana, 

@@ -48,7 +48,7 @@ async function main() {
             lamports: amount
         })
     );
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
+    [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0], 
         amount, 
         TestCallSolana,

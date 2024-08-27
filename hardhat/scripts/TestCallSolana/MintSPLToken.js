@@ -110,8 +110,8 @@ async function main() {
         )
     );
 
-    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
-    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+    console.log('Processing batchExecute method with all instructions ...');
+    [tx, receipt] = await config.utils.batchExecute(
         solanaTx.instructions, 
         [minBalance, 0, 100000000], 
         TestCallSolana,

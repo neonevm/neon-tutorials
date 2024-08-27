@@ -83,14 +83,14 @@ async function main() {
     // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
     if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + TokenA.mint.toBase58() + ' ).');
         }
         if (!ataContractTokenBInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB ( ' + TokenB.mint.toBase58() + ' ).');
         }
         return;
     } else if (Number((await getAccount(connection, ataContractTokenB)).amount) < Number(DecimalUtil.toBN(amountIn, TokenB.decimals))) {
-        console.log('Account ' + contractPublicKey + ' does not have enough TokenB amount to proceed with the swap execution.');
+        console.log('Account ' + contractPublicKey + ' does not have enough TokenB ( ' + TokenB.mint.toBase58() + ' ) amount to proceed with the swap execution.');
         return;
     }
 
@@ -111,7 +111,7 @@ async function main() {
     console.log("estimatedAmountOut:", DecimalUtil.fromBN(quote.estimatedAmountOut, TokenA.decimals).toString(), "TokenA");
     console.log("otherAmountThreshold:", DecimalUtil.fromBN(quote.otherAmountThreshold, TokenA.decimals).toString(), "TokenA");
 
-    console.log('Executing executeComposabilityMethod with Orca\'s swap instruction ...');
+    console.log('Processing execute method with Orca\'s swap instruction ...');
     // Prepare the swap instruction
     solanaTx = new web3.Transaction();
     solanaTx.add(
@@ -128,8 +128,8 @@ async function main() {
         )
     );
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
-        solanaTx.instructions[0], 
+    [tx, receipt] = await config.utils.execute(
+        solanaTx.instructions[0],
         0, 
         TestCallSolana,
         undefined,

@@ -81,14 +81,14 @@ async function main() {
     // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
     if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + swapConfig.TokenA + ' ).');
         }
         if (!ataContractTokenBInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB ( ' + swapConfig.TokenB + ' ).');
         }
         return;
     } else if (Number((await getAccount(connection, ataContractTokenA)).amount) < swapConfig.tokenAAmount * 10 ** amountIn.currency.decimals) {
-        console.log('Account ' + contractPublicKey + ' does not have enough TokenA amount to proceed with the swap execution.');
+        console.log('Account ' + contractPublicKey + ' does not have enough TokenA ( ' + swapConfig.TokenA + ' ) amount to proceed with the swap execution.');
         return;
     }
 
@@ -104,11 +104,11 @@ async function main() {
         fixedSide: "in"
     });
 
-    console.log('Executing executeComposabilityMethod with Raydium\'s swap instruction ...');
+    console.log('Processing execute method with Raydium\'s swap instruction ...');
     solanaTx = new web3.Transaction();
     solanaTx.add(ins.innerTransaction.instructions[0]);
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
+    [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0], 
         0, 
         TestCallSolana,

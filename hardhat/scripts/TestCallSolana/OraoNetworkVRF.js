@@ -90,7 +90,7 @@ async function main() {
         })
     );
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
+    [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0], 
         7103920, 
         TestCallSolana,

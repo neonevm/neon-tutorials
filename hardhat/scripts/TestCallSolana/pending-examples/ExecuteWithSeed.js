@@ -12,7 +12,7 @@ const {
     createApproveInstruction,
     getAccount
 } = require('@solana/spl-token');
-const { config } = require('./config');
+const { config } = require('../config');
 
 async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE, "processed");
@@ -81,8 +81,8 @@ async function main() {
         )
     );
 
-    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
+    console.log('Processing execute method with all instructions ...');
+    [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0], 
         0, 
         TestCallSolana,
@@ -115,8 +115,8 @@ async function main() {
         )
     ); */
 
-    console.log('Executing batchExecuteComposabilityMethod with all instructions ...');
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
+    console.log('Processing execute method with all instructions ...');
+    [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0], 
         0, 
         TestCallSolana,

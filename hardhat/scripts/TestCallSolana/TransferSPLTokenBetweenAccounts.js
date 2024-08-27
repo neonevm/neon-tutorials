@@ -164,8 +164,8 @@ async function main() {
         )
     );
 
-    console.log('Executing batchExecuteComposabilityMethod ...');
-    [tx, receipt] = await config.utils.batchExecuteComposabilityMethod(
+    console.log('Processing batchExecute method ...');
+    [tx, receipt] = await config.utils.batchExecute(
         solanaTx.instructions, 
         [0, 0, 0, 0, 0], 
         TestCallSolana,
