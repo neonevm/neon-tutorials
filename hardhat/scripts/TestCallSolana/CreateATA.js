@@ -4,7 +4,7 @@
 //
 //
 
-const { ethers, network } = require("hardhat");
+const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
     ACCOUNT_SIZE,

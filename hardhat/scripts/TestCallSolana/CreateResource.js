@@ -13,6 +13,8 @@ const {
 const { config } = require('./config');
 
 async function main() {
+    console.log(network, 'network');
+    return;
     let SOLANA_NODE;
     let TestCallSolanaAddress;
     if (network.name == "neonmainnet") {
