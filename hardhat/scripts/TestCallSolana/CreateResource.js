@@ -13,11 +13,20 @@ const {
 const { config } = require('./config');
 
 async function main() {
-    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
+    let SOLANA_NODE;
+    let TestCallSolanaAddress;
+    if (network.name == "neonmainnet") {
+        SOLANA_NODE = config.SOLANA_NODE_MAINNET;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT_MAINNET;
+    } else if (network.name == "neondevnet") {
+        SOLANA_NODE = config.SOLANA_NODE;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
+    }
+
+    const connection = new web3.Connection(SOLANA_NODE, "processed");
     const [user1] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let tx;
     let receipt;

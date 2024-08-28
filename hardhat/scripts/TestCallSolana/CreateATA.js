@@ -99,7 +99,6 @@ async function main() {
         console.log(tx, 'tx');
         console.log(receipt.logs[0].args, 'receipt args');
     }
-    return;
 
     let ataUser1 = await getAssociatedTokenAddress(
         token,

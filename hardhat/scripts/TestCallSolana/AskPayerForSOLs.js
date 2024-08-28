@@ -9,10 +9,16 @@ const web3 = require("@solana/web3.js");
 const { config } = require('./config');
 
 async function main() {
+    let TestCallSolanaAddress;
+    if (network.name == "neonmainnet") {
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT_MAINNET;
+    } else if (network.name == "neondevnet") {
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
+    }
+
     const [user1] = await ethers.getSigners();
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
     let tx;

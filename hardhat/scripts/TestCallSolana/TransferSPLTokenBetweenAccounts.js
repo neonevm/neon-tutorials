@@ -16,16 +16,25 @@ const {
 } = require("@solana/spl-token");
 
 async function main() {
-    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
+    let SOLANA_NODE;
+    let TestCallSolanaAddress;
+    if (network.name == "neonmainnet") {
+        SOLANA_NODE = config.SOLANA_NODE_MAINNET;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT_MAINNET;
+    } else if (network.name == "neondevnet") {
+        SOLANA_NODE = config.SOLANA_NODE;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
+    }
+
+    const connection = new web3.Connection(SOLANA_NODE, "processed");
     const [user1, user2] = await ethers.getSigners();
-    const tokenMintPublicKey = '8LkbY4Q1jGEF1BwedHz1ALM3q4zZRhZpCMWRe6SbrbKj';
+    const tokenMintPublicKey = '';
     if (tokenMintPublicKey == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
     }
     const token = new web3.PublicKey(tokenMintPublicKey);
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
     let tx;
