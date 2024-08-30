@@ -14,70 +14,79 @@ const { BN } = require('bn.js');
 const config = {
     SOLANA_NODE: 'https://api.devnet.solana.com',
     SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
-    CALL_SOLANA_SAMPLE_CONTRACT: '0x004FB641e6C998Fc7dbdfB595F723727c8d07535',
-    CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0xEf7b3ed123d2c51c780F8684B0DD7c0b4bd89190',
+    CALL_SOLANA_SAMPLE_CONTRACT: '0x776E4abe7d73Fed007099518F3aA02C8dDa9baA0',
+    CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0x5BAB7cAb78D378bBf325705C51ec4649200A311b',
     utils: {
-        executeComposabilityMethod: async function(instruction, lamports, contractInstance, seed, msgSender) {
-            let keys = [];
-            for (let i = 0, len = instruction.keys.length; i < len; ++i) {
-                if (instruction.keys[i].pubkey != undefined) {
-                    keys.push({
-                        account: config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()),
-                        is_signer: instruction.keys[i].isSigner,
-                        is_writable: instruction.keys[i].isWritable
-                    });
-                }
-            }
-    
-            if (seed == undefined) {
-                seed = '0x0000000000000000000000000000000000000000000000000000000000000000';
-            }
-            const tx = await contractInstance.connect(msgSender).execute(
-                config.utils.publicKeyToBytes32(instruction.programId.toString()),
-                keys,
-                instruction.data,
-                lamports,
-                seed
+        execute: async function(instruction, lamports, contractInstance, salt, msgSender) {
+            const packedProgramId = ethers.solidityPacked( 
+                ["bytes32"],
+                [config.utils.publicKeyToBytes32(instruction.programId.toBase58())]
             );
-            const receipt = await tx.wait(3);
 
+            let encodeKeys = '';
+            for (let i = 0, len = instruction.keys.length; i < len; ++i) {
+                encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString())]).substring(2);
+                encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isSigner]).substring(2);
+                encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isWritable]).substring(2);
+            }
+
+            const packedInstructionData = ethers.solidityPacked( 
+                ["bytes"],
+                [instruction.data]
+            ).substring(2);
+            
+            if (salt == undefined) {
+                salt = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            }
+            
+            const tx = await contractInstance.connect(msgSender).execute(
+                lamports,
+                salt,
+                packedProgramId + ethers.zeroPadBytes(ethers.toBeHex(instruction.keys.length), 8).substring(2) + encodeKeys + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData
+            );
+
+            const receipt = await tx.wait(3);
             return [tx, receipt];
         },
-        batchExecuteComposabilityMethod: async function(instructions, lamports, contractInstance, seeds, msgSender) {
-            let keysArr = [];
-            let programIds = [];
-            let instructionsData = [];
-            let setSeeds = false;
-            if (seeds == undefined) {
-                setSeeds = true;
-                seeds = [];
+        batchExecute: async function(instructions, lamports, contractInstance, salts, msgSender) {
+            let setSalts = false;
+            if (salts == undefined) {
+                setSalts = true;
+                salts = [];
             }
+
+            let bytesDataArr = [];
             for (let i = 0, len = instructions.length; i < len; ++i) {
-                let keys = [];
+                let packedProgramId = ethers.solidityPacked( 
+                    ["bytes32"],
+                    [config.utils.publicKeyToBytes32(instructions[i].programId.toBase58())]
+                );
+    
+                let encodeKeys = '';
                 for (let y = 0, leny = instructions[i].keys.length; y < leny; ++y) {
                     if (instructions[i].keys[y].pubkey != undefined) {
-                        keys.push({
-                            account: config.utils.publicKeyToBytes32(instructions[i].keys[y].pubkey.toString()),
-                            is_signer: instructions[i].keys[y].isSigner,
-                            is_writable: instructions[i].keys[y].isWritable
-                        });
+                        encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(instructions[i].keys[y].pubkey.toString())]).substring(2);
+                        encodeKeys+= ethers.solidityPacked(["bool"], [instructions[i].keys[y].isSigner]).substring(2);
+                        encodeKeys+= ethers.solidityPacked(["bool"], [instructions[i].keys[y].isWritable]).substring(2);
                     }
                 }
-                keysArr.push(keys);
-                programIds.push(config.utils.publicKeyToBytes32(instructions[i].programId.toString()));
-                instructionsData.push(instructions[i].data);
+            
+                let packedInstructionData = ethers.solidityPacked( 
+                    ["bytes"],
+                    [instructions[i].data]
+                ).substring(2);
 
-                if (setSeeds) {
-                    seeds.push('0x0000000000000000000000000000000000000000000000000000000000000000');
+                bytesDataArr.push(packedProgramId + ethers.zeroPadBytes(ethers.toBeHex(instructions[i].keys.length), 8).substring(2) + encodeKeys + ethers.zeroPadBytes(ethers.toBeHex(instructions[i].data.length), 8).substring(2) + packedInstructionData);
+
+                if (setSalts) {
+                    salts.push('0x0000000000000000000000000000000000000000000000000000000000000000');
                 }
             }
     
             const tx = await contractInstance.connect(msgSender).batchExecute(
-                programIds,
-                keysArr,
-                instructionsData,
                 lamports,
-                seeds
+                salts,
+                bytesDataArr
             );
             const receipt = await tx.wait(3);
 

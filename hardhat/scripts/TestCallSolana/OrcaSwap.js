@@ -5,10 +5,6 @@
 //
 //
 
-if (process.env.ANCHOR_PROVIDER_URL == undefined || process.env.ANCHOR_WALLET == undefined) {
-    return console.log('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution - export ANCHOR_PROVIDER_URL=https://api.devnet.solana.com && export ANCHOR_WALLET=./id.json');
-}
-
 const { ethers } = require("hardhat");
 const web3 = require("@solana/web3.js");
 const {
@@ -22,15 +18,45 @@ const { DecimalUtil, Percentage } = require("@orca-so/common-sdk");
 const { Decimal } = require("decimal.js");
 
 async function main() {
+    let SOLANA_NODE;
+    let TestCallSolanaAddress;
+    let WHIRLPOOLS_CONFIG;
+    let TokenA;
+    let TokenB;
+    let tickSpacing;
+    let amountIn;
+    if (network.name == "neonmainnet") {
+        if (process.env.ANCHOR_PROVIDER_URL != config.SOLANA_NODE_MAINNET || process.env.ANCHOR_WALLET == undefined) {
+            return console.log('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE_MAINNET+' && export ANCHOR_WALLET=./id.json');
+        }
+        SOLANA_NODE = config.SOLANA_NODE_MAINNET;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT_MAINNET;
+        WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
+        TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
+        TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
+        tickSpacing = 4;
+        amountIn = new Decimal('0.0001');
+    } else if (network.name == "neondevnet") {
+        if (process.env.ANCHOR_PROVIDER_URL != config.SOLANA_NODE || process.env.ANCHOR_WALLET == undefined) {
+            return console.log('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE+' && export ANCHOR_WALLET=./id.json');
+        }
+        SOLANA_NODE = config.SOLANA_NODE;
+        TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
+        WHIRLPOOLS_CONFIG = new web3.PublicKey("FcrweFY1G9HJAHG5inkGB6pKg1HZ6x9UC2WioAfWrGkR");
+        TokenA = {mint: new web3.PublicKey("Jd4M8bfJG3sAkd82RsGWyEXoaBXQP7njFzBwEaCTuDa"), decimals: 9}; // devSAMO
+        TokenB = {mint: new web3.PublicKey("BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k"), decimals: 6}; // devUSDC
+        tickSpacing = 64;
+        amountIn = new Decimal('0.1');
+    }
+    console.log(ORCA_WHIRLPOOL_PROGRAM_ID, 'ORCA_WHIRLPOOL_PROGRAM_ID');
+
     const [user1] = await ethers.getSigners();
-    const connection = new web3.Connection(config.SOLANA_NODE, "processed");
+    const connection = new web3.Connection(SOLANA_NODE, "processed");
     const provider = AnchorProvider.env();
     const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID);
     const client = buildWhirlpoolClient(ctx);
-    const DEVNET_WHIRLPOOLS_CONFIG = new web3.PublicKey("FcrweFY1G9HJAHG5inkGB6pKg1HZ6x9UC2WioAfWrGkR");
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT;
     let TestCallSolana;
     let solanaTx;
     let tx;
@@ -52,19 +78,14 @@ async function main() {
     const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
-    const TokenA = {mint: new web3.PublicKey("Jd4M8bfJG3sAkd82RsGWyEXoaBXQP7njFzBwEaCTuDa"), decimals: 9}; // devSAMO
-    const TokenB = {mint: new web3.PublicKey("BRjpCHtyQLNCo8gqRUr8jtdAj5AjPYQaoqbvcZiHok1k"), decimals: 6}; // devUSDC
-
     const whirlpool_pubkey = PDAUtil.getWhirlpool(
         ORCA_WHIRLPOOL_PROGRAM_ID,
-        DEVNET_WHIRLPOOLS_CONFIG,
-        TokenA.mint, // devSAMO
-        TokenB.mint, // devUSDC
-        64 // tick spacing
+        WHIRLPOOLS_CONFIG,
+        TokenA.mint,
+        TokenB.mint,
+        tickSpacing // tick spacing
     ).publicKey;
     const whirlpool = await client.getPool(whirlpool_pubkey);
-
-    const amountIn = new Decimal('0.1'); // 0.1 devUSDC
     
     const ataContractTokenA = await getAssociatedTokenAddress(
         TokenA.mint,
@@ -83,35 +104,34 @@ async function main() {
     // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
     if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + TokenA.mint.toBase58() + ' ).');
         }
         if (!ataContractTokenBInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB.');
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB ( ' + TokenB.mint.toBase58() + ' ).');
         }
         return;
-    } else if (Number((await getAccount(connection, ataContractTokenB)).amount) < Number(DecimalUtil.toBN(amountIn, TokenB.decimals))) {
-        console.log('Account ' + contractPublicKey + ' does not have enough TokenB amount to proceed with the swap execution.');
+    } else if (Number((await getAccount(connection, ataContractTokenA)).amount) < Number(DecimalUtil.toBN(amountIn, TokenA.decimals))) {
+        console.log('Account ' + contractPublicKey + ' does not have enough TokenA ( ' + TokenA.mint.toBase58() + ' ) amount to proceed with the swap execution.');
         return;
     }
 
     // Obtain swap estimation (run simulation)
     const quote = await swapQuoteByInputToken(
         whirlpool,
-        TokenB.mint, // devUSDC
-        DecimalUtil.toBN(amountIn, TokenB.decimals), // Input Token Mint amount
+        TokenA.mint,
+        DecimalUtil.toBN(amountIn, TokenA.decimals), // Input Token Mint amount
         Percentage.fromFraction(10, 1000), // Acceptable slippage (10/1000 = 1%)
         ctx.program.programId,
         ctx.fetcher,
         IGNORE_CACHE
     );
-    console.log(quote, 'quote');
 
     // Output the estimation
-    console.log("estimatedAmountIn:", DecimalUtil.fromBN(quote.estimatedAmountIn, TokenB.decimals).toString(), "TokenB");
-    console.log("estimatedAmountOut:", DecimalUtil.fromBN(quote.estimatedAmountOut, TokenA.decimals).toString(), "TokenA");
-    console.log("otherAmountThreshold:", DecimalUtil.fromBN(quote.otherAmountThreshold, TokenA.decimals).toString(), "TokenA");
+    console.log("estimatedAmountIn:", DecimalUtil.fromBN(quote.estimatedAmountIn, TokenA.decimals).toString(), "TokenA");
+    console.log("estimatedAmountOut:", DecimalUtil.fromBN(quote.estimatedAmountOut, TokenB.decimals).toString(), "TokenB");
+    console.log("otherAmountThreshold:", DecimalUtil.fromBN(quote.otherAmountThreshold, TokenB.decimals).toString(), "TokenB");
 
-    console.log('Executing executeComposabilityMethod with Orca\'s swap instruction ...');
+    console.log('Processing execute method with Orca\'s swap instruction ...');
     // Prepare the swap instruction
     solanaTx = new web3.Transaction();
     solanaTx.add(
@@ -121,15 +141,15 @@ async function main() {
                 quote,
                 ctx,
                 whirlpool,
-                ataContractTokenB,
                 ataContractTokenA,
+                ataContractTokenB,
                 new web3.PublicKey(contractPublicKey)
             )
         )
     );
 
-    [tx, receipt] = await config.utils.executeComposabilityMethod(
-        solanaTx.instructions[0], 
+    [tx, receipt] = await config.utils.execute(
+        solanaTx.instructions[0],
         0, 
         TestCallSolana,
         undefined,

@@ -6,7 +6,7 @@ import './interfaces/ICallSolana.sol';
 contract TestCallSolana {
     ICallSolana public constant CALL_SOLANA = ICallSolana(0xFF00000000000000000000000000000000000006);
 
-    event LogData(bytes response, bytes32 programId, bytes data);
+    event LogData(bytes response);
     event CreateResource(bytes32 salt, uint64 space, uint64 lamports, bytes32 programId, bytes32 response);
 
     function getNeonAddress(address _address) public view returns(bytes32) {
@@ -30,25 +30,21 @@ contract TestCallSolana {
     }
 
     function execute(
-        bytes32 program_id, 
-        ICallSolana.AccountMeta[] memory accounts, 
-        bytes memory instruction_data, 
         uint64 lamports,
-        bytes32 salt
+        bytes32 salt,
+        bytes memory instruction
     ) external {
-        _execute(program_id, accounts, instruction_data, lamports, salt);
+        _execute(lamports, salt, instruction);
     }
 
     function batchExecute(
-        bytes32[] memory program_id,
-        ICallSolana.AccountMeta[][] memory accounts, 
-        bytes[] memory instruction_data, 
         uint64[] memory lamports,
-        bytes32[] memory salt
+        bytes32[] memory salt,
+        bytes[] memory instruction
     ) external {
-        uint len = program_id.length;
+        uint len = instruction.length;
         for (uint i = 0; i < len; ++i) {
-            _execute(program_id[i], accounts[i], instruction_data[i], lamports[i], salt[i]);
+            _execute(lamports[i], salt[i], instruction[i]);
         }
     }
 
@@ -70,22 +66,14 @@ contract TestCallSolana {
     }
 
     function _execute(
-        bytes32 program_id, 
-        ICallSolana.AccountMeta[] memory accounts, 
-        bytes memory instruction_data, 
         uint64 lamports,
-        bytes32 salt
-    ) internal returns(bytes memory, bytes32, bytes memory) {
-        ICallSolana.Instruction memory instruction = ICallSolana.Instruction({
-            program_id: program_id,
-            accounts: accounts,
-            instruction_data: instruction_data
-        });
-
+        bytes32 salt,
+        bytes memory instruction
+    ) internal {
         bytes memory response;
         if (salt != bytes32(0)) {
             response = CALL_SOLANA.executeWithSeed(
-                lamports, 
+                lamports,
                 salt,
                 instruction
             );
@@ -95,9 +83,7 @@ contract TestCallSolana {
                 instruction
             );
         }
-        (bytes32 programId, bytes memory data) = CALL_SOLANA.getReturnData();
         
-        emit LogData(response, programId, data);
-        return (response, programId, data);
+        emit LogData(response);
     }
 }
