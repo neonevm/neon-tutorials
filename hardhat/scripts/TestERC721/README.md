@@ -29,3 +29,5 @@ npx hardhat run scripts/TestERC721/mint.js --network neondevnet
 ```sh
 TestERC721 NFT with tokenId 2009 has been minted to 0x9CE2A03A7a258fB96d04Afb8Dd84b69A748B5959
 ```
+
+**Note:** To deploy the smart contract on Neon EVM Mainnet, `--network neondevnet` should be replaced by `--network neonmainnet` while running the hardhat command for running the script.

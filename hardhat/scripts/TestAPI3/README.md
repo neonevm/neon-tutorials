@@ -4,7 +4,7 @@ To know more about API3 price feeds, please see this [documentation](https://neo
 
 ## Deploy script
 
-1. To deploy the script, run the following:
+1. To deploy `TestAPI3.sol`, run the following -
 
 ```sh
 npx hardhat run scripts/TestAPI3/deploy.js --network neondevnet
@@ -27,3 +27,5 @@ The result represents an array with the following parameters:
 
 - 1st parameter - Price
 - 2nd parameter - Timestamp of the last price push
+
+**Note:** To deploy the smart contract on Neon EVM Mainnet, `--network neondevnet` should be replaced by `--network neonmainnet` while running the hardhat command for running the script.

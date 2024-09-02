@@ -1,10 +1,10 @@
 # Deploying an ERC20 token example on Neon EVM Mainnet and Devnet
 
-This is an example of deploying an ERC20 token on Neon EVM Devnet and Mainnet
+This is an example of deploying an ERC20 token on Neon EVM Devnet and Mainnet.
 
 ## Deploy script
 
-1. To deploy the script, run the following -
+1. To deploy `TestERC20.sol`, run the following -
 
 ```sh
 npx hardhat run scripts/TestERC20/deploy.js --network neondevnet
@@ -32,3 +32,5 @@ Receiver balance before transfer 0n
 Sender balance after transfer 990000000000000000000n
 Receiver balance after transfer 10000000000000000000n
 ```
+
+**Note:** To deploy the smart contract on Neon EVM Mainnet, `--network neondevnet` should be replaced by `--network neonmainnet` while running the hardhat command for running the script.

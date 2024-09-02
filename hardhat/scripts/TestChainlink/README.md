@@ -4,7 +4,7 @@ To know more about Chainlink price feeds, please see this [documentation](https:
 
 ## Deploy script
 
-1. To deploy the script, run the following:
+1. To deploy `TestChainlink.sol`, run the following -
 
 ```sh
 npx hardhat run scripts/TestChainlink/deploy.js --network neondevnet
@@ -21,3 +21,5 @@ SOL_USD 131.73112
 USDC_USD 1
 USDT_USD 1
 ```
+
+**Note:** To deploy the smart contract on Neon EVM Mainnet, `--network neondevnet` should be replaced by `--network neonmainnet` while running the hardhat command for running the script.
