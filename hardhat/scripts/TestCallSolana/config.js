@@ -99,6 +99,46 @@ const config = {
             return ethers.zeroPadValue(ethers.toBeHex(address), 32);
         }
     },
+    orcaHelper: {
+        getParamsFromPools: function(pools, tokenAccounts, PDAUtil) {
+            const tokenAccKeys = config.orcaHelper.getTokenAccsForPools(pools, tokenAccounts);
+            const whirlpoolOne = pools[0].whirlpoolPda.publicKey;
+            const whirlpoolTwo = pools[1].whirlpoolPda.publicKey;
+            const oracleOne = PDAUtil.getOracle(
+                ctx.program.programId,
+                whirlpoolOne,
+            ).publicKey;
+            const oracleTwo = PDAUtil.getOracle(
+                ctx.program.programId,
+                whirlpoolTwo,
+            ).publicKey;
+
+            return {
+                whirlpoolOne: pools[0].whirlpoolPda.publicKey,
+                whirlpoolTwo: pools[1].whirlpoolPda.publicKey,
+                tokenOwnerAccountOneA: tokenAccKeys[0],
+                tokenVaultOneA: pools[0].tokenVaultAKeypair.publicKey,
+                tokenOwnerAccountOneB: tokenAccKeys[1],
+                tokenVaultOneB: pools[0].tokenVaultBKeypair.publicKey,
+                tokenOwnerAccountTwoA: tokenAccKeys[2],
+                tokenVaultTwoA: pools[1].tokenVaultAKeypair.publicKey,
+                tokenOwnerAccountTwoB: tokenAccKeys[3],
+                tokenVaultTwoB: pools[1].tokenVaultBKeypair.publicKey,
+                oracleOne,
+                oracleTwo,
+            };
+        },
+        getTokenAccsForPools: function(pools, tokenAccounts) {
+            const mints = [];
+            for (const pool of pools) {
+                mints.push(pool.tokenMintA);
+                mints.push(pool.tokenMintB);
+            }
+            return mints.map(
+                (mint) => tokenAccounts.find((acc) => acc.mint.equals(mint)).account
+            );
+        }
+    },
     raydiumHelper: {
         calcAmountOut: async function(Liquidity, connection, poolKeys, rawAmountIn, swapInDirection, slippage) {
             const poolInfo = await Liquidity.fetchInfo({ connection: connection, poolKeys });
@@ -127,7 +167,7 @@ const config = {
                 slippage: new Percent(slippage, 100)
             })
         
-            return {
+            return [
                 amountIn,
                 amountOut,
                 minAmountOut,
@@ -135,7 +175,7 @@ const config = {
                 executionPrice,
                 priceImpact,
                 fee
-            }
+            ];
         },
         findPoolInfoForTokens: async function(liquidityFile, mintA, mintB) {
             const liquidityJsonResp = await fetch(liquidityFile);
