@@ -90,22 +90,33 @@ async function main() {
         new web3.PublicKey(contractPublicKey),
         true
     );
-    //const ataContractTokenAInfo = await connection.getAccountInfo(ataContractTokenA);
 
     const ataContractTokenB = await getAssociatedTokenAddress(
         TokenB.mint,
         new web3.PublicKey(contractPublicKey),
         true
     );
-    //const ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
+
+    const ataContractTokenC = await getAssociatedTokenAddress(
+        TokenC.mint,
+        new web3.PublicKey(contractPublicKey),
+        true
+    );
 
     // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
-    /* if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
+    /* 
+    const ataContractTokenAInfo = await connection.getAccountInfo(ataContractTokenA);
+    const ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
+    const ataContractTokenCInfo = await connection.getAccountInfo(ataContractTokenC);
+    if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
         if (!ataContractTokenAInfo) {
             console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + TokenA.mint.toBase58() + ' ).');
         }
         if (!ataContractTokenBInfo) {
             console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB ( ' + TokenB.mint.toBase58() + ' ).');
+        }
+        if (!ataContractTokenCInfo) {
+            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenC ( ' + TokenC.mint.toBase58() + ' ).');
         }
         return;
     } else if (Number((await getAccount(connection, ataContractTokenA)).amount) < Number(DecimalUtil.toBN(amountIn, TokenA.decimals))) {
@@ -147,7 +158,8 @@ async function main() {
         TokenC.mint,
         TokenB.mint,
         tickSpacingPool2 // tick spacing
-    ).publicKey; */
+    ).publicKey;
+    console.log(whirlpoolPubkey2, 'whirlpoolPubkey2'); */
     const whirlpoolPool2 = await client.getPool(PoolBC);
 
     const quote2 = await swapQuoteByInputToken(
@@ -166,8 +178,6 @@ async function main() {
     console.log("quote2 otherAmountThreshold:", DecimalUtil.fromBN(quote2.otherAmountThreshold, TokenC.decimals).toString(), "TokenC");
 
     const twoHopQuote = twoHopSwapQuoteFromSwapQuotes(quote1, quote2);
-    console.log(twoHopQuote, 'twoHopQuote');
-    return;
 
     solanaTx = new web3.Transaction();
     solanaTx.add(
@@ -175,30 +185,20 @@ async function main() {
             ctx.program,
             {
                 ...twoHopQuote,
-                ...config.orcaHelper.getParamsFromPools([pools[0], pools[1]], tokenAccounts, PDAUtil),
+                ...config.orcaHelper.getParamsFromPools(
+                    [whirlpoolPool1, whirlpoolPool2], 
+                    PDAUtil, 
+                    ctx.program.programId,
+                    ataContractTokenA,
+                    ataContractTokenB,
+                    ataContractTokenC
+                ),
                 tokenAuthority: new web3.PublicKey(contractPublicKey)
             }
         )
-    );
-    console.log(solanaTx, 'solanaTx');
-    return;
-
+    ); 
+    
     console.log('Processing execute method with Orca\'s swap instruction ...');
-    // Prepare the swap instruction
-    solanaTx.add(
-        WhirlpoolIx.swapIx(
-            ctx.program,
-            SwapUtils.getSwapParamsFromQuote(
-                quote,
-                ctx,
-                whirlpool,
-                ataContractTokenA,
-                ataContractTokenB,
-                new web3.PublicKey(contractPublicKey)
-            )
-        )
-    );
-
     [tx, receipt] = await config.utils.execute(
         solanaTx.instructions[0],
         0, 

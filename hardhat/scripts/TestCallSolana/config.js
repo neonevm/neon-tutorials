@@ -100,32 +100,38 @@ const config = {
         }
     },
     orcaHelper: {
-        getParamsFromPools: function(pools, tokenAccounts, PDAUtil) {
-            const tokenAccKeys = config.orcaHelper.getTokenAccsForPools(pools, tokenAccounts);
-            const whirlpoolOne = pools[0].whirlpoolPda.publicKey;
-            const whirlpoolTwo = pools[1].whirlpoolPda.publicKey;
+        getParamsFromPools: function(
+            pools, 
+            PDAUtil, 
+            programId,
+            ataContractTokenA,
+            ataContractTokenB,
+            ataContractTokenC
+        ) {
+            const whirlpoolOne = pools[0].address;
+            const whirlpoolTwo = pools[1].address;
             const oracleOne = PDAUtil.getOracle(
-                ctx.program.programId,
+                programId,
                 whirlpoolOne,
             ).publicKey;
             const oracleTwo = PDAUtil.getOracle(
-                ctx.program.programId,
+                programId,
                 whirlpoolTwo,
             ).publicKey;
 
             return {
-                whirlpoolOne: pools[0].whirlpoolPda.publicKey,
-                whirlpoolTwo: pools[1].whirlpoolPda.publicKey,
-                tokenOwnerAccountOneA: tokenAccKeys[0],
-                tokenVaultOneA: pools[0].tokenVaultAKeypair.publicKey,
-                tokenOwnerAccountOneB: tokenAccKeys[1],
-                tokenVaultOneB: pools[0].tokenVaultBKeypair.publicKey,
-                tokenOwnerAccountTwoA: tokenAccKeys[2],
-                tokenVaultTwoA: pools[1].tokenVaultAKeypair.publicKey,
-                tokenOwnerAccountTwoB: tokenAccKeys[3],
-                tokenVaultTwoB: pools[1].tokenVaultBKeypair.publicKey,
+                whirlpoolOne: whirlpoolOne,
+                whirlpoolTwo: whirlpoolTwo,
+                tokenOwnerAccountOneA: ataContractTokenA,
+                tokenVaultOneA: pools[0].tokenVaultAInfo.address,
+                tokenOwnerAccountOneB: ataContractTokenB,
+                tokenVaultOneB: pools[0].tokenVaultBInfo.address,
+                tokenOwnerAccountTwoA: ataContractTokenC,
+                tokenVaultTwoA: pools[1].tokenVaultAInfo.address,
+                tokenOwnerAccountTwoB: ataContractTokenB,
+                tokenVaultTwoB: pools[1].tokenVaultBInfo.address,
                 oracleOne,
-                oracleTwo,
+                oracleTwo
             };
         },
         getTokenAccsForPools: function(pools, tokenAccounts) {
