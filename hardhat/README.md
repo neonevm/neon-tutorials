@@ -35,12 +35,12 @@ USER1_KEY=<2ND_PRIVATE_KEY>
 USER2_KEY=<3RD_PRIVATE_KEY>
 ```
 
-## Refrences to the example scripts to deploy contracts
+## References to the example scripts to deploy contracts
 
 1. [TestERC20](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestERC20/README.md)
 2. [TestERC721](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestERC721/README.md)
 3. [TestAPI3](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestAPI3/README.md)
-4. [TestChainlink](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestChainlink
+4. [TestChainlink](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestChainlink)
 5. [TestReadSolanaData](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestReadSolanaData/README.md)
 6. [TestCallSolana](https://github.com/neonlabsorg/neon-tutorials/blob/main/hardhat/scripts/TestCallSolana/README.md)
 
