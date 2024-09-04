@@ -1,8 +1,38 @@
-# Reading Solana token account data example on Neon EVM Devnet
+# Reading Solana account data via Neon EVM Devnet
+
+## Reading Pyth price feeds from Solana Devnet via Neon EVM Devnet
+
+This is an example showing how to read Pyth price feeds from Solana Devnet via Neon EVM Devnet.
+
+### Deploy script
+
+1. To deploy `TestReadPythPriceFeed.sol`, run the following -
+
+```sh
+npx hardhat run scripts/TestReadSolanaData/TestReadPythPriceFeed.js --network neondevnet
+```
+
+2. The output will look like this -
+
+```sh
+TestReadPythPriceFeed deployed to 0x7068EbfED06C7a87ba23e339199FACeF76515Df2
+Result(3) [ 102486086n, 1714670447n, 1n ] neonPrice
+Result(3) [ 13932481388n, 1714670448n, 1n ] solPrice
+Result(3) [ 299735750000n, 1714670448n, 1n ] ethPrice
+Result(3) [ 5919709374999n, 1714670448n, 1n ] btcPrice
+```
+
+The result represents an array with the following parameters:
+
+- 1st parameter - Price
+- 2nd parameter - Timestamp of the last price push
+- 3rd parameter - Status (0 = UNKNOWN, 1 = TRADING, 2 = HALTED, 3 = AUCTION)
+
+## Reading Solana token account data example on Neon EVM Devnet
 
 This is an example showing how to read data from a token account on Solana.
 
-## Deploy script
+### Deploy script
 
 1. To deploy `TestReadTokenAccountData.sol`, run the following -
 
