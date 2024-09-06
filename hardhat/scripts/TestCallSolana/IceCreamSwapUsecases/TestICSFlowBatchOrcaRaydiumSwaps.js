@@ -34,59 +34,67 @@ async function main() {
     const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID);
     const client = buildWhirlpoolClient(ctx);
 
-    const TestCallSolanaAddress = config.CALL_SOLANA_SAMPLE_CONTRACT_MAINNET;
-    const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
-    let TestCallSolana;
-    let solanaTx;
+    const TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    const TestICSFlowFactory = await ethers.getContractFactory("TestICSFlow");
+    let TestICSFlow;
     let tx;
     let receipt;
 
-    if (ethers.isAddress(TestCallSolanaAddress)) {
-        TestCallSolana = TestCallSolanaFactory.attach(TestCallSolanaAddress);
+    if (ethers.isAddress(TestICSFlowAddress)) {
+        TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
     } else {
-        TestCallSolana = await ethers.deployContract("TestCallSolana");
-        await TestCallSolana.waitForDeployment();
+        TestICSFlow = await ethers.deployContract("TestICSFlow");
+        await TestICSFlow.waitForDeployment();
 
-        TestCallSolanaAddress = TestCallSolana.target;
+        TestICSFlowAddress = TestICSFlow.target;
         console.log(
-            `TestCallSolana deployed to ${TestCallSolana.target}`
+            `TestICSFlow deployed to ${TestICSFlow.target}`
         );
     }
 
-    const contractPublicKeyInBytes = await TestCallSolana.getNeonAddress(TestCallSolanaAddress);
+    const contractPublicKeyInBytes = await TestICSFlow.getNeonAddress(TestICSFlowAddress);
     const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
 
     const swapAmountIn = new Decimal('0.0002');
-    const ataContractTokenA = await getAssociatedTokenAddress(
+    
+    let ataContract = await getAssociatedTokenAddress(
         TokenA.mint,
         new web3.PublicKey(contractPublicKey),
         true
     );
-    const ataContractTokenAInfo = await connection.getAccountInfo(ataContractTokenA);
+    const ataContractInfo = await connection.getAccountInfo(ataContract);
 
-    const ataContractTokenB = await getAssociatedTokenAddress(
-        TokenB.mint,
-        new web3.PublicKey(contractPublicKey),
-        true
+    const user1USDCTokenAccount = config.utils.calculateTokenAccount(
+        config.TOKENS.ADDRESSES.USDC,
+        user1.address,
+        new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
     );
-    const ataContractTokenBInfo = await connection.getAccountInfo(ataContractTokenB);
 
-    // in order to proceed with swap the executor account needs to have existing Token Accounts for both tokens
-    if (!ataContractTokenAInfo || !ataContractTokenBInfo) {
-        if (!ataContractTokenAInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + TokenA.mint.toBase58() + ' ).');
-        }
-        if (!ataContractTokenBInfo) {
-            console.log('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenB ( ' + TokenB.mint.toBase58() + ' ).');
-        }
-        return;
-    } else if (Number((await getAccount(connection, ataContractTokenA)).amount) < Number(DecimalUtil.toBN(swapAmountIn, TokenA.decimals))) {
-        console.log('Account ' + contractPublicKey + ' does not have enough TokenA ( ' + TokenA.mint.toBase58() + ' ) amount to proceed with the swap execution.');
-        return;
+    // in order to proceed with swap the executor account needs to have existing ATA account
+    if (!ataContractInfo) {
+        return console.error('Account ' + contractPublicKey + ' does not have initialized ATA account for TokenA ( ' + TokenA.mint.toBase58() + ' ).');
     }
 
-    solanaTx = new web3.Transaction();
+    const WSOL = new ethers.Contract(
+        config.TOKENS.ADDRESSES.WSOL,
+        config.TOKENS.ABIs.ERC20ForSPL,
+        ethers.provider
+    );
+
+    const raydiymSwapConfig = {
+        liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
+        slippage: 1 // percents
+    };
+
+    console.log('\nQuery Raydium pools data ...');
+    const poolKeys = await config.raydiumHelper.findPoolInfoForTokens(raydiymSwapConfig.liquidityFile, TokenA.mint.toBase58(), TokenB.mint.toBase58());
+    if (!poolKeys) {
+        console.error('Pool info not found');
+        return 'Pool info not found';
+    } else {
+        console.log('Found pool info');
+    }
 
     // BUILD ORCA SWAP INSTRUCTION
     console.log('\nBUILD ORCA SWAP INSTRUCTION ...');
@@ -116,62 +124,59 @@ async function main() {
     console.log("otherAmountThreshold:", DecimalUtil.fromBN(quote.otherAmountThreshold, TokenB.decimals).toString(), "TokenB");
 
     // Prepare the swap instruction
-    solanaTx.add(
-        WhirlpoolIx.swapIx(
-            ctx.program,
-            SwapUtils.getSwapParamsFromQuote(
-                quote,
-                ctx,
-                whirlpool,
-                ataContractTokenA,
-                ataContractTokenB,
-                new web3.PublicKey(contractPublicKey)
-            )
+    const orcaSwap = WhirlpoolIx.swapIx(
+        ctx.program,
+        SwapUtils.getSwapParamsFromQuote(
+            quote,
+            ctx,
+            whirlpool,
+            ataContract,
+            user1USDCTokenAccount[0],
+            new web3.PublicKey(contractPublicKey)
         )
     );
     // /BUILD ORCA SWAP INSTRUCTION
 
     // BUILD RAYDIUM SWAP INSTRUCTION
     console.log('\nBUILD RAYDIUM SWAP INSTRUCTION ...');
-    const raydiymSwapConfig = {
-        liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
-        slippage: 1 // percents
-    };
-
-    const poolKeys = await config.raydiumHelper.findPoolInfoForTokens(raydiymSwapConfig.liquidityFile, TokenA.mint.toBase58(), TokenB.mint.toBase58());
-    if (!poolKeys) {
-        console.error('Pool info not found');
-        return 'Pool info not found';
-    } else {
-        console.log('Found pool info');
-    }
-
     const directionIn = poolKeys.quoteMint.toString() == TokenB.mint.toBase58();
-    const { minAmountOut, amountIn } = await config.raydiumHelper.calcAmountOut(Liquidity, connection, poolKeys, swapAmountIn / 2, directionIn, raydiymSwapConfig.slippage);
+    const [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(Liquidity, connection, poolKeys, swapAmountIn / 2, directionIn, raydiymSwapConfig.slippage);
     
-    const ins = Liquidity.makeSwapInstruction({
+    const raydiumSwap = Liquidity.makeSwapInstruction({
         poolKeys: poolKeys,
         userKeys: {
-            tokenAccountIn: ataContractTokenA,
-            tokenAccountOut: ataContractTokenB,
+            tokenAccountIn: ataContract,
+            tokenAccountOut: user1USDCTokenAccount[0],
             owner: new web3.PublicKey(contractPublicKey)
         },
         amountIn: amountIn.raw,
         amountOut: minAmountOut.raw,
         fixedSide: "in"
     });
-
-    solanaTx.add(ins.innerTransaction.instructions[0]);
     // /BUILD RAYDIUM SWAP INSTRUCTION
+    
+    console.log('\nBroadcast WSOL approval ... ');
+    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, swapAmountIn * 10 ** TokenA.decimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
 
-    console.log('\nProcessing batchExecute method ...');
-    [tx, receipt] = await config.utils.batchExecute(
-        solanaTx.instructions,
+    console.log('\nBroadcast batch of Orca & Raydium swaps WSOL -> USDC ... ');
+    tx = await TestICSFlow.connect(user1).batchExecute(
+        config.TOKENS.ADDRESSES.WSOL,
+        config.TOKENS.ADDRESSES.USDC,
+        swapAmountIn * 10 ** TokenA.decimals,
+        ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContract.toBase58())), 32),
         [0, 0], 
-        TestCallSolana,
-        undefined,
-        user1
+        [
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+            '0x0000000000000000000000000000000000000000000000000000000000000000'
+        ],
+        [
+            config.utils.prepareInstructionData(orcaSwap.instructions[0]),
+            config.utils.prepareInstructionData(raydiumSwap.innerTransaction.instructions[0])
+        ]
     );
+    receipt = await tx.wait(1);
     console.log(tx, 'tx');
     for (let i = 0, len = receipt.logs.length; i < len; ++i) {
         console.log(receipt.logs[i].args, ' receipt args instruction #', i);
