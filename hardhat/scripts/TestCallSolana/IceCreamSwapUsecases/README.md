@@ -1,4 +1,4 @@
-# IceCreamSwap flow
+# IceCreamSwap flow with Neon EVM composability to Solana
 
 ![alt text](https://github.com/neonlabsorg/neon-tutorials/blob/test/icecreamswap-usecases/hardhat/scripts/TestCallSolana/IceCreamSwapUsecases/ics-flow.jpeg)
 
