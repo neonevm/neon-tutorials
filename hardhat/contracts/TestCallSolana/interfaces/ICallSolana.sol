@@ -4,7 +4,7 @@ pragma solidity ^0.8.26;
 interface ICallSolana {
     struct Instruction {
         bytes32 program_id;
-        AccountMeta[] accounts; // keys
+        AccountMeta[] accounts;
         bytes instruction_data;
     }
 

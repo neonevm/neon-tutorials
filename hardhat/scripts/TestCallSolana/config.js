@@ -36,7 +36,7 @@ const config = {
                 [instruction.data]
             ).substring(2);
 
-            return packedProgramId + ethers.zeroPadBytes(ethers.toBeHex(instruction.keys.length), 8).substring(2) + encodeKeys + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
+            return /* packedProgramId +  */ '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.keys.length), 8).substring(2) + encodeKeys + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
         },
         execute: async function(instruction, lamports, contractInstance, salt, msgSender) { 
             if (salt == undefined) {

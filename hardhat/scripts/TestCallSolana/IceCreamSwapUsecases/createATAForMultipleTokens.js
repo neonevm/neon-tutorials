@@ -15,7 +15,7 @@ if (process.env.ANCHOR_WALLET == undefined) {
 const keypair = web3.Keypair.fromSecretKey(Uint8Array.from(new Uint8Array(JSON.parse(fs.readFileSync(process.env.ANCHOR_WALLET).toString()))));
 console.log(keypair.publicKey.toBase58(), 'payer');
 
-const owner = new web3.PublicKey('Ds4mzv8E6NW2wtDEaE6yXbaiiBsKuKy16mhmEzNneZLH'); // set your contractPublicKey here
+const owner = new web3.PublicKey('GwaiLwzUBUMTvLtyraddukpT8kFv8faZxeCvJ6KHitG2'); // set your contractPublicKey here
 const tokenMintsArray = [
     'So11111111111111111111111111111111111111112', // WSOL
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC

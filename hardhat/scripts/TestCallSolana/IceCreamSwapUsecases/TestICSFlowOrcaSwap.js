@@ -21,7 +21,8 @@ async function main() {
         return console.error('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE_MAINNET+' && export ANCHOR_WALLET=./id.json');
     }
 
-    let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    //let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    let TestICSFlowAddress = '0xF7437bd87884481395145f9049D005130eDFBB22';
     const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
     const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
@@ -41,7 +42,12 @@ async function main() {
     if (ethers.isAddress(TestICSFlowAddress)) {
         TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
     } else {
-        TestICSFlow = await ethers.deployContract("TestICSFlow");
+        TestICSFlow = await ethers.deployContract("TestICSFlow", [
+            [
+                '0x0e03685f8e909053e458121c66f5a76aedc7706aa11c82f8aa952a8f2b7879a9', // Orca
+                '0x4bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd' // Raydium
+            ]
+        ]);
         await TestICSFlow.waitForDeployment();
 
         TestICSFlowAddress = TestICSFlow.target;
@@ -128,6 +134,7 @@ async function main() {
         ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContract.toBase58())), 32),
         0, 
         '0x0000000000000000000000000000000000000000000000000000000000000000',
+        0, // Orca programId
         config.utils.prepareInstructionData(orcaSwap.instructions[0])
     );
     await tx.wait(1);
