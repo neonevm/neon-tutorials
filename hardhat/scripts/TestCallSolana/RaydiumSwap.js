@@ -27,7 +27,7 @@ async function main() {
         TokenB: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC address
         direction: "in", // Swap direction: 'in' or 'out'
         liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
-        slippage: 5 // percents
+        slippage: 1 // percents
     };
 
     const TestCallSolanaFactory = await ethers.getContractFactory("TestCallSolana");
@@ -92,7 +92,7 @@ async function main() {
         return;
     }
 
-    const ins = await Liquidity.makeSwapInstruction({
+    const ins = Liquidity.makeSwapInstruction({
         poolKeys: poolKeys,
         userKeys: {
             tokenAccountIn: ataContractTokenA,
