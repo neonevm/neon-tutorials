@@ -22,7 +22,7 @@ async function main() {
     }
 
     //let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    let TestICSFlowAddress = '0xF7437bd87884481395145f9049D005130eDFBB22';
+    let TestICSFlowAddress = '0x51557019484e76525e79A95d1C22d970AeeE236e';
     const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
     const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
@@ -41,11 +41,18 @@ async function main() {
 
     if (ethers.isAddress(TestICSFlowAddress)) {
         TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
+        console.log(
+            `TestICSFlow at ${TestICSFlow.target}`
+        );
     } else {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
+            user1.address,
             [
                 '0x0e03685f8e909053e458121c66f5a76aedc7706aa11c82f8aa952a8f2b7879a9', // Orca
-                '0x4bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd' // Raydium
+                //'0x4bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd' // Raydium
+            ],
+            [
+                ['0xf8c69e91e17587c8']
             ]
         ]);
         await TestICSFlow.waitForDeployment();
@@ -72,6 +79,7 @@ async function main() {
         user1.address,
         new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
     );
+    console.log(user1USDCTokenAccount, 'user1USDCTokenAccount');
 
     // in order to proceed with swap the executor account needs to have existing ATA account
     if (!ataContractInfo) {
@@ -120,7 +128,10 @@ async function main() {
             new web3.PublicKey(contractPublicKey)
         )
     );
-    
+
+    console.log(config.utils.prepareInstructionData(orcaSwap.instructions[0]), 'instruction');
+    console.log(config.utils.prepareInstructionAccounts(orcaSwap.instructions[0]), 'instruction');
+
     console.log('\nBroadcast WSOL approval ... ');
     tx = await WSOL.connect(user1).approve(TestICSFlowAddress, amountIn * 10 ** TokenA.decimals);
     await tx.wait(1);
@@ -131,11 +142,12 @@ async function main() {
         config.TOKENS.ADDRESSES.WSOL,
         config.TOKENS.ADDRESSES.USDC,
         amountIn * 10 ** TokenA.decimals,
-        ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContract.toBase58())), 32),
-        0, 
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-        0, // Orca programId
-        config.utils.prepareInstructionData(orcaSwap.instructions[0])
+        config.utils.publicKeyToBytes32(ataContract.toBase58()),
+        config.utils.publicKeyToBytes32(user1USDCTokenAccount[0].toBase58()), // !!! this have to be defined on-chain !!!
+        0, // lamports
+        config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId
+        config.utils.prepareInstructionData(orcaSwap.instructions[0]),
+        config.utils.prepareInstructionAccounts(orcaSwap.instructions[0])
     );
     await tx.wait(1);
     console.log(tx, 'tx');

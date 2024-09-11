@@ -13,30 +13,44 @@ const { BN } = require('bn.js');
 
 const config = {
     SOLANA_NODE: 'https://api.devnet.solana.com',
-    SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
+    SOLANA_NODE_MAINNET: 'https://personal-access-mainnet.sol-rpc.neoninfra.xyz:8503/p4o4i8Ew0uGelojCvH6jXEZ4Vr1ueij3FXB69Aeb',
     CALL_SOLANA_SAMPLE_CONTRACT: '0x776E4abe7d73Fed007099518F3aA02C8dDa9baA0',
     CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0x5BAB7cAb78D378bBf325705C51ec4649200A311b',
     ICS_FLOW_MAINNET: '0x7733D1031b023F700Ce791b95107514Dd58a630a',
     utils: {
-        prepareInstructionData: function(instruction) {
-            const packedProgramId = ethers.solidityPacked( 
-                ["bytes32"],
-                [config.utils.publicKeyToBytes32(instruction.programId.toBase58())]
-            );
-
+        prepareInstructionAccounts: function(instruction) {
             let encodeKeys = '';
             for (let i = 0, len = instruction.keys.length; i < len; ++i) {
+                console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'pk');
                 encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString())]).substring(2);
                 encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isSigner]).substring(2);
                 encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isWritable]).substring(2);
             }
 
+            return '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.keys.length), 8).substring(2) + encodeKeys;
+        },
+        prepareInstructionData: function(instruction) {
             const packedInstructionData = ethers.solidityPacked( 
                 ["bytes"],
                 [instruction.data]
             ).substring(2);
 
-            return /* packedProgramId +  */ '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.keys.length), 8).substring(2) + encodeKeys + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
+            // Orca:
+            // USDC -> WSOL
+            // f8c69e91e17587c81027000000000000d92c010000000000af331ba8327fbb35b1c4feff000000000100
+
+            // WSOL -> USDC
+            // f8c69e91e17587c8a086010000000000aa31000000000000503b01000100000000000000000000000101
+
+            // WSOL -> WBTC
+            // f8c69e91e17587c8a0860100000000001600000000000000503b01000100000000000000000000000101
+
+            // WBTC <> SOL
+            // f8c69e91e17587c840420f0000000000936bb42000000000503b01000100000000000000000000000101
+
+            // Raydium
+
+            return /* packedProgramId +  */ '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
         },
         execute: async function(instruction, lamports, contractInstance, salt, msgSender) { 
             if (salt == undefined) {
