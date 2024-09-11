@@ -102,4 +102,17 @@ contract SolanaComposabilityValidation is Ownable {
             }
         }
     }
+
+    function _salt(address account) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(account)));
+    }
+
+    function prepareArbitraryTokenAccountSeeds(address token, address owner) internal pure returns (bytes memory) {
+        return abi.encodePacked(
+            hex"03",
+            hex"436f6e747261637444617461", // ContractData
+            token,
+            _salt(owner)
+        );
+    }
 }

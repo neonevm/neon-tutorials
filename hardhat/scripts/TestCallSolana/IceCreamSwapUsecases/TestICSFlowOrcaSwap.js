@@ -22,7 +22,7 @@ async function main() {
     }
 
     //let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    let TestICSFlowAddress = '0x51557019484e76525e79A95d1C22d970AeeE236e';
+    let TestICSFlowAddress = '0x70ab799082a641910EAE4224F7EA6e328AFE7712';
     const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
     const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
@@ -47,6 +47,7 @@ async function main() {
     } else {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
             user1.address,
+            config.utils.publicKeyToBytes32('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG'),
             [
                 '0x0e03685f8e909053e458121c66f5a76aedc7706aa11c82f8aa952a8f2b7879a9', // Orca
                 //'0x4bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd' // Raydium
@@ -79,7 +80,6 @@ async function main() {
         user1.address,
         new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
     );
-    console.log(user1USDCTokenAccount, 'user1USDCTokenAccount');
 
     // in order to proceed with swap the executor account needs to have existing ATA account
     if (!ataContractInfo) {
@@ -143,7 +143,6 @@ async function main() {
         config.TOKENS.ADDRESSES.USDC,
         amountIn * 10 ** TokenA.decimals,
         config.utils.publicKeyToBytes32(ataContract.toBase58()),
-        config.utils.publicKeyToBytes32(user1USDCTokenAccount[0].toBase58()), // !!! this have to be defined on-chain !!!
         0, // lamports
         config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId
         config.utils.prepareInstructionData(orcaSwap.instructions[0]),

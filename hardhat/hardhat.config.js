@@ -51,7 +51,6 @@ module.exports = {
     },
     neonmainnet: {
       url: "https://neon-mainnet.everstake.one",
-      //url: "https://mainnet-proxy.neonevm.org",
       accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
       chainId: 245022934,
       allowUnlimitedContractSize: false,
