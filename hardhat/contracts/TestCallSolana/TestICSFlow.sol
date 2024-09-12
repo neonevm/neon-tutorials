@@ -3,7 +3,7 @@ pragma solidity ^0.8.26;
 
 import './interfaces/IERC20.sol';
 import './interfaces/ICallSolana.sol';
-import './with-keccak/SolanaComposabilityValidation.sol';
+import './SolanaComposabilityValidation.sol';
 
 contract TestICSFlow is SolanaComposabilityValidation {
     ICallSolana public constant CALL_SOLANA = ICallSolana(0xFF00000000000000000000000000000000000006);
@@ -20,12 +20,8 @@ contract TestICSFlow is SolanaComposabilityValidation {
         NEON_EVM_PROGRAM = _NEON_EVM_PROGRAM;
     }
 
-    function getNeonAddress(address _address) public view returns(bytes32) {
-        return CALL_SOLANA.getNeonAddress(_address);
-    }
-
-    function getSolanaPDA(bytes32 program_id, bytes memory seeds) public view returns(bytes32) {
-        return CALL_SOLANA.getSolanaPDA(program_id, seeds);
+    function getNeonAddress(address evm_address) public view returns(bytes32) {
+        return CALL_SOLANA.getNeonAddress(evm_address);
     }
 
     function execute(
