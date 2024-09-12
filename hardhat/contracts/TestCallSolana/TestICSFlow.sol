@@ -34,9 +34,10 @@ contract TestICSFlow {
         address tokenOut,
         uint64 amount,
         bytes32 programId,
-        bytes calldata instruction,
+        bytes calldata programIdinstruction,
         bytes calldata accountsData
     ) external {
+        // build accounts validation - this validation basically validate that the receiver of the swap output is the token arbitrary account of the msg.sender
         bytes32[] memory accounts = new bytes32[](1);
         accounts[0] = CALL_SOLANA.getSolanaPDA(
             NEON_EVM_PROGRAM,
@@ -72,26 +73,6 @@ contract TestICSFlow {
 
         _execute(0, programId, instruction, accountsData);
     }
-
-    /* function batchExecute(
-        address tokenIn,
-        address tokenOut,
-        uint64 amount,
-        bytes32 ataAccount,
-        uint64[] calldata lamports,
-        bytes32[] calldata programId,
-        bytes[] calldata accountsData,
-        bytes[] calldata instruction
-    ) external {
-        IERC20(tokenIn).transferFrom(msg.sender, address(this), amount); // transfer the tokens from the user to the contract's arbitrary Token account
-        IERC20(tokenIn).transferSolana(ataAccount, amount); // transfer the tokens from the contract's arbitrary Token account to contract's ATA account
-        IERC20(tokenOut).transfer(msg.sender, 0); // needed to make sure that the receiver has arbitrary Token account initialized; if the receiver is different than msg.sender then this line should be changed
-
-        uint len = instruction.length;
-        for (uint i = 0; i < len; ++i) {
-            _execute(lamports[i], programId[i], accountsData[i], instruction[i], new bytes32[](0), new uint[](0));
-        }
-    } */
 
     function _execute(
         uint64 lamports,

@@ -48,7 +48,7 @@ library SolanaComposabilityValidation {
             InvalidInstruction()
         );
 
-        // validate accounts of given instruction of a programId
+        // validate the accounts of a given instruction
         uint len = accounts.length;
         if (len > 0) {
             require(
@@ -85,7 +85,7 @@ library SolanaComposabilityValidation {
     }
 
     /**
-     * @notice Calculates the Solana ATA for given EVM wallet.
+     * @notice Calculates a Solana ATA account.
      */
     function getAssociateTokenAccountSeeds(bytes32 owner, bytes32 programId, bytes32 mint) internal pure returns (bytes memory) {
         return abi.encodePacked(
