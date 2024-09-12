@@ -22,7 +22,7 @@ async function main() {
     }
 
     //let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    let TestICSFlowAddress = '0x70ab799082a641910EAE4224F7EA6e328AFE7712';
+    let TestICSFlowAddress = '0x229ddd3bc606D3561bc858E2e0Dabe7Cc5BBC5fC';
     const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
     const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
@@ -46,15 +46,9 @@ async function main() {
         );
     } else {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
-            user1.address,
-            config.utils.publicKeyToBytes32('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG'),
-            [
-                '0x0e03685f8e909053e458121c66f5a76aedc7706aa11c82f8aa952a8f2b7879a9', // Orca
-                //'0x4bd949c43602c33f207790ed16a3524ca1b9975cf121a2a90cffec7df8b68acd' // Raydium
-            ],
-            [
-                ['0xf8c69e91e17587c8']
-            ]
+            config.utils.publicKeyToBytes32('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG'), // Neon EVM Program
+            config.utils.publicKeyToBytes32('whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc'), // Orca Program
+            config.utils.publicKeyToBytes32('675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8') // Raydium Program
         ]);
         await TestICSFlow.waitForDeployment();
 
@@ -138,12 +132,10 @@ async function main() {
     console.log(tx, 'tx');
 
     console.log('\nBroadcast Orca swap WSOL -> USDC ... ');
-    tx = await TestICSFlow.connect(user1).execute(
+    tx = await TestICSFlow.connect(user1).orcaSwap(
         config.TOKENS.ADDRESSES.WSOL,
         config.TOKENS.ADDRESSES.USDC,
         amountIn * 10 ** TokenA.decimals,
-        config.utils.publicKeyToBytes32(ataContract.toBase58()),
-        0, // lamports
         config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId
         config.utils.prepareInstructionData(orcaSwap.instructions[0]),
         config.utils.prepareInstructionAccounts(orcaSwap.instructions[0])
