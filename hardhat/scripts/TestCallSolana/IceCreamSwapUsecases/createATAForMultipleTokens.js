@@ -15,12 +15,12 @@ if (process.env.ANCHOR_WALLET == undefined) {
 const keypair = web3.Keypair.fromSecretKey(Uint8Array.from(new Uint8Array(JSON.parse(fs.readFileSync(process.env.ANCHOR_WALLET).toString()))));
 console.log(keypair.publicKey.toBase58(), 'payer');
 
-const owner = new web3.PublicKey('FztZn4GPVuarLGA7G1GLKjX36fnMpu51EHwt1HFDWDtL'); // set your contractPublicKey here
+const owner = new web3.PublicKey('J7tgzh8qU6Fm29ZQrZ2H53NTCfG4Sp62FGSsswCC65hg'); // set your contractPublicKey here
 const tokenMintsArray = [
     'So11111111111111111111111111111111111111112', // WSOL
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-    /* 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
-    '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC */
+    /* 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', */ // USDT
+    '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC
 ];
 let atasToBeCreated = '';
 

@@ -12,7 +12,8 @@ const {
     getAssociatedTokenAddress
 } = require('@solana/spl-token');
 const {
-    Liquidity
+    Liquidity,
+    TradeV2
 } = require('@raydium-io/raydium-sdk');
 const { config } = require('../config');
 
@@ -22,23 +23,27 @@ async function main() {
 
     const swapConfig = {
         tokenAAmount: 0.0001, // Swap 0.0001 SOL for USDC in this example
-        TokenA: "So11111111111111111111111111111111111111112", // WSOL
-        TokenB: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
+        TokenA: config.DATA.SVM.ADDRESSES.SOL, // WSOL
+        TokenB: config.DATA.SVM.ADDRESSES.USDC, // USDC
         TokenADecimals: 9,
         direction: "in", // Swap direction: 'in' or 'out'
         liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
         slippage: 1 // percents
     };
 
-    const TestICSFlowFactory = await ethers.getContractFactory("TestICSFlow");
     let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    const TestICSFlowFactory = await ethers.getContractFactory("TestICSFlow");
     let TestICSFlow;
     let tx;
 
     if (ethers.isAddress(TestICSFlowAddress)) {
         TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
     } else {
-        TestICSFlow = await ethers.deployContract("TestICSFlow");
+        TestICSFlow = await ethers.deployContract("TestICSFlow", [
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
+        ]);
         await TestICSFlow.waitForDeployment();
 
         TestICSFlowAddress = TestICSFlow.target;
@@ -59,9 +64,9 @@ async function main() {
     const ataContractInfo = await connection.getAccountInfo(ataContract);
 
     const user1USDCTokenAccount = config.utils.calculateTokenAccount(
-        config.TOKENS.ADDRESSES.USDC,
+        config.DATA.EVM.ADDRESSES.USDC,
         user1.address,
-        new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
+        new web3.PublicKey(config.DATA.SVM.ADDRESSES.NEON_PROGRAM)
     );
 
     // in order to proceed with swap the executor account needs to have existing ATA account
@@ -70,10 +75,15 @@ async function main() {
     }
 
     const WSOL = new ethers.Contract(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ABIs.ERC20ForSPL,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ABIs.ERC20ForSPL,
         ethers.provider
     );
+
+    console.log('\nBroadcast WSOL approval ... ');
+    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, swapConfig.tokenAAmount * 10 ** swapConfig.TokenADecimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
 
     console.log('\nQuery Raydium pools data ...');
     const poolKeys = await config.raydiumHelper.findPoolInfoForTokens(swapConfig.liquidityFile, swapConfig.TokenA, swapConfig.TokenB);
@@ -89,6 +99,8 @@ async function main() {
     console.log(minAmountOut, 'minAmountOut');
     console.log(amountIn, 'amountIn');
 
+    TradeV2.makeSwapInstruction
+
     const raydiumSwap = Liquidity.makeSwapInstruction({
         poolKeys: poolKeys,
         userKeys: {
@@ -101,20 +113,14 @@ async function main() {
         fixedSide: "in"
     });
 
-    console.log('\nBroadcast WSOL approval ... ');
-    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, swapConfig.tokenAAmount * 10 ** swapConfig.TokenADecimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
-
     console.log('\nBroadcast Raydium swap WSOL -> USDC ... ');
-    tx = await TestICSFlow.connect(user1).execute(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ADDRESSES.USDC,
+    tx = await TestICSFlow.connect(user1).raydiumSwap(
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ADDRESSES.USDC,
         swapConfig.tokenAAmount * 10 ** swapConfig.TokenADecimals,
-        ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContract.toBase58())), 32),
-        0, 
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-        config.utils.prepareInstructionData(raydiumSwap.innerTransaction.instructions[0])
+        config.utils.publicKeyToBytes32(raydiumSwap.innerTransaction.instructions[0].programId.toBase58()), // Raydium programId
+        config.utils.prepareInstructionData(raydiumSwap.innerTransaction.instructions[0]),
+        config.utils.prepareInstructionAccounts(raydiumSwap.innerTransaction.instructions[0])
     );
     await tx.wait(1);
     console.log(tx, 'tx');

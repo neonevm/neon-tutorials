@@ -24,9 +24,9 @@ async function main() {
     if (process.env.ANCHOR_PROVIDER_URL != config.SOLANA_NODE_MAINNET || process.env.ANCHOR_WALLET == undefined) {
         return console.log('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE_MAINNET+' && export ANCHOR_WALLET=./id.json');
     }
-    const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
-    const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
-    const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
+    const WHIRLPOOLS_CONFIG = new web3.PublicKey(config.DATA.SVM.ADDRESSES.WHIRLPOOLS_CONFIG);
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
 
     const [user1] = await ethers.getSigners();
     const connection = new web3.Connection(config.SOLANA_NODE_MAINNET, "processed");
@@ -34,16 +34,19 @@ async function main() {
     const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID);
     const client = buildWhirlpoolClient(ctx);
 
-    const TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
     const TestICSFlowFactory = await ethers.getContractFactory("TestICSFlow");
     let TestICSFlow;
     let tx;
-    let receipt;
 
     if (ethers.isAddress(TestICSFlowAddress)) {
         TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
     } else {
-        TestICSFlow = await ethers.deployContract("TestICSFlow");
+        TestICSFlow = await ethers.deployContract("TestICSFlow", [
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
+        ]);
         await TestICSFlow.waitForDeployment();
 
         TestICSFlowAddress = TestICSFlow.target;
@@ -66,9 +69,9 @@ async function main() {
     const ataContractInfo = await connection.getAccountInfo(ataContract);
 
     const user1USDCTokenAccount = config.utils.calculateTokenAccount(
-        config.TOKENS.ADDRESSES.USDC,
+        config.DATA.EVM.ADDRESSES.USDC,
         user1.address,
-        new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
+        new web3.PublicKey(config.DATA.SVM.ADDRESSES.NEON_PROGRAM)
     );
 
     // in order to proceed with swap the executor account needs to have existing ATA account
@@ -77,10 +80,15 @@ async function main() {
     }
 
     const WSOL = new ethers.Contract(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ABIs.ERC20ForSPL,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ABIs.ERC20ForSPL,
         ethers.provider
     );
+    
+    console.log('\nBroadcast WSOL approval ... ');
+    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, swapAmountIn * 10 ** TokenA.decimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
 
     const raydiymSwapConfig = {
         liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
@@ -154,33 +162,27 @@ async function main() {
         fixedSide: "in"
     });
     // /BUILD RAYDIUM SWAP INSTRUCTION
-    
-    console.log('\nBroadcast WSOL approval ... ');
-    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, swapAmountIn * 10 ** TokenA.decimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
 
     console.log('\nBroadcast batch of Orca & Raydium swaps WSOL -> USDC ... ');
-    tx = await TestICSFlow.connect(user1).batchExecute(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ADDRESSES.USDC,
+    tx = await TestICSFlow.connect(user1).batchOrcaRaydiumSwap(
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ADDRESSES.USDC,
         swapAmountIn * 10 ** TokenA.decimals,
-        ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContract.toBase58())), 32),
-        [0, 0], 
         [
-            '0x0000000000000000000000000000000000000000000000000000000000000000',
-            '0x0000000000000000000000000000000000000000000000000000000000000000'
+            config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId,
+            config.utils.publicKeyToBytes32(raydiumSwap.innerTransaction.instructions[0].programId.toBase58()), // Orca programId
         ],
         [
             config.utils.prepareInstructionData(orcaSwap.instructions[0]),
             config.utils.prepareInstructionData(raydiumSwap.innerTransaction.instructions[0])
+        ],
+        [
+            config.utils.prepareInstructionAccounts(orcaSwap.instructions[0]),
+            config.utils.prepareInstructionAccounts(raydiumSwap.innerTransaction.instructions[0])
         ]
     );
-    receipt = await tx.wait(1);
+    await tx.wait(1);
     console.log(tx, 'tx');
-    for (let i = 0, len = receipt.logs.length; i < len; ++i) {
-        console.log(receipt.logs[i].args, ' receipt args instruction #', i);
-    }
 }
 
 // We recommend this pattern to be able to use async/await everywhere

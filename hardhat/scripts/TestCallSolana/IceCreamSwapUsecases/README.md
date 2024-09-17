@@ -8,11 +8,10 @@ This flow describes the user's interaction with Solana through Neon EVM's compos
 - `npx hardhat run scripts/TestCallSolana/IceCreamSwapUsecases/TestICSFlowOrcaSwap.js --network neonmainnet` - Broadcasting of singlehop WSOL -> USDC swap to Orca
 - `npx hardhat run scripts/TestCallSolana/IceCreamSwapUsecases/TestICSFlowOrcaMultihopSwap.js --network neonmainnet` - Broadcasting of multihop WSOL -> USDC -> WBTC swap to Orca
 - `npx hardhat run scripts/TestCallSolana/IceCreamSwapUsecases/TestICSFlowRaydiumSwap.js --network neonmainnet` - Broadcasting of singlehop WSOL -> USDC swap to Raydium
-- `npx hardhat run scripts/TestCallSolana/IceCreamSwapUsecases/TestICSFlowRaydiumMultihopSwap.js --network neonmainnet` - Broadcasting of multihop WSOL -> USDC -> WBTC swap to Raydium
 - `npx hardhat run scripts/TestCallSolana/IceCreamSwapUsecases/TestICSFlowBatchOrcaRaydiumSwaps.js --network neonmainnet` - Broadcasting a batch of 2 singlehop WSOL -> USDC swaps to Orca & Raydium
 
 ### Comments:
-- This example uses the following smart contract deployed on the Neon EVM Mainnet [0x7733D1031b023F700Ce791b95107514Dd58a630a](https://neonscan.org/address/0x7733d1031b023f700ce791b95107514dd58a630a). This smart contract includes a funnel-like mechanism which process instructions on Solana. To be able to use the Neon EVM's composability feature you need basic knowledge on Solana. The main methods used in this smart contract are `execute` and `batchExecute`. Second method is used if you have to include multiple Solana instructions _( like for example the batch swap to Orca & Raydium )_.
+- This example uses the following smart contract deployed on the Neon EVM Mainnet [0xE1498451381968185911aC5E056Cd18CCCc1a4B5](https://neonscan.org/address/0xE1498451381968185911aC5E056Cd18CCCc1a4B5). This smart contract includes a funnel-like mechanism which process instructions on Solana. To be able to use the Neon EVM's composability feature you need basic knowledge on Solana. The main methods used in this smart contract are `execute` and `batchExecute`. Second method is used if you have to include multiple Solana instructions _( like for example the batch swap to Orca & Raydium )_.
 - Before starting with the execution you need to make sure that the smart contract has all of the needed ATA accounts initialized. This can be done through using script:
 
     ```node createATAForMultipleTokens.js```

@@ -13,7 +13,7 @@ contract TestICSFlow {
     bytes32 public immutable ORCA_PROGRAM;
     bytes32 public immutable RAYDIUM_PROGRAM;
 
-    event LogData(bytes response);
+    event ComposabilityResponse(bytes response);
 
     constructor(
         bytes32 _NEON_EVM_PROGRAM,
@@ -34,10 +34,109 @@ contract TestICSFlow {
         address tokenOut,
         uint64 amount,
         bytes32 programId,
-        bytes calldata programIdinstruction,
+        bytes calldata instruction,
         bytes calldata accountsData
     ) external {
-        // build accounts validation - this validation basically validate that the receiver of the swap output is the token arbitrary account of the msg.sender
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            amount, 
+            programId, 
+            instruction, 
+            accountsData,
+            ORCA_PROGRAM,
+            hex"f8c69e91e17587c8", // Orca single swap instruction ID
+            5
+        );
+    }
+
+    function orcaTwoHopSwap(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32 programId,
+        bytes calldata instruction,
+        bytes calldata accountsData
+    ) external {
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            amount, 
+            programId, 
+            instruction, 
+            accountsData, 
+            ORCA_PROGRAM,
+            hex"c360ed6c44a2dbe6", // Orca two hop swap instruction ID
+            8
+        );
+    }
+
+    function raydiumSwap(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32 programId,
+        bytes calldata instruction,
+        bytes calldata accountsData
+    ) external {
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            amount, 
+            programId, 
+            instruction, 
+            accountsData,
+            RAYDIUM_PROGRAM,
+            hex"09a08601", // Raydium single swap instruction ID
+            16
+        );
+    }
+
+    function batchOrcaRaydiumSwap(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32[] calldata programIds,
+        bytes[] calldata instructions,
+        bytes[] calldata accountsDatas
+    ) external {
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            amount, 
+            programIds[0], 
+            instructions[0], 
+            accountsDatas[0],
+            ORCA_PROGRAM,
+            hex"f8c69e91e17587c8", // Orca single swap instruction ID
+            5
+        );
+
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            0, 
+            programIds[1], 
+            instructions[1], 
+            accountsDatas[1],
+            RAYDIUM_PROGRAM,
+            hex"09a08601", // Raydium single swap instruction ID
+            16
+        );
+    }
+
+    function _swap(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32 programId,
+        bytes calldata instruction,
+        bytes calldata accountsData,
+        bytes32 validProgramId,
+        bytes memory validInstructionId,
+        uint validMsgSenderAccountIndex
+    ) internal {
+        // accounts validation - this validation validates that the receiver of the swap output is the token arbitrary account of the msg.sender
         bytes32[] memory accounts = new bytes32[](1);
         accounts[0] = CALL_SOLANA.getSolanaPDA(
             NEON_EVM_PROGRAM,
@@ -45,36 +144,38 @@ contract TestICSFlow {
         );
 
         uint[] memory accountsIndex = new uint[](1);
-        accountsIndex[0] = 5;
+        accountsIndex[0] = validMsgSenderAccountIndex;
 
         SolanaComposabilityValidation.validateComposabilityRequest(
-            ORCA_PROGRAM, 
+            validProgramId, 
             programId, 
-            hex"f8c69e91e17587c8", // Orca swap instruction ID
+            validInstructionId,
             instruction, 
             accountsData, 
             accounts, 
             accountsIndex
         );
 
-        IERC20(tokenIn).transferFrom(msg.sender, address(this), amount); // transfer the tokens from the user to the contract's arbitrary Token account = owner = Neon EVM Program
-        IERC20(tokenIn).transferSolana(
-            CALL_SOLANA.getSolanaPDA(
-                ASSOCIATED_TOKEN_PROGRAM,
-                SolanaComposabilityValidation.getAssociateTokenAccountSeeds(
-                    CALL_SOLANA.getNeonAddress(address(this)), 
-                    TOKEN_PROGRAM,
-                    IERC20(tokenIn).tokenMint()
-                )
-            ),
-            amount
-        ); // transfer the tokens from the contract's arbitrary Token account to contract's ATA account
-        IERC20(tokenOut).transfer(msg.sender, 0); // needed to make sure that the receiver has arbitrary Token account initialized; if the receiver is different than msg.sender then this line should be changed
+        if (amount > 0) {
+            IERC20(tokenIn).transferFrom(msg.sender, address(this), amount); // transfer the tokens from the user to the contract's arbitrary Token account = owner = Neon EVM Program
+            IERC20(tokenIn).transferSolana(
+                CALL_SOLANA.getSolanaPDA(
+                    ASSOCIATED_TOKEN_PROGRAM,
+                    SolanaComposabilityValidation.getAssociateTokenAccountSeeds(
+                        CALL_SOLANA.getNeonAddress(address(this)), 
+                        TOKEN_PROGRAM,
+                        IERC20(tokenIn).tokenMint()
+                    )
+                ),
+                amount
+            ); // transfer the tokens from the contract's arbitrary Token account to contract's ATA account
+            IERC20(tokenOut).transfer(msg.sender, 0); // needed to make sure that the receiver has arbitrary Token account initialized; if the receiver is different than msg.sender then this line should be changed
+        }
 
-        _execute(0, programId, instruction, accountsData);
+        _executeComposabilityRequest(0, programId, instruction, accountsData);
     }
 
-    function _execute(
+    function _executeComposabilityRequest(
         uint64 lamports,
         bytes32 programId,
         bytes calldata instruction,
@@ -89,6 +190,6 @@ contract TestICSFlow {
             )
         );
         
-        emit LogData(response);
+        emit ComposabilityResponse(response);
     }
 }
