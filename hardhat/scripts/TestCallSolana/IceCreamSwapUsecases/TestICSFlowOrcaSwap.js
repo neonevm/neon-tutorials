@@ -21,11 +21,10 @@ async function main() {
         return console.error('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE_MAINNET+' && export ANCHOR_WALLET=./id.json');
     }
 
-    //let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    let TestICSFlowAddress = '0x229ddd3bc606D3561bc858E2e0Dabe7Cc5BBC5fC';
-    const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
-    const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
-    const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
+    let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
+    const WHIRLPOOLS_CONFIG = new web3.PublicKey(config.DATA.SVM.ADDRESSES.WHIRLPOOLS_CONFIG);
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
     const tickSpacing = 4; // tickSpacing of Orca's WSOL/ USDC pool
     const amountIn = new Decimal('0.0001'); // 0.0001 WSOL
 
@@ -46,9 +45,9 @@ async function main() {
         );
     } else {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
-            config.utils.publicKeyToBytes32('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG'), // Neon EVM Program
-            config.utils.publicKeyToBytes32('whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc'), // Orca Program
-            config.utils.publicKeyToBytes32('675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8') // Raydium Program
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
         ]);
         await TestICSFlow.waitForDeployment();
 
@@ -70,9 +69,9 @@ async function main() {
     const ataContractInfo = await connection.getAccountInfo(ataContract);
 
     const user1USDCTokenAccount = config.utils.calculateTokenAccount(
-        config.TOKENS.ADDRESSES.USDC,
+        config.DATA.EVM.ADDRESSES.USDC,
         user1.address,
-        new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
+        new web3.PublicKey(config.DATA.SVM.ADDRESSES.NEON_PROGRAM)
     );
 
     // in order to proceed with swap the executor account needs to have existing ATA account
@@ -81,10 +80,15 @@ async function main() {
     }
 
     const WSOL = new ethers.Contract(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ABIs.ERC20ForSPL,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ABIs.ERC20ForSPL,
         ethers.provider
     );
+
+    console.log('\nBroadcast WSOL approval ... ');
+    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, amountIn * 10 ** TokenA.decimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
 
     const whirlpool_pubkey = PDAUtil.getWhirlpool(
         ORCA_WHIRLPOOL_PROGRAM_ID,
@@ -123,18 +127,10 @@ async function main() {
         )
     );
 
-    console.log(config.utils.prepareInstructionData(orcaSwap.instructions[0]), 'instruction');
-    console.log(config.utils.prepareInstructionAccounts(orcaSwap.instructions[0]), 'instruction');
-
-    console.log('\nBroadcast WSOL approval ... ');
-    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, amountIn * 10 ** TokenA.decimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
-
     console.log('\nBroadcast Orca swap WSOL -> USDC ... ');
     tx = await TestICSFlow.connect(user1).orcaSwap(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ADDRESSES.USDC,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ADDRESSES.USDC,
         amountIn * 10 ** TokenA.decimals,
         config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId
         config.utils.prepareInstructionData(orcaSwap.instructions[0]),

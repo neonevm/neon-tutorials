@@ -23,12 +23,12 @@ async function main() {
     }
     
     let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    const TokenA = {mint: new web3.PublicKey("So11111111111111111111111111111111111111112"), decimals: 9}; // WSOL
-    const TokenB = {mint: new web3.PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), decimals: 6}; // USDC
-    const TokenC = {mint: new web3.PublicKey("3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh"), decimals: 8}; // WBTC
-    const PoolAB = new web3.PublicKey('Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE'); // WSOL/ USDC
-    const PoolBC = new web3.PublicKey('55BrDTCLWayM16GwrMEQU57o4PTm6ceF9wavSdNZcEiy'); // WBTC/ USDC
-    const WHIRLPOOLS_CONFIG = new web3.PublicKey("2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ");
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
+    const TokenC = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.WBTC), decimals: 8}; // WBTC
+    const PoolAB = new web3.PublicKey(config.DATA.SVM.ADDRESSES.ORCA_WSOL_USDC_POOL); // WSOL/ USDC
+    const PoolBC = new web3.PublicKey(config.DATA.SVM.ADDRESSES.ORCA_WBTC_USDC_POOL); // WBTC/ USDC
+    const WHIRLPOOLS_CONFIG = new web3.PublicKey(config.DATA.SVM.ADDRESSES.WHIRLPOOLS_CONFIG);
     const tickSpacingPool1 = 4;
     const tickSpacingPool2 = 2;
     const amountIn = new Decimal('0.0001');
@@ -42,12 +42,15 @@ async function main() {
     const TestICSFlowFactory = await ethers.getContractFactory("TestICSFlow");
     let TestICSFlow;
     let tx;
-    let receipt;
 
     if (ethers.isAddress(TestICSFlowAddress)) {
         TestICSFlow = TestICSFlowFactory.attach(TestICSFlowAddress);
     } else {
-        TestICSFlow = await ethers.deployContract("TestICSFlow");
+        TestICSFlow = await ethers.deployContract("TestICSFlow", [
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
+        ]);
         await TestICSFlow.waitForDeployment();
 
         TestICSFlowAddress = TestICSFlow.target;
@@ -75,9 +78,9 @@ async function main() {
     //const ataContractInfoUSDC = await connection.getAccountInfo(ataContractUSDC);
 
     const user1WBTCTokenAccount = config.utils.calculateTokenAccount(
-        config.TOKENS.ADDRESSES.WBTC,
+        config.DATA.EVM.ADDRESSES.WBTC,
         user1.address,
-        new web3.PublicKey('NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG')
+        new web3.PublicKey(config.DATA.SVM.ADDRESSES.NEON_PROGRAM)
     );
 
     // in order to proceed with swap the executor account needs to have existing ATA account
@@ -86,10 +89,15 @@ async function main() {
     } */
 
     const WSOL = new ethers.Contract(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ABIs.ERC20ForSPL,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ABIs.ERC20ForSPL,
         ethers.provider
     );
+    
+    console.log('\nBroadcast WSOL approval ... ');
+    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, amountIn * 10 ** TokenA.decimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
 
     // pool address can be found by following code
     /* const whirlpoolPubkey1 = PDAUtil.getWhirlpool(
@@ -161,21 +169,15 @@ async function main() {
             tokenAuthority: new web3.PublicKey(contractPublicKey)
         }
     );
-    
-    console.log('\nBroadcast WSOL approval ... ');
-    tx = await WSOL.connect(user1).approve(TestICSFlowAddress, amountIn * 10 ** TokenA.decimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
 
     console.log('\nBroadcast Orca multihop swap WSOL -> USDC -> WBTC ... ');
-    tx = await TestICSFlow.connect(user1).execute(
-        config.TOKENS.ADDRESSES.WSOL,
-        config.TOKENS.ADDRESSES.WBTC,
+    tx = await TestICSFlow.connect(user1).orcaTwoHopSwap(
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ADDRESSES.WBTC,
         amountIn * 10 ** TokenA.decimals,
-        ethers.zeroPadValue(ethers.toBeHex(ethers.decodeBase58(ataContractWSOL.toBase58())), 32),
-        0, 
-        '0x0000000000000000000000000000000000000000000000000000000000000000',
-        config.utils.prepareInstructionData(orcaSwap.instructions[0])
+        config.utils.publicKeyToBytes32(ORCA_WHIRLPOOL_PROGRAM_ID.toBase58()), // Orca programId
+        config.utils.prepareInstructionData(orcaSwap.instructions[0]),
+        config.utils.prepareInstructionAccounts(orcaSwap.instructions[0])
     );
     await tx.wait(1);
     console.log(tx, 'tx');
