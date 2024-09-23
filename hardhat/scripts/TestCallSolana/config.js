@@ -1,5 +1,6 @@
 const web3 = require("@solana/web3.js");
 const {
+    Liquidity,
     Token,
     TOKEN_PROGRAM_ID,
     TokenAmount, 
@@ -7,18 +8,27 @@ const {
     Currency, 
     CurrencyAmount, 
     Price, 
-    Percent
+    Percent,
+    LIQUIDITY_STATE_LAYOUT_V4,
+    MARKET_STATE_LAYOUT_V3,
+    SPL_MINT_LAYOUT,
+    SPL_ACCOUNT_LAYOUT,
+    Market
 } = require('@raydium-io/raydium-sdk');
+const fs = require('fs');
 const { BN } = require('bn.js');
 
 const config = {
     SOLANA_NODE: 'https://api.devnet.solana.com',
-    SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
+    //SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
+    SOLANA_NODE_MAINNET: 'https://personal-access-mainnet.sol-rpc.neoninfra.xyz:8503/p4o4i8Ew0uGelojCvH6jXEZ4Vr1ueij3FXB69Aeb',
     CALL_SOLANA_SAMPLE_CONTRACT: '0x776E4abe7d73Fed007099518F3aA02C8dDa9baA0',
     CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0x5BAB7cAb78D378bBf325705C51ec4649200A311b',
     ICS_FLOW_MAINNET: '0xE1498451381968185911aC5E056Cd18CCCc1a4B5',
+    VAULTCRAFT_FLOW_MAINNET: '0x75316D6bF6a0beA3ff879ba8807E7C98D98D7C26',
     utils: {
         prepareInstructionAccounts: function(instruction) {
+            console.log('prepareInstructionAccounts');
             let encodeKeys = '';
             for (let i = 0, len = instruction.keys.length; i < len; ++i) {
                 console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'pk');
@@ -34,33 +44,22 @@ const config = {
                 ["bytes"],
                 [instruction.data]
             ).substring(2);
+            console.log(packedInstructionData, 'packedInstructionData');
 
-            // Orca:
-            // USDC -> WSOL
-            // f8c69e91e17587c81027000000000000d92c010000000000af331ba8327fbb35b1c4feff000000000100
-
-            // WSOL -> USDC
-            // f8c69e91e17587c8a086010000000000aa31000000000000503b01000100000000000000000000000101
-
-            // WSOL -> WBTC
-            // f8c69e91e17587c8a0860100000000001600000000000000503b01000100000000000000000000000101
-
-            // WBTC <> SOL
-            // f8c69e91e17587c840420f0000000000936bb42000000000503b01000100000000000000000000000101
-
-            // Raydium
-
-            return /* packedProgramId +  */ '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
+            return '0x' + ethers.zeroPadBytes(ethers.toBeHex(instruction.data.length), 8).substring(2) + packedInstructionData;
+        },
+        prepareInstruction: function(instruction) {
+            return config.utils.publicKeyToBytes32(instruction.programId.toBase58()) + config.utils.prepareInstructionAccounts(instruction).substring(2) + config.utils.prepareInstructionData(instruction).substring(2);
         },
         execute: async function(instruction, lamports, contractInstance, salt, msgSender) { 
             if (salt == undefined) {
                 salt = '0x0000000000000000000000000000000000000000000000000000000000000000';
             }
-            
+
             const tx = await contractInstance.connect(msgSender).execute(
                 lamports,
                 salt,
-                config.utils.prepareInstructionData(instruction)
+                config.utils.prepareInstruction(instruction)
             );
 
             const receipt = await tx.wait(3);
@@ -112,7 +111,6 @@ const config = {
             const isHexStrict = /^(0x)?[0-9a-f]*$/i.test(hex.toString());
             if (!isHexStrict) {
                 throw new Error(`Given value "${hex}" is not a valid hex string.`);
-                //return console.error(`Given value "${hex}" is not a valid hex string.`);
             } else {
                 return isHexStrict;
             }
@@ -165,7 +163,7 @@ const config = {
         }
     },
     raydiumHelper: {
-        calcAmountOut: async function(Liquidity, connection, poolKeys, rawAmountIn, swapInDirection, slippage) {
+        calcAmountOut: async function(connection, poolKeys, rawAmountIn, swapInDirection, slippage) {
             const poolInfo = await Liquidity.fetchInfo({ connection: connection, poolKeys });
         
             let currencyInMint = poolKeys.baseMint
@@ -203,9 +201,12 @@ const config = {
             ];
         },
         findPoolInfoForTokens: async function(liquidityFile, mintA, mintB) {
-            const liquidityJsonResp = await fetch(liquidityFile);
+            const liquidityJson = JSON.parse(fs.readFileSync(__dirname + '/' + liquidityFile, 'utf8'));
+
+            /* const liquidityJsonResp = await fetch(liquidityFile);
             if (!liquidityJsonResp.ok) return
-            const liquidityJson = (await liquidityJsonResp.json())
+            const liquidityJson = (await liquidityJsonResp.json()) */
+
             const allPoolKeysJson = [...(liquidityJson?.official ?? []), ...(liquidityJson?.unOfficial ?? [])]
         
             const poolData = allPoolKeysJson.find(
@@ -251,6 +252,61 @@ const config = {
                     (o) => typeof o === 'object' && v instanceof o,
                 )
             )
+        },
+        formatAmmKeysById: async function(connection, id) {
+            const account = await connection.getAccountInfo(new web3.PublicKey(id));
+            if (account === null) throw Error(' get id info error ')
+            const info = LIQUIDITY_STATE_LAYOUT_V4.decode(account.data);
+          
+            const marketId = info.marketId
+            const marketAccount = await connection.getAccountInfo(marketId);
+            if (marketAccount === null) throw Error(' get market info error')
+            const marketInfo = MARKET_STATE_LAYOUT_V3.decode(marketAccount.data)
+          
+            const lpMint = info.lpMint
+            const lpMintAccount = await connection.getAccountInfo(lpMint);
+            if (lpMintAccount === null) throw Error(' get lp mint info error')
+            const lpMintInfo = SPL_MINT_LAYOUT.decode(lpMintAccount.data)
+          
+            return {
+                id,
+                baseMint: info.baseMint.toString(),
+                quoteMint: info.quoteMint.toString(),
+                lpMint: info.lpMint.toString(),
+                baseDecimals: info.baseDecimal.toNumber(),
+                quoteDecimals: info.quoteDecimal.toNumber(),
+                lpDecimals: lpMintInfo.decimals,
+                version: 4,
+                programId: account.owner.toString(),
+                authority: Liquidity.getAssociatedAuthority({ programId: account.owner }).publicKey.toString(),
+                openOrders: info.openOrders.toString(),
+                targetOrders: info.targetOrders.toString(),
+                baseVault: info.baseVault.toString(),
+                quoteVault: info.quoteVault.toString(),
+                withdrawQueue: info.withdrawQueue.toString(),
+                lpVault: info.lpVault.toString(),
+                marketVersion: 3,
+                marketProgramId: info.marketProgramId.toString(),
+                marketId: info.marketId.toString(),
+                marketAuthority: Market.getAssociatedAuthority({ programId: info.marketProgramId, marketId: info.marketId }).publicKey.toString(),
+                marketBaseVault: marketInfo.baseVault.toString(),
+                marketQuoteVault: marketInfo.quoteVault.toString(),
+                marketBids: marketInfo.bids.toString(),
+                marketAsks: marketInfo.asks.toString(),
+                marketEventQueue: marketInfo.eventQueue.toString(),
+                lookupTableAccount: web3.PublicKey.default.toString()
+            }
+        },
+        getWalletTokenAccount: async function(connection, wallet) {
+            const walletTokenAccount = await connection.getTokenAccountsByOwner(wallet, {
+                programId: TOKEN_PROGRAM_ID,
+            });
+            
+            return walletTokenAccount.value.map((i) => ({
+                pubkey: i.pubkey,
+                programId: i.account.owner,
+                accountInfo: SPL_ACCOUNT_LAYOUT.decode(i.account.data),
+            }));
         }
     },
     DATA: {
@@ -258,19 +314,27 @@ const config = {
             ADDRESSES: {
                 SOL: 'So11111111111111111111111111111111111111112',
                 USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+                USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
                 WBTC: '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh',
+                RAY: '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R',
                 NEON_PROGRAM: 'NeonVMyRX5GbCrsAHnUwx1nYYoJAtskU1bWUo6JGNyG',
                 ORCA_PROGRAM: 'whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc',
                 ORCA_WSOL_USDC_POOL: 'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE',
                 ORCA_WBTC_USDC_POOL: '55BrDTCLWayM16GwrMEQU57o4PTm6ceF9wavSdNZcEiy',
                 WHIRLPOOLS_CONFIG: '2LecshUwdy9xi7meFgHtFJQNSKk4KdTrcpvaB56dP2NQ',
-                RAYDIUM_PROGRAM: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8'
+                RAYDIUM_PROGRAM: '675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8',
+                RAYDIUM_RAY_USDC_POOL: '6UmmUiYoBjSrhakAobJw8BvkmJtDVxaeBtbt7rxWo1mg',
+                RAYDIUM_RAY_SOL_POOL: 'AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA',
+                RAYDIUM_SOL_USDC_POOL: '58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2',
+                RAYDIUM_SOL_WBTC_POOL: 'HCfytQ49w6Dn9UhHCqjNYTZYQ6z5SwqmsyYYqW4EKDdA',
+                RAYDIUM_SOL_USDT_POOL: '7XawhbbxtsRcQA8KTkHT9f9nc6d69UwqCDh6U5EEbEmX'
             }
         },
         EVM: {
             ADDRESSES: {
                 WSOL: '0x5f38248f339bf4e84a2caf4e4c0552862dc9f82a',
                 USDC: '0xea6b04272f9f62f997f666f07d3a974134f7ffb9',
+                USDT: '0x5f0155d08eF4aaE2B500AefB64A3419dA8bB611a',
                 WBTC: '0x16a3Fe59080D6944A42B441E44450432C1445372'
             },
             ABIs: {

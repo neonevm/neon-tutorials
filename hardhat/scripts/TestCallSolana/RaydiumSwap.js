@@ -62,7 +62,7 @@ async function main() {
     }
     
     const directionIn = poolKeys.quoteMint.toString() == swapConfig.TokenB;
-    const { minAmountOut, amountIn } = await config.raydiumHelper.calcAmountOut(Liquidity, connection, poolKeys, swapConfig.tokenAAmount, directionIn, swapConfig.slippage);
+    const { minAmountOut, amountIn } = await config.raydiumHelper.calcAmountOut(connection, poolKeys, swapConfig.tokenAAmount, directionIn, swapConfig.slippage);
 
     const ataContractTokenA = await getAssociatedTokenAddress(
         new web3.PublicKey(swapConfig.TokenA),
