@@ -27,9 +27,9 @@ async function main() {
     const connection = new web3.Connection(config.SOLANA_NODE_MAINNET, "processed");
 
     const addLPConfig = {
-        TokenA: config.DATA.SVM.ADDRESSES.SOL,
-        TokenB: config.DATA.SVM.ADDRESSES.RAY,
-        PoolAB: config.DATA.SVM.ADDRESSES.RAYDIUM_RAY_SOL_POOL,
+        TokenA: config.DATA.SVM.ADDRESSES.USDC,
+        TokenB: config.DATA.SVM.ADDRESSES.SOL,
+        PoolAB: config.DATA.SVM.ADDRESSES.RAYDIUM_SOL_USDC_POOL,
         //liquidityFile: "https://api.raydium.io/v2/sdk/liquidity/mainnet.json",
         liquidityFile: "raydiumPools.json",
         slippage: 10 // percents

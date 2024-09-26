@@ -22,10 +22,16 @@ async function main() {
     const TestVaultCraftFlowFactory = await ethers.getContractFactory("TestVaultCraftFlow");
     let TestVaultCraftFlow;
     let tx;
-    const userDeposit = 0.1; // 1 USDC
+
+    const WSOL = new ethers.Contract(
+        config.DATA.EVM.ADDRESSES.WSOL,
+        config.DATA.EVM.ABIs.ERC20ForSPL,
+        ethers.provider
+    );
+
+    const userDeposit = 0.001; // 0.001 WSOL
 
     const swapConfig = {
-        tokenAAmount: (userDeposit * 0.9) / 2, // 10% from the deposits stay as floating amount
         TokenA: config.DATA.SVM.ADDRESSES.USDC,
         TokenB: config.DATA.SVM.ADDRESSES.SOL,
         PoolAB: config.DATA.SVM.ADDRESSES.RAYDIUM_SOL_USDC_POOL,
@@ -38,7 +44,7 @@ async function main() {
     };
 
     const addLpConfig = {
-        slippage: 5
+        slippage: 1 // percents
     };
 
     if (ethers.isAddress(TestVaultCraftFlowAddress)) {
@@ -61,6 +67,18 @@ async function main() {
     const contractPublicKeyInBytes = await TestVaultCraftFlow.getNeonAddress(TestVaultCraftFlowAddress);
     const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
     console.log(contractPublicKey, 'contractPublicKey');
+
+    console.log('\nBroadcast WSOL approval from user ... ');
+    tx = await WSOL.connect(user2).approve(TestVaultCraftFlowAddress, userDeposit * 10 ** swapConfig.TokenBDecimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
+
+    console.log('\nBroadcast WSOL deposit from user ... ');
+    tx = await TestVaultCraftFlow.connect(user2).deposit(config.DATA.EVM.ADDRESSES.WSOL, userDeposit * 10 ** swapConfig.TokenBDecimals);
+    await tx.wait(1);
+    console.log(tx, 'tx');
+
+    const amountToBeDepositedToSolana = (parseInt(await WSOL.balanceOf(TestVaultCraftFlow.target)) / 10 ** swapConfig.TokenBDecimals) * 0.9; // 10% of the pool's assets will stay as floating amount
 
     console.log('\nQuery Raydium pools data ...');
     const poolKeys = await config.raydiumHelper.findPoolInfoForTokens(swapConfig.liquidityFile, swapConfig.TokenA, swapConfig.TokenB);
@@ -111,28 +129,12 @@ async function main() {
     console.log(ataContractTokenB, 'ataContractTokenB');
     console.log(ataContractTokenLP, 'ataContractTokenLP');
 
-    const USDC = new ethers.Contract(
-        config.DATA.EVM.ADDRESSES.USDC,
-        config.DATA.EVM.ABIs.ERC20ForSPL,
-        ethers.provider
-    );
-
-    console.log('\nBroadcast USDC approval ... ');
-    tx = await USDC.connect(user2).approve(TestVaultCraftFlowAddress, userDeposit * 10 ** swapConfig.TokenADecimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
-
-    console.log('\nBroadcast USDC deposit ... ');
-    tx = await TestVaultCraftFlow.connect(user2).deposit(config.DATA.EVM.ADDRESSES.USDC, userDeposit * 10 ** swapConfig.TokenADecimals);
-    await tx.wait(1);
-    console.log(tx, 'tx');
-
     // BUILD SWAP INSTRUCTION
     let [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(
         connection, 
         poolKeys, 
-        swapConfig.tokenAAmount, 
-        poolKeys.quoteMint.toString() == swapConfig.TokenB, 
+        (amountToBeDepositedToSolana) / 2, // 10% from the deposits stay as floating amount
+        poolKeys.quoteMint.toString() == swapConfig.TokenA, 
         swapConfig.slippage
     );
     console.log(Number(amountIn.raw), 'amountIn');
@@ -141,8 +143,8 @@ async function main() {
     const raydiumSwap = Liquidity.makeSwapInstruction({
         poolKeys: poolKeys,
         userKeys: {
-            tokenAccountIn: ataContractTokenA,
-            tokenAccountOut: ataContractTokenB,
+            tokenAccountIn: ataContractTokenB,
+            tokenAccountOut: ataContractTokenA,
             owner: new web3.PublicKey(contractPublicKey)
         },
         amountIn: amountIn.raw,
@@ -155,20 +157,20 @@ async function main() {
     const inputAmount = new TokenAmount(
         new Token(
             TOKEN_PROGRAM_ID,
-            new web3.PublicKey(swapConfig.TokenB),
-            swapConfig.TokenBDecimals
+            new web3.PublicKey(swapConfig.TokenA),
+            swapConfig.TokenADecimals
         ),
         minAmountOut.raw
     );
     
-    const { maxAnotherAmount, anotherAmount, liquidity } = Liquidity.computeAnotherAmount({
+    const { maxAnotherAmount } = Liquidity.computeAnotherAmount({
         poolKeys,
         poolInfo: { ...targetPoolInfo, ...extraPoolInfo },
         amount: inputAmount,
         anotherCurrency: new Token(
             TOKEN_PROGRAM_ID,
-            new web3.PublicKey(swapConfig.TokenA),
-            swapConfig.TokenADecimals
+            new web3.PublicKey(swapConfig.TokenB),
+            swapConfig.TokenBDecimals
         ),
         slippage: new Percent(addLpConfig.slippage, 100)
     });
@@ -183,16 +185,16 @@ async function main() {
             lpTokenAccount: ataContractTokenLP,
             owner: new web3.PublicKey(contractPublicKey)
         },
-        baseAmountIn: 1,
-        quoteAmountIn: 2,
+        baseAmountIn: maxAnotherAmount.raw,
+        quoteAmountIn: inputAmount.raw,
         fixedSide: 'a'
     });
     console.log(addLiquidityInstruction.innerTransaction.instructions, 'addLiquidityInstruction');
 
-    console.log('\nBroadcast Raydium swap USDC -> RAY & Raydium deposit LP to USDC/ RAY pool ... ');
+    console.log('\nBroadcast Raydium swap WSOL -> RAY & Raydium deposit LP to USDC/ RAY pool ... ');
     tx = await TestVaultCraftFlow.connect(owner).depositIntoRaydium(
-        config.DATA.EVM.ADDRESSES.USDC,
-        userDeposit * 10 ** swapConfig.TokenADecimals,
+        config.DATA.EVM.ADDRESSES.WSOL,
+        amountToBeDepositedToSolana * 10 ** swapConfig.TokenBDecimals,
         config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM),
         [
             config.utils.prepareInstructionData(raydiumSwap.innerTransaction.instructions[0]),

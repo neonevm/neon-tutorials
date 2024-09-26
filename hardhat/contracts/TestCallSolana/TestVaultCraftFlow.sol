@@ -44,7 +44,7 @@ contract TestVaultCraftFlow is Ownable {
         
         // swap
         _executeComposabilityRequest(0, programId, instructions[0], accountsDatas[0]);
-
+        
         // deposit LP
         _executeComposabilityRequest(0, programId, instructions[1], accountsDatas[1]);
     }
