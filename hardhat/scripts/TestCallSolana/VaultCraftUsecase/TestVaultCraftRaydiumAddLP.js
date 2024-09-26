@@ -22,7 +22,7 @@ async function main() {
     const TestVaultCraftFlowFactory = await ethers.getContractFactory("TestVaultCraftFlow");
     let TestVaultCraftFlow;
     let tx;
-    const userDeposit = 0.01; // 1 USDC
+    const userDeposit = 0.1; // 1 USDC
 
     const swapConfig = {
         tokenAAmount: (userDeposit * 0.9) / 2, // 10% from the deposits stay as floating amount
@@ -183,8 +183,8 @@ async function main() {
             lpTokenAccount: ataContractTokenLP,
             owner: new web3.PublicKey(contractPublicKey)
         },
-        baseAmountIn: inputAmount.raw,
-        quoteAmountIn: maxAnotherAmount.raw,
+        baseAmountIn: 1,
+        quoteAmountIn: 2,
         fixedSide: 'a'
     });
     console.log(addLiquidityInstruction.innerTransaction.instructions, 'addLiquidityInstruction');

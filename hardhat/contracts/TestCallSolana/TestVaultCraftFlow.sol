@@ -34,7 +34,7 @@ contract TestVaultCraftFlow is Ownable {
             CALL_SOLANA.getSolanaPDA(
                 ASSOCIATED_TOKEN_PROGRAM,
                 abi.encodePacked(
-                    CALL_SOLANA.getNeonAddress(address(this)), 
+                    CALL_SOLANA.getNeonAddress(address(this)),
                     TOKEN_PROGRAM,
                     IERC20(token).tokenMint()
                 )
