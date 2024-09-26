@@ -50,7 +50,8 @@ module.exports = {
       gasPrice: "auto",
     },
     neonmainnet: {
-      url: "https://neon-proxy-mainnet.solana.p2p.org",
+        //url: "https://mainnet-proxy.neonevm.org",
+        url: "https://neon-proxy-mainnet.solana.p2p.org",
       accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
       chainId: 245022934,
       allowUnlimitedContractSize: false,

@@ -20,18 +20,16 @@ const { BN } = require('bn.js');
 
 const config = {
     SOLANA_NODE: 'https://api.devnet.solana.com',
-    //SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
-    SOLANA_NODE_MAINNET: 'https://personal-access-mainnet.sol-rpc.neoninfra.xyz:8503/p4o4i8Ew0uGelojCvH6jXEZ4Vr1ueij3FXB69Aeb',
+    SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
     CALL_SOLANA_SAMPLE_CONTRACT: '0x776E4abe7d73Fed007099518F3aA02C8dDa9baA0',
     CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0x5BAB7cAb78D378bBf325705C51ec4649200A311b',
     ICS_FLOW_MAINNET: '0xE1498451381968185911aC5E056Cd18CCCc1a4B5',
-    VAULTCRAFT_FLOW_MAINNET: '0x75316D6bF6a0beA3ff879ba8807E7C98D98D7C26',
+    VAULTCRAFT_FLOW_MAINNET: '0xe5caDFF1f4d8EA2228a6d2175d4edB568524fa25',
     utils: {
         prepareInstructionAccounts: function(instruction) {
-            console.log('prepareInstructionAccounts');
             let encodeKeys = '';
             for (let i = 0, len = instruction.keys.length; i < len; ++i) {
-                console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'pk');
+                console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'publicKey');
                 encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString())]).substring(2);
                 encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isSigner]).substring(2);
                 encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isWritable]).substring(2);
@@ -179,8 +177,8 @@ const config = {
             }
         
             const currencyIn = new Token(TOKEN_PROGRAM_ID, currencyInMint, currencyInDecimals)
-            const amountIn = new TokenAmount(currencyIn, rawAmountIn, false)
             const currencyOut = new Token(TOKEN_PROGRAM_ID, currencyOutMint, currencyOutDecimals)
+            const amountIn = new TokenAmount(currencyIn, rawAmountIn, false)
         
             const { amountOut, minAmountOut, currentPrice, executionPrice, priceImpact, fee } = Liquidity.computeAmountOut({
                 poolKeys,
@@ -198,6 +196,42 @@ const config = {
                 executionPrice,
                 priceImpact,
                 fee
+            ];
+        },
+        calcAmountIn: async function(connection, poolKeys, rawAmountOut, swapInDirection, slippage) {
+            const poolInfo = await Liquidity.fetchInfo({ connection: connection, poolKeys });
+        
+            let currencyInMint = poolKeys.baseMint
+            let currencyInDecimals = poolInfo.baseDecimals
+            let currencyOutMint = poolKeys.quoteMint
+            let currencyOutDecimals = poolInfo.quoteDecimals
+        
+            if (!swapInDirection) {
+                currencyInMint = poolKeys.quoteMint
+                currencyInDecimals = poolInfo.quoteDecimals
+                currencyOutMint = poolKeys.baseMint
+                currencyOutDecimals = poolInfo.baseDecimals
+            }
+        
+            const currencyIn = new Token(TOKEN_PROGRAM_ID, currencyInMint, currencyInDecimals)
+            const currencyOut = new Token(TOKEN_PROGRAM_ID, currencyOutMint, currencyOutDecimals)
+            const amountOut = new TokenAmount(currencyOut, rawAmountOut, false)
+        
+            const { amountIn, maxAmountIn, currentPrice, executionPrice, priceImpact } = Liquidity.computeAmountIn({
+                poolKeys,
+                poolInfo,
+                amountOut,
+                currencyIn,
+                slippage: new Percent(slippage, 100)
+            })
+        
+            return [
+                amountIn,
+                amountOut,
+                maxAmountIn,
+                currentPrice,
+                executionPrice,
+                priceImpact
             ];
         },
         findPoolInfoForTokens: async function(liquidityFile, mintA, mintB) {
