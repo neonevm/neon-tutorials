@@ -32,7 +32,7 @@ async function main() {
 
     const swapConfig = {
         TokenA: config.DATA.SVM.ADDRESSES.USDC,
-        TokenB: config.DATA.SVM.ADDRESSES.SOL,
+        TokenB: config.DATA.SVM.ADDRESSES.WSOL,
         PoolAB: config.DATA.SVM.ADDRESSES.RAYDIUM_SOL_USDC_POOL,
         TokenADecimals: 6,
         TokenBDecimals: 9,

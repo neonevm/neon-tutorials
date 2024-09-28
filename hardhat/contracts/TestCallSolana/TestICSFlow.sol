@@ -175,6 +175,33 @@ contract TestICSFlow {
         _executeComposabilityRequest(0, programId, instruction, accountsData);
     }
 
+    function call(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32 programId,
+        bytes calldata instruction,
+        bytes calldata accountsData
+    ) external {
+        if (amount > 0) {
+            IERC20(tokenIn).transferFrom(msg.sender, address(this), amount); // transfer the tokens from the user to the contract's arbitrary Token account = owner = Neon EVM Program
+            IERC20(tokenIn).transferSolana(
+                CALL_SOLANA.getSolanaPDA(
+                    ASSOCIATED_TOKEN_PROGRAM,
+                    SolanaComposabilityValidation.getAssociateTokenAccountSeeds(
+                        CALL_SOLANA.getNeonAddress(address(this)), 
+                        TOKEN_PROGRAM,
+                        IERC20(tokenIn).tokenMint()
+                    )
+                ),
+                amount
+            ); // transfer the tokens from the contract's arbitrary Token account to contract's ATA account
+            IERC20(tokenOut).transfer(msg.sender, 0); // needed to make sure that the receiver has arbitrary Token account initialized; if the receiver is different than msg.sender then this line should be changed
+        }
+
+        _executeComposabilityRequest(0, programId, instruction, accountsData);
+    }
+
     function _executeComposabilityRequest(
         uint64 lamports,
         bytes32 programId,

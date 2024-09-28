@@ -25,7 +25,7 @@ async function main() {
         return console.log('This script uses the @coral-xyz/anchor library which requires the variables ANCHOR_PROVIDER_URL and ANCHOR_WALLET to be set. Please create id.json in the root of the hardhat project with your Solana\'s private key and run the following command in the terminal in order to proceed with the script execution: \n\n export ANCHOR_PROVIDER_URL='+config.SOLANA_NODE_MAINNET+' && export ANCHOR_WALLET=./id.json');
     }
     const WHIRLPOOLS_CONFIG = new web3.PublicKey(config.DATA.SVM.ADDRESSES.WHIRLPOOLS_CONFIG);
-    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.WSOL), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
 
     const [user1] = await ethers.getSigners();

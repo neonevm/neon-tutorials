@@ -23,7 +23,7 @@ async function main() {
 
     let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
     const WHIRLPOOLS_CONFIG = new web3.PublicKey(config.DATA.SVM.ADDRESSES.WHIRLPOOLS_CONFIG);
-    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.WSOL), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
     const tickSpacing = 4; // tickSpacing of Orca's WSOL/ USDC pool
     const amountIn = new Decimal('0.0001'); // 0.0001 WSOL
