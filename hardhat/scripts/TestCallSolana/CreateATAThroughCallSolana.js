@@ -26,7 +26,7 @@ async function main() {
 
     const connection = new web3.Connection(SOLANA_NODE, "processed");
     const [user1, user2] = await ethers.getSigners();
-    const tokenMintPublicKey = '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh';
+    const tokenMintPublicKey = '';
     if (tokenMintPublicKey == '') {
         return console.error('Before proceeding with instructions execution please set value for the tokenMintPublicKey variable.');
     }

@@ -95,7 +95,7 @@ async function main() {
     }
     
     const directionIn = poolKeys.quoteMint.toString() == swapConfig.TokenB;
-    const [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(Liquidity, connection, poolKeys, swapConfig.tokenAAmount, directionIn, swapConfig.slippage);
+    const [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(connection, poolKeys, swapConfig.tokenAAmount, directionIn, swapConfig.slippage);
     console.log(minAmountOut, 'minAmountOut');
     console.log(amountIn, 'amountIn');
 

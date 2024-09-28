@@ -6,7 +6,7 @@ const {
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
 } = require('@solana/spl-token');
-const { config } = require('../config');
+const { config } = require('./config');
 
 const connection = new web3.Connection(config.SOLANA_NODE_MAINNET, "processed");
 if (process.env.ANCHOR_WALLET == undefined) {
@@ -15,12 +15,15 @@ if (process.env.ANCHOR_WALLET == undefined) {
 const keypair = web3.Keypair.fromSecretKey(Uint8Array.from(new Uint8Array(JSON.parse(fs.readFileSync(process.env.ANCHOR_WALLET).toString()))));
 console.log(keypair.publicKey.toBase58(), 'payer');
 
-const owner = new web3.PublicKey('J7tgzh8qU6Fm29ZQrZ2H53NTCfG4Sp62FGSsswCC65hg'); // set your contractPublicKey here
+const publicKey = new web3.PublicKey('HBR2E5yYTiQttX2S2U5jB6tC7rG92xwUqnNxiivmT2Dj'); // set your contractPublicKey here
 const tokenMintsArray = [
     'So11111111111111111111111111111111111111112', // WSOL
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-    /* 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', */ // USDT
-    '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC
+    //'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',// USDT
+    //'3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC
+    //'4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // RAY
+    //'FbC6K13MzHvN42bXrtGaWsvZY9fxrackRSZcBGfjPc7m', // LP USDC-RAY
+    '8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu' // LP SOL-USDC
 ];
 let atasToBeCreated = '';
 
@@ -33,7 +36,7 @@ async function init() {
     for (let i = 0, len = tokenMintsArray.length; i < len; ++i) {
         const associatedToken = getAssociatedTokenAddressSync(
             new web3.PublicKey(tokenMintsArray[i]), 
-            owner, 
+            publicKey, 
             true, 
             TOKEN_PROGRAM_ID, 
             ASSOCIATED_TOKEN_PROGRAM_ID
@@ -48,7 +51,7 @@ async function init() {
                 createAssociatedTokenAccountInstruction(
                     keypair.publicKey,
                     associatedToken,
-                    owner,
+                    publicKey,
                     new web3.PublicKey(tokenMintsArray[i]), 
                     TOKEN_PROGRAM_ID, 
                     ASSOCIATED_TOKEN_PROGRAM_ID

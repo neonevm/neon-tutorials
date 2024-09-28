@@ -148,7 +148,7 @@ async function main() {
     // BUILD RAYDIUM SWAP INSTRUCTION
     console.log('\nBUILD RAYDIUM SWAP INSTRUCTION ...');
     const directionIn = poolKeys.quoteMint.toString() == TokenB.mint.toBase58();
-    const [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(Liquidity, connection, poolKeys, swapAmountIn / 2, directionIn, raydiymSwapConfig.slippage);
+    const [amountIn, , minAmountOut] = await config.raydiumHelper.calcAmountOut(connection, poolKeys, swapAmountIn / 2, directionIn, raydiymSwapConfig.slippage);
     
     const raydiumSwap = Liquidity.makeSwapInstruction({
         poolKeys: poolKeys,
