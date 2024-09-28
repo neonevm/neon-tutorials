@@ -6,7 +6,7 @@ const {
     TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
 } = require('@solana/spl-token');
-const { config } = require('../config');
+const { config } = require('./config');
 
 const connection = new web3.Connection(config.SOLANA_NODE_MAINNET, "processed");
 if (process.env.ANCHOR_WALLET == undefined) {
@@ -15,7 +15,7 @@ if (process.env.ANCHOR_WALLET == undefined) {
 const keypair = web3.Keypair.fromSecretKey(Uint8Array.from(new Uint8Array(JSON.parse(fs.readFileSync(process.env.ANCHOR_WALLET).toString()))));
 console.log(keypair.publicKey.toBase58(), 'payer');
 
-const publicKey = new web3.PublicKey('FvXBc7mYYDivHoHgB81Ujw66rMYVfWCTcrBrWuxo1ZtT'); // set your contractPublicKey here
+const publicKey = new web3.PublicKey('HBR2E5yYTiQttX2S2U5jB6tC7rG92xwUqnNxiivmT2Dj'); // set your contractPublicKey here
 const tokenMintsArray = [
     'So11111111111111111111111111111111111111112', // WSOL
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
