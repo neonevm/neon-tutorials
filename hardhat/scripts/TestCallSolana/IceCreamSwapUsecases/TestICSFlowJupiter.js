@@ -12,15 +12,15 @@ async function main() {
 
     const swapConfig = {
         TokenA: {
-            SVM: config.DATA.SVM.ADDRESSES.WSOL,
-            EVM: config.DATA.EVM.ADDRESSES.WSOL
-        },
-        TokenB: {
             SVM: config.DATA.SVM.ADDRESSES.USDC,
             EVM: config.DATA.EVM.ADDRESSES.USDC
         },
-        TokenAAmount: new Decimal('0.001'),
-        TokenADecimals: 9,
+        TokenB: {
+            SVM: config.DATA.SVM.ADDRESSES.USDT,
+            EVM: config.DATA.EVM.ADDRESSES.USDT
+        },
+        TokenAAmount: new Decimal('0.01'),
+        TokenADecimals: 6,
         TokenBDecimals: 6,
         slippage: 1
     };
@@ -41,6 +41,7 @@ async function main() {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.JUPITER_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
         ]);
         await TestICSFlow.waitForDeployment();
@@ -123,7 +124,7 @@ async function main() {
     const jupiterSwap = web3.Transaction.from(swapTransactionBuf);
 
     console.log('\nBroadcast Jupiter swap TokenA -> TokenB ... ');
-    tx = await TestICSFlow.connect(user1).call(
+    tx = await TestICSFlow.connect(user1).jupiterSwap(
         swapConfig.TokenA.EVM,
         swapConfig.TokenB.EVM,
         swapConfig.TokenAAmount * 10 ** swapConfig.TokenADecimals,
@@ -134,8 +135,8 @@ async function main() {
     await tx.wait(1);
     console.log(tx, 'tx');
 
-    console.log(await TokenB.balanceOf(user1.address), 'user1 TokenA balance after swap');
-    console.log(await TokenA.balanceOf(user1.address), 'user1 TokenB balance after swap');
+    console.log(await TokenA.balanceOf(user1.address), 'user1 TokenA balance after swap');
+    console.log(await TokenB.balanceOf(user1.address), 'user1 TokenB balance after swap');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
