@@ -16,12 +16,12 @@ async function main() {
             EVM: config.DATA.EVM.ADDRESSES.USDC
         },
         TokenB: {
-            SVM: config.DATA.SVM.ADDRESSES.USDT,
-            EVM: config.DATA.EVM.ADDRESSES.USDT
+            SVM: config.DATA.SVM.ADDRESSES.WSOL,
+            EVM: config.DATA.EVM.ADDRESSES.WSOL
         },
         TokenAAmount: new Decimal('0.01'),
         TokenADecimals: 6,
-        TokenBDecimals: 6,
+        TokenBDecimals: 9,
         slippage: 1
     };
 
