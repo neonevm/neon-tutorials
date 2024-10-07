@@ -15,12 +15,12 @@ if (process.env.ANCHOR_WALLET == undefined) {
 const keypair = web3.Keypair.fromSecretKey(Uint8Array.from(new Uint8Array(JSON.parse(fs.readFileSync(process.env.ANCHOR_WALLET).toString()))));
 console.log(keypair.publicKey.toBase58(), 'payer');
 
-const publicKey = new web3.PublicKey('HBR2E5yYTiQttX2S2U5jB6tC7rG92xwUqnNxiivmT2Dj'); // set your contractPublicKey here
+const publicKey = new web3.PublicKey('FhRnXcJyn2XGBkBy1PNvMGWDQcwW31P5ViAE2PNEPNgN'); // set your contractPublicKey here
 const tokenMintsArray = [
     'So11111111111111111111111111111111111111112', // WSOL
     'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-    //'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',// USDT
-    //'3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC
+    'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',// USDT
+    '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // WBTC
     //'4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R', // RAY
     //'FbC6K13MzHvN42bXrtGaWsvZY9fxrackRSZcBGfjPc7m', // LP USDC-RAY
     '8HoQnePLqPj4M7PUDzfw8e3Ymdwgc7NLGnaTUapubyvu' // LP SOL-USDC

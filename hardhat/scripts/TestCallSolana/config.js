@@ -23,12 +23,12 @@ const config = {
     SOLANA_NODE_MAINNET: 'https://api.mainnet-beta.solana.com/',
     CALL_SOLANA_SAMPLE_CONTRACT: '0x776E4abe7d73Fed007099518F3aA02C8dDa9baA0',
     CALL_SOLANA_SAMPLE_CONTRACT_MAINNET: '0x5BAB7cAb78D378bBf325705C51ec4649200A311b',
-    ICS_FLOW_MAINNET: '0xE1498451381968185911aC5E056Cd18CCCc1a4B5',
+    ICS_FLOW_MAINNET: '0x16906ADb704590F94F8a32ff0a690306A34A0bfC',
     VAULTCRAFT_FLOW_MAINNET: '0xBD8bAFA0b09920b2933dd0eD044f27B10B20F265',
     DATA: {
         SVM: {
             ADDRESSES: {
-                SOL: 'So11111111111111111111111111111111111111112',
+                WSOL: 'So11111111111111111111111111111111111111112',
                 USDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
                 USDT: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
                 WBTC: '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh',
@@ -43,7 +43,8 @@ const config = {
                 RAYDIUM_RAY_SOL_POOL: 'AVs9TA4nWDzfPJE9gGVNJMVhcQy3V9PGazuz33BfG2RA',
                 RAYDIUM_SOL_USDC_POOL: '58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2',
                 RAYDIUM_SOL_WBTC_POOL: 'HCfytQ49w6Dn9UhHCqjNYTZYQ6z5SwqmsyYYqW4EKDdA',
-                RAYDIUM_SOL_USDT_POOL: '7XawhbbxtsRcQA8KTkHT9f9nc6d69UwqCDh6U5EEbEmX'
+                RAYDIUM_SOL_USDT_POOL: '7XawhbbxtsRcQA8KTkHT9f9nc6d69UwqCDh6U5EEbEmX',
+                JUPITER_PROGRAM: 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4'
             }
         },
         EVM: {
@@ -63,12 +64,12 @@ const config = {
             let encodeKeys = '';
             for (let i = 0, len = instruction.keys.length; i < len; ++i) {
                 if (typeof(overwriteAccounts) != "undefined" && Object.hasOwn(overwriteAccounts, i)) {
-                    console.log(config.utils.publicKeyToBytes32(overwriteAccounts[i].key), 'pk');
+                    console.log(config.utils.publicKeyToBytes32(overwriteAccounts[i].key), 'publicKey');
                     encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(overwriteAccounts[i].key)]).substring(2);
                     encodeKeys+= ethers.solidityPacked(["bool"], [overwriteAccounts[i].isSigner]).substring(2);
                     encodeKeys+= ethers.solidityPacked(["bool"], [overwriteAccounts[i].isWritable]).substring(2);
                 } else {
-                    console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'pk');
+                    console.log(config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString()), 'publicKey');
                     encodeKeys+= ethers.solidityPacked(["bytes32"], [config.utils.publicKeyToBytes32(instruction.keys[i].pubkey.toString())]).substring(2);
                     encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isSigner]).substring(2);
                     encodeKeys+= ethers.solidityPacked(["bool"], [instruction.keys[i].isWritable]).substring(2);

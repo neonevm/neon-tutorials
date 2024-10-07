@@ -23,7 +23,7 @@ async function main() {
     }
     
     let TestICSFlowAddress = config.ICS_FLOW_MAINNET;
-    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.SOL), decimals: 9}; // WSOL
+    const TokenA = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.WSOL), decimals: 9}; // WSOL
     const TokenB = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.USDC), decimals: 6}; // USDC
     const TokenC = {mint: new web3.PublicKey(config.DATA.SVM.ADDRESSES.WBTC), decimals: 8}; // WBTC
     const PoolAB = new web3.PublicKey(config.DATA.SVM.ADDRESSES.ORCA_WSOL_USDC_POOL); // WSOL/ USDC
@@ -49,6 +49,7 @@ async function main() {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.JUPITER_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
         ]);
         await TestICSFlow.waitForDeployment();

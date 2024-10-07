@@ -23,7 +23,7 @@ async function main() {
 
     const swapConfig = {
         tokenAAmount: 0.0001, // Swap 0.0001 SOL for USDC in this example
-        TokenA: config.DATA.SVM.ADDRESSES.SOL, // WSOL
+        TokenA: config.DATA.SVM.ADDRESSES.WSOL, // WSOL
         TokenB: config.DATA.SVM.ADDRESSES.USDC, // USDC
         TokenADecimals: 9,
         direction: "in", // Swap direction: 'in' or 'out'
@@ -42,6 +42,7 @@ async function main() {
         TestICSFlow = await ethers.deployContract("TestICSFlow", [
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.ORCA_PROGRAM),
+            config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.JUPITER_PROGRAM),
             config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM)
         ]);
         await TestICSFlow.waitForDeployment();

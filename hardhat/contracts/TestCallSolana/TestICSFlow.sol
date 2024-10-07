@@ -11,6 +11,7 @@ contract TestICSFlow {
     bytes32 public constant ASSOCIATED_TOKEN_PROGRAM = 0x8c97258f4e2489f1bb3d1029148e0d830b5a1399daff1084048e7bd8dbe9f859;
     bytes32 public immutable NEON_EVM_PROGRAM;
     bytes32 public immutable ORCA_PROGRAM;
+    bytes32 public immutable JUPITER_PROGRAM;
     bytes32 public immutable RAYDIUM_PROGRAM;
 
     event ComposabilityResponse(bytes response);
@@ -18,10 +19,12 @@ contract TestICSFlow {
     constructor(
         bytes32 _NEON_EVM_PROGRAM,
         bytes32 _ORCA_PROGRAM,
+        bytes32 _JUPITER_PROGRAM,
         bytes32 _RAYDIUM_PROGRAM
     ) {
         NEON_EVM_PROGRAM = _NEON_EVM_PROGRAM;
         ORCA_PROGRAM = _ORCA_PROGRAM;
+        JUPITER_PROGRAM = _JUPITER_PROGRAM;
         RAYDIUM_PROGRAM = _RAYDIUM_PROGRAM;
     }
 
@@ -47,6 +50,27 @@ contract TestICSFlow {
             ORCA_PROGRAM,
             hex"f8c69e91e17587c8", // Orca single swap instruction ID
             5
+        );
+    }
+
+    function jupiterSwap(
+        address tokenIn,
+        address tokenOut,
+        uint64 amount,
+        bytes32 programId,
+        bytes calldata instruction,
+        bytes calldata accountsData
+    ) external {
+        _swap(
+            tokenIn, 
+            tokenOut, 
+            amount, 
+            programId, 
+            instruction, 
+            accountsData,
+            JUPITER_PROGRAM,
+            hex"e517cb977ae3ad2a", // Jupiter instruction ID
+            4
         );
     }
 
