@@ -80,7 +80,7 @@ async function main() {
   console.log(contractPublicKey, "contractPublicKey");
 
   console.log("\n ***USER*** Broadcast WSOL approval ... ");
-  tx = await WSOL.connect(user2).approve(
+  tx = await WSOL.connect(owner).approve(
     TestCreateRaydiumPoolAddress,
     0.03 * 10 ** 9
   );
@@ -88,7 +88,7 @@ async function main() {
   console.log(tx, "tx");
 
   console.log("\n ***USER*** Broadcast TNEON approval ... ");
-  tx = await TNEON.connect(user2).approve(
+  tx = await TNEON.connect(owner).approve(
     TestCreateRaydiumPoolAddress,
     10 * 10 ** 6
   );
