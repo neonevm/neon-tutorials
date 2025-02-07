@@ -10,15 +10,21 @@ const {
 } = require("@solana/spl-token");
 const bs58 = require("bs58");
 require("dotenv").config();
+const web3 = require("@solana/web3.js");
 
-const owner = Keypair.fromSecretKey(
-  bs58.default.decode(process.env.PRIVATE_KEY_OWNER)
+/*const owner = Keypair.fromSecretKey(
+  bs58.decode(process.env.SOLANA_PRIVATE_KEY)
+);*/
+
+const owner = new web3.PublicKey(
+  "4r2w8TovPn3yVkvPnn7QbYLDHQTK28eJT2GqECSUnVxG"
 );
-const connection = new Connection(
+
+/*const connection = new Connection(
   "https://api.mainnet-beta.solana.com/",
   "processed"
-); // Replace <YOUR_RPC_URL> with your RPC URL
-//const connection = new Connection(clusterApiUrl("devnet")); // For devnet
+); // Replace <YOUR_RPC_URL> with your RPC URL*/
+const connection = new Connection(clusterApiUrl("devnet")); // For devnet
 const txVersion = TxVersion.V0; // or TxVersion.LEGACY
 
 let raydium;
@@ -27,7 +33,7 @@ const initSdk = async (params) => {
   raydium = await Raydium.load({
     owner,
     connection,
-    cluster: "mainnet", // 'mainnet' | 'devnet'
+    cluster: "devnet", // 'mainnet' | 'devnet'
     disableFeatureCheck: true,
     disableLoadToken: !(params && params.loadToken),
     blockhashCommitment: "finalized",

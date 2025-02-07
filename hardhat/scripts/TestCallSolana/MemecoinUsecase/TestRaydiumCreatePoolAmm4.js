@@ -12,8 +12,6 @@ const {
   Percent,
 } = require("@raydium-io/raydium-sdk");*/
 const {
-  Raydium,
-  TxVersion,
   MARKET_STATE_LAYOUT_V3,
   AMM_V4,
   OPEN_BOOK_PROGRAM,
@@ -21,16 +19,18 @@ const {
   DEVNET_PROGRAM_ID,
 } = require("@raydium-io/raydium-sdk-v2");
 const { config } = require("../config");
-//const { config } = require("./config");
+const { initSdk, txVersion } = require("./config");
+const BN = require("bn.js");
 
 async function main() {
   const [owner, user2] = await ethers.getSigners();
-  const connection = new web3.Connection(
-    config.SOLANA_NODE_MAINNET,
-    "processed"
-  );
+  const connection = new web3.Connection(config.SOLANA_NODE, "processed");
 
-  let TestCreateRaydiumPoolAddress = config.CREATE_RAYDIUM_POOL_MAINNET;
+  const raydium = await initSdk();
+  //console.log(raydium);
+
+  //let TestCreateRaydiumPoolAddress = config.CREATE_RAYDIUM_POOL_MAINNET;
+  let TestCreateRaydiumPoolAddress = config.CREATE_RAYDIUM_POOL_DEVNET;
   const TestCreateRaydiumPoolFactory = await ethers.getContractFactory(
     "TestCreateRaydiumPool"
   );
@@ -38,13 +38,13 @@ async function main() {
   let tx;
 
   const WSOL = new ethers.Contract(
-    config.DATA.EVM.ADDRESSES.WSOL,
+    config.DATA.EVM.ADDRESSES.WSOL_DEVNET,
     config.DATA.EVM.ABIs.ERC20ForSPL,
     ethers.provider
   );
 
-  const TNEON = new ethers.Contract(
-    config.DATA.EVM.ADDRESSES.TNEON,
+  const TNEON2 = new ethers.Contract(
+    config.DATA.EVM.ADDRESSES.TNEON2,
     config.DATA.EVM.ABIs.ERC20ForSPL,
     ethers.provider
   );
@@ -61,7 +61,7 @@ async function main() {
         owner.address,
         config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
         config.utils.publicKeyToBytes32(
-          config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM
+          config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM_DEVNET
         ),
       ]
     );
@@ -87,8 +87,8 @@ async function main() {
   await tx.wait(1);
   console.log(tx, "tx");
 
-  console.log("\n ***USER*** Broadcast TNEON approval ... ");
-  tx = await TNEON.connect(owner).approve(
+  console.log("\n ***USER*** Broadcast TNEON2 approval ... ");
+  tx = await TNEON2.connect(owner).approve(
     TestCreateRaydiumPoolAddress,
     10 * 10 ** 6
   );
@@ -112,35 +112,35 @@ async function main() {
     );
   }
 
-  const ataContractTNEON = await getAssociatedTokenAddress(
-    new web3.PublicKey(config.DATA.SVM.ADDRESSES.TNEON),
+  const ataContractTNEON2 = await getAssociatedTokenAddress(
+    new web3.PublicKey(config.DATA.SVM.ADDRESSES.TNEON2),
     new web3.PublicKey(contractPublicKey),
     true
   );
   try {
-    await getAccount(connection, ataContractTNEON);
+    await getAccount(connection, ataContractTNEON2);
   } catch (err) {
     return console.error(
       "Account " +
         contractPublicKey +
         " does not have initialized ATA account for TokenB ( " +
-        config.DATA.SVM.ADDRESSES.TNEON +
+        config.DATA.SVM.ADDRESSES.TNEON2 +
         " )."
     );
   }
 
   console.log(ataContractWSOL, "ataContractWSOL");
-  console.log(ataContractTNEON, "ataContractTNEON");
+  console.log(ataContractTNEON2, "ataContractTNEON2");
 
-  const marketId = new PublicKey(
-    "BhTBX9GdK6MVpCCmd4s37Gxe5Vu7HnoBAzeWnim5svyi"
+  const marketId = new web3.PublicKey(
+    "3Q2N1a1eKpdeFgPG1QCmNpXy1DW3kUqcrrETWsknw4WW"
   );
 
-  const txVersion = TxVersion.V0;
+  //const txVersion = TxVersion.V0;
 
   // If you are sure about your market info, you don't need to get market info from RPC
   const marketBufferInfo = await connection.getAccountInfo(
-    new PublicKey(marketId)
+    new web3.PublicKey(marketId)
   );
   const { baseMint, quoteMint } = MARKET_STATE_LAYOUT_V3.decode(
     marketBufferInfo.data
@@ -150,8 +150,8 @@ async function main() {
   // Or get mint info using the API: await raydium.token.getTokenInfo('mint address')
 
   // AMM pool doesn't support token 2022
-  const baseMintInfo = await Raydium.token.getTokenInfo(baseMint);
-  const quoteMintInfo = await Raydium.token.getTokenInfo(quoteMint);
+  const baseMintInfo = await raydium.token.getTokenInfo(baseMint);
+  const quoteMintInfo = await raydium.token.getTokenInfo(quoteMint);
   const baseAmount = new BN(4000000);
   const quoteAmount = new BN(10000000);
 
@@ -174,8 +174,9 @@ async function main() {
     );
   }
 
-  const { execute, extInfo } = await Raydium.liquidity.createPoolV4({
-    programId: AMM_V4,
+  const addInstructions = await raydium.liquidity.createPoolV4({
+    //programId: AMM_V4,
+    programId: DEVNET_PROGRAM_ID.AmmV4, // devnet
     marketInfo: {
       marketId,
       programId: OPEN_BOOK_PROGRAM,
@@ -193,40 +194,43 @@ async function main() {
 
     startTime: new BN(0), // Unit in seconds
     ownerInfo: {
-      useSOLBalance: true,
+      feePayer: new web3.PublicKey(contractPublicKey),
+      wallet: new web3.PublicKey(contractPublicKey),
+      //useSOLBalance: true,
     },
     associatedOnly: false,
     txVersion,
-    feeDestinationId: FEE_DESTINATION_ID,
+    //feeDestinationId: FEE_DESTINATION_ID,
+    feeDestinationId: DEVNET_PROGRAM_ID.FEE_DESTINATION_ID, // devnet
     // Optional: Set up priority fee here
     /*computeBudgetConfig: {
       units: 600000,
       microLamports: 46591500,
     },*/
   });
-  console.log(execute.innerTransaction.instructions, "createPoolOnRaydium");
+  console.log(addInstructions.builder.instructions[0], "createPoolOnRaydium");
 
   // /BUILD RAYDIUM CREATE POOL INSTRUCTION
 
-  /*console.log("\n ***OWNER*** Broadcast Raydium create WSOL/TNEON pool ... ");
+  console.log("\n ***OWNER*** Broadcast Raydium create WSOL/TNEON2 pool ... ");
   tx = await TestCreateRaydiumPool.connect(owner).createRaydiumPool(
-    config.DATA.EVM.ADDRESSES.TNEON,
-    config.DATA.EVM.ADDRESSES.WSOL,
-    parseInt(baseAmountAmount * 10 ** 6),
-    parseInt(quoteAmount * 10 ** 9),
+    config.DATA.EVM.ADDRESSES.TNEON2,
+    config.DATA.EVM.ADDRESSES.WSOL_DEVNET,
+    parseInt(baseAmount),
+    parseInt(quoteAmount),
     [
       config.utils.prepareInstructionData(
-        execute.innerTransaction.instructions[0]
+        addInstructions.builder.instructions[0]
       ),
     ],
     [
       config.utils.prepareInstructionAccounts(
-        execute.innerTransaction.instructions[0]
+        addInstructions.builder.instructions[0]
       ),
     ]
   );
   await tx.wait(1);
-  console.log(tx, "tx");*/
+  console.log(tx, "tx");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
