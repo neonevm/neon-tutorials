@@ -174,7 +174,7 @@ async function main() {
     );
   }
 
-  const addInstructions = await raydium.liquidity.createPoolV4({
+  const addInstructions = await raydium.liquidity.createPoolV4InstructionV2({
     //programId: AMM_V4,
     programId: DEVNET_PROGRAM_ID.AmmV4, // devnet
     marketInfo: {
