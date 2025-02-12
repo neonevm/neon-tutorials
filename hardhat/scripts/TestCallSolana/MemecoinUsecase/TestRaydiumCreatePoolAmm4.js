@@ -235,9 +235,6 @@ async function main() {
       config.utils.prepareInstructionData(
         addInstructions.builder.instructions[2]
       ),
-      /*config.utils.prepareInstructionData(
-        addInstructions.builder.endInstructions[0]
-      ),*/
     ],
     [
       config.utils.prepareInstructionAccounts(
@@ -249,9 +246,6 @@ async function main() {
       config.utils.prepareInstructionAccounts(
         addInstructions.builder.instructions[2]
       ),
-      /*config.utils.prepareInstructionAccounts(
-        addInstructions.builder.endInstructions[0]
-      ),*/
     ]
   );
   await tx.wait(1);
