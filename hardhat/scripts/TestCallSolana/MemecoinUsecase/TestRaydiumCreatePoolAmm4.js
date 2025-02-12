@@ -5,12 +5,6 @@ const {
   getAccount,
   TOKEN_PROGRAM_ID,
 } = require("@solana/spl-token");
-/*const {
-  Liquidity,
-  TokenAmount,
-  Token,
-  Percent,
-} = require("@raydium-io/raydium-sdk");*/
 const {
   MARKET_STATE_LAYOUT_V3,
   AMM_V4,
@@ -23,7 +17,7 @@ const { initSdk, txVersion } = require("./config");
 const BN = require("bn.js");
 
 async function main() {
-  const [owner, user2] = await ethers.getSigners();
+  const [owner] = await ethers.getSigners();
   const connection = new web3.Connection(config.SOLANA_NODE, "processed");
 
   const raydium = await initSdk();
@@ -59,7 +53,9 @@ async function main() {
       "TestCreateRaydiumPool",
       [
         owner.address,
-        config.utils.publicKeyToBytes32(config.DATA.SVM.ADDRESSES.NEON_PROGRAM),
+        config.utils.publicKeyToBytes32(
+          config.DATA.SVM.ADDRESSES.NEON_PROGRAM_DEVNET
+        ),
         config.utils.publicKeyToBytes32(
           config.DATA.SVM.ADDRESSES.RAYDIUM_PROGRAM_DEVNET
         ),
@@ -78,6 +74,12 @@ async function main() {
   );
   const contractPublicKey = ethers.encodeBase58(contractPublicKeyInBytes);
   console.log(contractPublicKey, "contractPublicKey");
+
+  const ownerPublicKeyInBytes = await TestCreateRaydiumPool.getNeonAddress(
+    owner
+  );
+  const ownerPublicKey = ethers.encodeBase58(ownerPublicKeyInBytes);
+  console.log(ownerPublicKey, "ownerPublicKey");
 
   console.log("\n ***USER*** Broadcast WSOL approval ... ");
   tx = await WSOL.connect(owner).approve(
@@ -174,7 +176,7 @@ async function main() {
     );
   }
 
-  const addInstructions = await raydium.liquidity.createPoolV4InstructionV2({
+  const addInstructions = await raydium.liquidity.createPoolV4({
     //programId: AMM_V4,
     programId: DEVNET_PROGRAM_ID.AmmV4, // devnet
     marketInfo: {
@@ -194,9 +196,7 @@ async function main() {
 
     startTime: new BN(0), // Unit in seconds
     ownerInfo: {
-      feePayer: new web3.PublicKey(contractPublicKey),
-      wallet: new web3.PublicKey(contractPublicKey),
-      //useSOLBalance: true,
+      useSOLBalance: true,
     },
     associatedOnly: false,
     txVersion,
@@ -208,7 +208,14 @@ async function main() {
       microLamports: 46591500,
     },*/
   });
-  console.log(addInstructions.builder.instructions[0], "createPoolOnRaydium");
+  console.log(addInstructions.builder, "createPoolOnRaydium");
+  console.log(addInstructions.builder.instructions[0], "createPoolOnRaydium0");
+
+  //addInstructions.builder.instructions[1].keys[2].isSigner = true;
+  //addInstructions.builder.instructions[1].keys[2].isWritable = true;
+  console.log(addInstructions.builder.instructions[1], "createPoolOnRaydium1");
+
+  console.log(addInstructions.builder.instructions[2], "createPoolOnRaydium2");
 
   // /BUILD RAYDIUM CREATE POOL INSTRUCTION
 
@@ -222,11 +229,29 @@ async function main() {
       config.utils.prepareInstructionData(
         addInstructions.builder.instructions[0]
       ),
+      config.utils.prepareInstructionData(
+        addInstructions.builder.instructions[1]
+      ),
+      config.utils.prepareInstructionData(
+        addInstructions.builder.instructions[2]
+      ),
+      /*config.utils.prepareInstructionData(
+        addInstructions.builder.endInstructions[0]
+      ),*/
     ],
     [
       config.utils.prepareInstructionAccounts(
         addInstructions.builder.instructions[0]
       ),
+      config.utils.prepareInstructionAccounts(
+        addInstructions.builder.instructions[1]
+      ),
+      config.utils.prepareInstructionAccounts(
+        addInstructions.builder.instructions[2]
+      ),
+      /*config.utils.prepareInstructionAccounts(
+        addInstructions.builder.endInstructions[0]
+      ),*/
     ]
   );
   await tx.wait(1);
