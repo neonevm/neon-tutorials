@@ -6,6 +6,16 @@ module.exports = {
   solidity: {
         compilers:[
             {
+                version: '0.8.28',
+                settings: {
+                    viaIR: true,
+                    optimizer: {
+                        enabled: true,
+                        runs: 10000,
+                    }
+                }
+            },
+            {
                 version: '0.8.26',
                 settings: {
                     viaIR: true,
@@ -41,6 +51,14 @@ module.exports = {
     ],
   },
   networks: {
+  curvestand: {
+      url: process.env.NEON_EVM_NODE,
+      accounts: [process.env.DEPLOYER_KEY, process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
+      allowUnlimitedContractSize: false,
+      gasMultiplier: 2,
+      maxFeePerGas: 10000,
+      maxPriorityFeePerGas: 5000
+  },
     neondevnet: {
       url: "https://devnet.neonevm.org",
       accounts: [process.env.PRIVATE_KEY_OWNER, process.env.USER1_KEY],
